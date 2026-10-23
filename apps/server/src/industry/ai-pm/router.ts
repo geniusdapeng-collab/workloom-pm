@@ -1,0 +1,134 @@
+import { Hono } from "hono";
+import { z, ZodError } from "zod";
+import { createHash } from "node:crypto";
+import { hasCapability, type Identity } from "@workloom/base/tenancy";
+import { createContext, type TrpcContext } from "../../trpc/context.js";
+import { AccessAuthorityError, currentMemberAuthority, memberAccessGrants } from "../../service/access-authority.js";
+import { CreatePmRunSchema, safeArtifactPath } from "./contract.js";
+import { PmTeamService, type PmTeamServiceOptions } from "./service.js";
+import { PmError, type PmScope } from "./types.js";
+
+const RunId = z.string().min(1).max(100).regex(/^[A-Za-z0-9_-]+$/);
+const EmptyMutation = z.object({}).strict();
+const MAX_BODY_BYTES = 256 * 1024;
+interface Authorized { identity: Identity; scope: PmScope }
+
+export interface PmAuthDeps {
+  context: (request: Request) => Promise<TrpcContext>;
+  authority: typeof currentMemberAuthority;
+  grants: typeof memberAccessGrants;
+}
+export interface PmRouterOptions {
+  service?: PmTeamService;
+  serviceOptions?: PmTeamServiceOptions;
+  /** In-process test dependency injection only; no HTTP request can change authentication. */
+  auth?: Partial<PmAuthDeps>;
+}
+
+async function readJson(request: Request, emptyAllowed = false): Promise<unknown> {
+  const declared = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) throw new PmError("BODY_TOO_LARGE", "请求超过256KiB上限", 413);
+  const reader = request.body?.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  if (reader) {
+    try {
+      for (;;) {
+        const result = await reader.read(); if (result.done) break;
+        size += result.value.byteLength;
+        if (size > MAX_BODY_BYTES) { await reader.cancel(); throw new PmError("BODY_TOO_LARGE", "请求超过256KiB上限", 413); }
+        chunks.push(result.value);
+      }
+    } finally { reader.releaseLock(); }
+  }
+  if (size === 0 && emptyAllowed) return {};
+  try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
+  catch { throw new PmError("INVALID_JSON", "请求必须是合法JSON"); }
+}
+
+function allowedQuery(request: Request, keys: string[]): URLSearchParams {
+  const query = new URL(request.url).searchParams;
+  const seen = new Set<string>();
+  for (const key of query.keys()) {
+    if (!keys.includes(key) || seen.has(key)) throw new PmError("INVALID_QUERY", "查询包含不支持或重复的参数");
+    seen.add(key);
+  }
+  return query;
+}
+
+/** Mount exactly once with app.route('/api/pm', createPmTeamRouter()). */
+export function createPmTeamRouter(options: PmRouterOptions = {}) {
+  // Product route composition also runs in tools and auth-only tests. Construct the
+  // database-backed worker only after a request has passed the member middleware.
+  let service = options.service;
+  const getService = () => service ??= new PmTeamService(options.serviceOptions);
+  const auth: PmAuthDeps = { context: createContext, authority: currentMemberAuthority, grants: memberAccessGrants, ...options.auth };
+  const app = new Hono<{ Variables: { pm: Authorized } }>();
+  app.use("*", async (context, next) => {
+    context.header("cache-control", "no-store");
+    const session = await auth.context(context.req.raw);
+    if (!session.session) throw new PmError("UNAUTHENTICATED", "请先以有效成员会话登录", 401);
+    if (session.partnerIdentity || !session.identity) throw new PmError("MEMBER_REQUIRED", "AI产品经理交付只允许当前工作区成员操作", 403);
+    const current = await auth.authority(session.identity);
+    const identity = current.identity;
+    if (identity.memberNo === "GUEST" || !["owner", "manager", "staff"].includes(identity.role)) {
+      throw new PmError("MEMBER_WRITE_ROLE_REQUIRED", "游客、伙伴和只读角色不能访问AI产品经理交付任务", 403);
+    }
+    const grants = auth.grants({ role: identity.role, plan: identity.plan, guest: false, permissions: current.permissions });
+    if (!grants.navigationPermissions.includes("tasks.read")) throw new PmError("TASK_READ_FORBIDDEN", "当前成员没有任务读取权限", 403);
+    if (context.req.method !== "GET" && (!grants.actionPermissions.includes("task.dispatch")
+      || !grants.actionPermissions.includes("workspace.write") || !hasCapability(identity.plan, "quest"))) {
+      throw new PmError("TASK_DISPATCH_FORBIDDEN", "当前成员没有任务派发、工作区写入权限或套餐能力", 403);
+    }
+    context.set("pm", { identity, scope: { tenantId: identity.tenantId, workspaceId: identity.workspaceId } });
+    await next();
+  });
+  app.onError((error, context) => {
+    if (error instanceof AccessAuthorityError) return context.json({ error: { code: "SESSION_INVALID", message: "当前成员关系或租户已失效，请重新登录" } }, 401);
+    if (error instanceof ZodError) return context.json({ error: { code: "INVALID_INPUT", message: "请求字段、长度或验收类型不符合合同", fields: error.issues.map((issue) => issue.path.join(".")) } }, 400);
+    if (error instanceof PmError) return context.json({ error: { code: error.code, message: error.message } }, error.httpStatus as 400);
+    const ref = createHash("sha256").update(`${error.name}|${error.message}`).digest("hex").slice(0, 8);
+    console.error(`[pm-team] 请求失败，ref=${ref}`);
+    return context.json({ error: { code: "PM_INTERNAL_ERROR", message: `服务内部错误，未宣称交付成功（ref=${ref}）`, ref } }, 500);
+  });
+
+  app.get("/status", async (context) => {
+    allowedQuery(context.req.raw, []);
+    return context.json(await getService().status(context.get("pm").scope));
+  });
+  app.get("/runs", async (context) => {
+    const query = allowedQuery(context.req.raw, ["limit"]);
+    const limit = z.coerce.number().int().min(1).max(50).parse(query.get("limit") ?? 20);
+    return context.json({ runs: await getService().list(context.get("pm").scope, limit) });
+  });
+  app.post("/runs", async (context) => {
+    allowedQuery(context.req.raw, []);
+    const actor = context.get("pm");
+    const result = await getService().create(actor.scope, CreatePmRunSchema.parse(await readJson(context.req.raw)), actor.identity.memberNo);
+    return context.json(result.detail, result.created ? 201 : 200);
+  });
+  app.get("/runs/:id", async (context) => {
+    allowedQuery(context.req.raw, []);
+    return context.json(await getService().detail(context.get("pm").scope, RunId.parse(context.req.param("id"))));
+  });
+  app.get("/runs/:id/artifacts", async (context) => {
+    const query = allowedQuery(context.req.raw, ["path"]);
+    const path = safeArtifactPath(z.string().min(1).max(220).parse(query.get("path")));
+    return context.json(await getService().artifact(context.get("pm").scope, RunId.parse(context.req.param("id")), path));
+  });
+  for (const action of ["start", "resume", "cancel"] as const) {
+    app.post(`/runs/:id/${action}`, async (context) => {
+      allowedQuery(context.req.raw, []);
+      EmptyMutation.parse(await readJson(context.req.raw, true));
+      const actor = context.get("pm");
+      const id = RunId.parse(context.req.param("id"));
+      const result = action === "cancel" ? await getService().cancel(actor.scope, id, actor.identity.memberNo)
+        : await getService().start(actor.scope, id, action === "resume");
+      return context.json(result, action === "cancel" ? 200 : 202);
+    });
+  }
+  return app;
+}
+
+export { PmTeamService } from "./service.js";
+export type { PmRunDetail, PmRun, PmTask, PmArtifact, EmployeeExecutor } from "./types.js";

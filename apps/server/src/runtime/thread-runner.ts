@@ -14,6 +14,7 @@ import { TRPCError } from "@trpc/server";
 import YAML from "yaml";
 import { getAppPool, getGatewayPool } from "@workloom/db";
 import { bundlesRoot } from "@workloom/base/bundles";
+import { gatewayAppendOnClient } from "@workloom/base/workdata";
 import { assemblePreset, runQuest, type AssembledPreset, type QuestPlanner, type QuestRunResult } from "@workloom/runtime";
 import { llmCall } from "../service/llm.js";
 import { loadDeploymentToolExecutor, describeToolCoverage } from "./tool-executor.js";
@@ -296,11 +297,113 @@ export async function loadGoalArchive(
       : "v1";
     return { text: text.trim(), version };
   } catch (error) {
+    await client.query("ROLLBACK").catch(() => undefined);
     console.warn(
       "[goal-archive] 档案读取失败（fail-closed：按无档案处理，不猜目标）",
       error instanceof Error ? error.message : String(error),
     );
     return undefined;
+  } finally {
+    client.release();
+  }
+}
+
+interface ThreadExecutionContext {
+  title: string;
+  status: string;
+  agent_id: string | null;
+  goalRef?: string;
+  goalVersion?: string;
+}
+
+/**
+ * Dispatch stores a long goal's binding in its append-only WorkData event.
+ * Every entry point reloads that same binding; a scheduler title is only an
+ * index, and cannot replace the full goal or authorize a newer archive version.
+ */
+async function threadExecutionContext(scope: Scope, threadId: string): Promise<ThreadExecutionContext> {
+  const client = await getAppPool().connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT set_config('app.workspace_id', $1, true)", [scope.workspaceId]);
+    await client.query("SELECT set_config('app.tenant_id', $1, true)", [scope.tenantId]);
+    const thread = await client.query<{ title: string; status: string; agent_id: string | null }>(
+      `SELECT title, status, agent_id FROM threads WHERE id=$1 AND workspace_id=$2 AND tenant_id=$3`,
+      [threadId, scope.workspaceId, scope.tenantId],
+    );
+    if (!thread.rows[0]) throw new TRPCError({ code: "NOT_FOUND", message: "任务不存在或无权访问" });
+    const dispatch = await client.query<{ dispatch_after: unknown }>(
+      `SELECT payload->'decision'->'after' AS dispatch_after FROM biz_events
+        WHERE tenant_id=$1 AND workspace_id=$2 AND session_id=$3
+          AND payload->'decision'->>'action'='thread.dispatch'
+        ORDER BY seq ASC LIMIT 1`,
+      [scope.tenantId, scope.workspaceId, threadId],
+    );
+    const after = dispatch.rows[0]?.dispatch_after;
+    let result: ThreadExecutionContext = thread.rows[0];
+    if (after && typeof after === "object" && !Array.isArray(after) && Object.hasOwn(after, "goal_ref")) {
+      const binding = after as Record<string, unknown>;
+      if (typeof binding.goal_ref !== "string" || !binding.goal_ref.trim()) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "任务目标档案引用无效，拒绝按短标题执行" });
+      }
+      if (typeof binding.goal_ref_version !== "string" || !binding.goal_ref_version.trim()) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "任务目标档案缺少绑定版本，拒绝按短标题执行" });
+      }
+      result = { ...result, goalRef: binding.goal_ref, goalVersion: binding.goal_ref_version };
+    }
+    await client.query("COMMIT");
+    return result;
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function executionGoal(scope: Scope, thread: ThreadExecutionContext, fallback: string): Promise<string> {
+  if (!thread.goalRef) return fallback;
+  const archived = await loadGoalArchive(scope, thread.goalRef);
+  if (!archived) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "任务目标档案缺失或无法读取，拒绝按短标题执行" });
+  if (archived.version !== thread.goalVersion) {
+    throw new TRPCError({ code: "PRECONDITION_FAILED", message: `任务目标档案版本已变更（绑定 ${thread.goalVersion}，当前 ${archived.version}），须重新派遣并审核` });
+  }
+  return archived.text;
+}
+
+/** Unexpected preparation/execution errors must not leave a claimed zombie. */
+async function failRunningThread(scope: Scope, threadId: string, error: unknown, phase: string): Promise<void> {
+  const client = await getAppPool().connect();
+  const summary = (error instanceof Error ? error.message : String(error)).replace(/\s+/g, " ").slice(0, 200);
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT set_config('app.workspace_id', $1, true)", [scope.workspaceId]);
+    await client.query("SELECT set_config('app.tenant_id', $1, true)", [scope.tenantId]);
+    // A successfully committed suspension/terminal state is authoritative.
+    // In particular, an untouched pending_review must retain its approval.
+    const changed = await client.query<{ id: string }>(
+      `UPDATE threads SET status='failed', error=$4, updated_at=now()
+        WHERE id=$1 AND workspace_id=$2 AND tenant_id=$3 AND status='running' RETURNING id`,
+      [threadId, scope.workspaceId, scope.tenantId, summary],
+    );
+    if ((changed.rowCount ?? 0) > 0) {
+      await gatewayAppendOnClient(client, {
+        ...scope, actor: { id: "system", type: "system" }, sessionId: threadId,
+      }, {
+        who: { id: "system", type: "system" },
+        context: { tenant_id: scope.tenantId, workspace_id: scope.workspaceId, time: new Date().toISOString(), channel: "inapp" },
+        object: { type: "thread", id: threadId },
+        decision: {
+          action: "thread.execution.failed", kind: "error", outcome: "error", phase,
+          error: summary, after: { status: "failed" }, basis: ["任务装配、规划或执行异常；未宣称交付完成"],
+        },
+        rule_impact: [], receipt: { synced: false, error: summary },
+      });
+    }
+    await client.query("COMMIT");
+  } catch (persistenceError) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw new AggregateError([error, persistenceError], "任务失败，且失败状态/WorkData 回执未能原子保存");
   } finally {
     client.release();
   }
@@ -361,27 +464,37 @@ export async function runQuestForThread(scope: Scope, input: ThreadQuestInput): 
       return { threadId: input.threadId, status: "running", stepsDone: 0, stepsTotal: 0, unverified: [], presetKey: "" };
     }
   }
-  const presetKey = await resolveThreadPresetKey(scope, input.presetRef, input.goal);
-  const toolExecutor = await loadDeploymentToolExecutor(scope);
-  const visualGoal = VISUAL_GOAL_PATTERN.test(input.goal);
-  const warnings = await questCoverageWarnings(scope, presetKey, input.goal);
-  // GR-13：把本工作区 bundle 的对象枚举交给规划器（围栏词表由 runQuest 内部按 active 规则注入）
-  const planVocabulary = await loadObjectVocabulary(scope);
-  // 行业规划器由行业仓组合根注册；未注册（基座缺省）时不传 fallbackPlanner，退回通用确定性规划
-  const fallbackPlanner = industryPlannerFactory?.(input.goal);
-  const result = await runQuest(getAppPool(), getGatewayPool(), scope, {
-    threadId: input.threadId,
-    goal: input.goal,
-    presetKey,
-    ...(input.mode ? { mode: input.mode } : {}),
-    ...(input.replan ? { replan: true, ...(input.replanReason ? { replanReason: input.replanReason } : {}) } : {}),
-    // 视觉目标关掉 LLM 规划（空参步骤到桥侧必 bad_request），走行业确定性直译
-    ...(visualGoal ? {} : { llmCall: llmCall("quest-plan") }),
-    ...(fallbackPlanner ? { fallbackPlanner } : {}),
-    ...(toolExecutor ? { toolExecutor } : {}),
-    ...(planVocabulary.objectTypes.length ? { planVocabulary } : {}),
-  });
-  return { ...result, ...(warnings.length ? { warnings } : {}), presetKey };
+  let phase = "goal";
+  try {
+    const thread = await threadExecutionContext(scope, input.threadId);
+    const goal = await executionGoal(scope, thread, input.goal);
+    phase = "assembly";
+    const presetKey = await resolveThreadPresetKey(scope, input.presetRef ?? thread.agent_id, goal);
+    const toolExecutor = await loadDeploymentToolExecutor(scope);
+    const visualGoal = VISUAL_GOAL_PATTERN.test(goal);
+    const warnings = await questCoverageWarnings(scope, presetKey, goal);
+    // GR-13：把本工作区 bundle 的对象枚举交给规划器（围栏词表由 runQuest 内部按 active 规则注入）
+    const planVocabulary = await loadObjectVocabulary(scope);
+    // 行业规划器由行业仓组合根注册；未注册（基座缺省）时不传 fallbackPlanner，退回通用确定性规划
+    const fallbackPlanner = industryPlannerFactory?.(goal);
+    phase = "execution";
+    const result = await runQuest(getAppPool(), getGatewayPool(), scope, {
+      threadId: input.threadId,
+      goal,
+      presetKey,
+      ...(input.mode ? { mode: input.mode } : {}),
+      ...(input.replan ? { replan: true, ...(input.replanReason ? { replanReason: input.replanReason } : {}) } : {}),
+      // 视觉目标关掉 LLM 规划（空参步骤到桥侧必 bad_request），走行业确定性直译
+      ...(visualGoal ? {} : { llmCall: llmCall("quest-plan") }),
+      ...(fallbackPlanner ? { fallbackPlanner } : {}),
+      ...(toolExecutor ? { toolExecutor } : {}),
+      ...(planVocabulary.objectTypes.length ? { planVocabulary } : {}),
+    });
+    return { ...result, ...(warnings.length ? { warnings } : {}), presetKey };
+  } catch (error) {
+    await failRunningThread(scope, input.threadId, error, phase);
+    throw error;
+  }
 }
 
 /**

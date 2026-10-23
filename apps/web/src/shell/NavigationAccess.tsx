@@ -16,7 +16,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import type { BaseClientActionPermission } from "@workloom/shared";
 import { ensureDemoLogin, trpc } from "../lib/trpc";
 import { hydrateClientSafeTerms, hydrateDisplayTerminology } from "../lib/display";
@@ -225,6 +225,18 @@ export function useNavigationAccess(): NavigationAccessValue {
   return useContext(NavigationAccessContext);
 }
 
+/** 游客先走正式登录；登录后的页面权限仍只由服务端授权决定。 */
+export function NavigationAccessDenied({ fallbackRoute, description }: { fallbackRoute: string; description: string }) {
+  const { subject } = useNavigationAccess();
+  const { pathname, search, hash } = useLocation();
+  if (subject?.kind === "guest") {
+    return <AsyncState status="forbidden" title="登录后继续使用" description="当前是只读游客身份。请先正式登录或注册；登录后仍会按工作区权限核验此入口。"
+      action={<Link to={`/login?next=${encodeURIComponent(`${pathname}${search}${hash}`)}`} className="wl-button wl-button--secondary">登录或注册</Link>} />;
+  }
+  return <AsyncState status="forbidden" title="当前身份不能访问此页面" description={description}
+    action={<Link to={fallbackRoute} className="wl-button wl-button--secondary">前往可用页面</Link>} />;
+}
+
 /** 同一权限结果同时约束左侧入口和直达深链，避免隐藏导航后仍可误入无权页面。 */
 export function NavigationAccessBoundary({ pathname, children }: { pathname: string; children: ReactNode }) {
   const { entries, knownEntries, status, reload } = useNavigationAccess();
@@ -239,14 +251,7 @@ export function NavigationAccessBoundary({ pathname, children }: { pathname: str
     return <AsyncState status="error" title="暂时无法确认访问权限" description="为避免误入敏感页面，系统暂未打开此入口。" onRetry={reload} />;
   }
   if (!isNavigationPathPermitted(pathname, knownEntries, entries)) {
-    return (
-      <AsyncState
-        status="forbidden"
-        title="当前身份不能访问此页面"
-        description="你当前的角色或版本没有这个入口的权限。如需使用，请联系管理员调整权限或版本。"
-        action={<Link to={fallbackRoute} className="wl-button wl-button--secondary">前往可用页面</Link>}
-      />
-    );
+    return <NavigationAccessDenied fallbackRoute={fallbackRoute} description="你当前的角色或版本没有这个入口的权限。如需使用，请联系管理员调整权限或版本。" />;
   }
   return <>{children}</>;
 }
@@ -265,7 +270,7 @@ export function NavigationCapabilityBoundary({ capabilityId, children }: { capab
     return <AsyncState status="empty" title="当前工作区未安装此能力" description="该页面属于行业包，只有当前行业包明确声明后才会开放。" action={<Link to={fallbackRoute} className="wl-button wl-button--secondary">前往可用页面</Link>} />;
   }
   if (!entries.some((entry) => entry.capabilityId === capabilityId)) {
-    return <AsyncState status="forbidden" title="当前身份不能访问此页面" description="该行业能力受工作区角色限制，请联系管理员调整权限。" action={<Link to={fallbackRoute} className="wl-button wl-button--secondary">前往可用页面</Link>} />;
+    return <NavigationAccessDenied fallbackRoute={fallbackRoute} description="该行业能力受工作区角色限制，请联系管理员调整权限。" />;
   }
   return <>{children}</>;
 }

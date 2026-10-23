@@ -1,25 +1,26 @@
 {
   "schemaVersion": "workloom.product/v1",
-  "productId": "workloom-im",
-  "role": "base",
-  "displayName": "WorkLoom 织元",
-  "packageName": "workloom-im",
-  "repository": "workloom-ai/workloom-im",
+  "productId": "workloom-pm",
+  "role": "industry",
+  "displayName": "WorkLoom PM",
+  "packageName": "workloom-pm",
+  "repository": "geniusdapeng-collab/workloom-pm",
   "defaultBundle": "ai-pm",
   "demoWorkspaceSlug": "ai-pm-demo",
   "demoMemberNo": "MEM-001",
   "release": {
-    "appId": "com.workloom.im",
+    "appId": "com.workloom.pm",
     "channel": "stable",
-    "artifactPrefix": "WorkLoom 织元",
+    "artifactPrefix": "WorkLoom PM",
     "workflow": ".github/workflows/desktop-production-release.yml",
     "website": "apps/site"
   },
   "desktop": {
-    "portOffset": 0
+    "portOffset": 200,
+    "startPath": "/development"
   },
   "clients": {
-    "bPc": { "enabled": true, "entry": "apps/web" },
+    "bPc": { "enabled": true, "entry": "apps/web", "secretaryAutoScan": false },
     "bMobile": { "enabled": true, "entry": "apps/webb" },
     "cMobile": { "enabled": true, "entry": "apps/webc" }
   }

@@ -7,7 +7,7 @@ import {
 import { isWorkLoomReservedRoute } from "@workloom/industry-contract";
 import { isValidElement, type ReactElement, type ReactNode } from "react";
 import { generatePath, Link, Navigate, useLocation, useParams } from "react-router";
-import { useNavigationAccess } from "./NavigationAccess";
+import { NavigationAccessDenied, useNavigationAccess } from "./NavigationAccess";
 
 /**
  * B 端 PC 行业页面的唯一扩展契约。
@@ -204,7 +204,7 @@ export function IndustryRouteBoundary({ definition, children }: {
     );
   }
   if (access === "forbidden") {
-    return <AsyncState status="forbidden" title="当前身份不能访问此页面" description="该行业能力受工作区角色限制，请联系管理员调整权限。" action={<Link to={fallbackRoute} className="wl-button wl-button--secondary">前往可用页面</Link>} />;
+    return <NavigationAccessDenied fallbackRoute={fallbackRoute} description="该行业能力受工作区角色限制，请联系管理员调整权限。" />;
   }
   return <>{children}</>;
 }

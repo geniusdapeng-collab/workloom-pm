@@ -12,7 +12,7 @@ import { cors } from "hono/cors";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { appRouter } from "./trpc/router.js";
+import * as productComposition from "./trpc/router.js";
 import { createContext, trpcErrorRef } from "./trpc/context.js";
 import { serviceGateway } from "./service/gateway.js";
 import { getOwnerPool, getAppPool, getGatewayPool } from "@workloom/db";
@@ -25,6 +25,7 @@ import { registerBundleAskFacts } from "./runtime/ask-facts-loader.js";
 import { readVoiceFile, synthesizeVoice, voiceStationConfig } from "./voice/station.js";
 
 const app = new Hono();
+const { appRouter } = productComposition;
 
 app.use(
   "*",
@@ -137,6 +138,12 @@ const port = Number(process.env.SERVER_PORT ?? 8787);
 
 /** C 端公开网关（AI 服务前台；独立于员工 tRPC，c-token 鉴权 + 限流） */
 app.route("/c", serviceGateway);
+
+/** 产品可选HTTP组合缝：行业装配只住在其保留的路由组合根中。 */
+const productHttpRoutes = (productComposition as unknown as {
+  productHttpRoutes?: Array<{ path: string; router: Hono<any> }>;
+}).productHttpRoutes ?? [];
+for (const extension of productHttpRoutes) app.route(extension.path, extension.router);
 
 /** 官方运营台 HTTP 端点（仅 SKILL_OPS_MODE=official 部署挂载）：
  *  GET  /skill-dist/manifest.json —— 客户端拉取通道（分发包逐一官方签名，客户端 staging① 验签）

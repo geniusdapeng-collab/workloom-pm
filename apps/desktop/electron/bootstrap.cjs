@@ -28,6 +28,30 @@ const crypto = require("node:crypto");
 
 const IS_WIN = process.platform === "win32";
 
+function parseDesktopStartPath(value = "/") {
+  if (typeof value !== "string" || !/^\/(?:[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*)?$/u.test(value)) {
+    throw new Error("WORKLOOM_START_PATH 必须是安全的本地绝对路由路径");
+  }
+  return value;
+}
+
+function resolveDesktopStartPath({ configured, packageFile } = {}) {
+  if (configured !== undefined) return parseDesktopStartPath(configured);
+  if (!packageFile) return "/";
+  let metadata;
+  try { metadata = JSON.parse(fs.readFileSync(packageFile, "utf8")); }
+  catch (error) {
+    if (error?.code === "ENOENT") return "/";
+    throw new Error("桌面产品 package.json 无法读取或解析启动路径");
+  }
+  return parseDesktopStartPath(metadata.workloomStartPath);
+}
+
+function desktopWebUrl(port, startPath = "/") {
+  const safePort = parseDesktopPort("WORKLOOM_WEB_PORT", port, {});
+  return `http://127.0.0.1:${safePort}${parseDesktopStartPath(startPath)}`;
+}
+
 function parseDesktopPort(name, fallback, env = process.env) {
   const raw = env[name] === undefined ? String(fallback) : String(env[name]);
   if (!/^\d{1,5}$/u.test(raw)) throw new Error(`${name} 必须是 1 到 65535 的十进制整数`);
@@ -765,10 +789,12 @@ async function httpOk(url) {
  * @param {string} opts.supportDir    可写支持目录（userData）
  * @param {(msg:string, progress:{phase?:string,percent?:number,etaSeconds?:number})=>void} [opts.onStatus] 状态回调（splash 展示）
  * @param {boolean} [opts.smoke]      冒烟模式：健康检查通过即返回（调用方随后 stop）
+ * @param {string} [opts.startPath]   受控产品首屏路由；默认 /，环境 WORKLOOM_START_PATH 可覆盖
  * @returns {Promise<{stop:()=>Promise<void>, webUrl:string}>}
  */
 async function bootstrap(opts) {
   const { resourcesDir, supportDir } = opts;
+  const startPath = parseDesktopStartPath(opts.startPath === undefined ? process.env.WORKLOOM_START_PATH : opts.startPath);
   const onStatus = opts.onStatus || (() => {});
   const abortSignal = opts.signal;
   const throwIfAborted = () => {
@@ -1180,7 +1206,7 @@ async function bootstrap(opts) {
   status("启动检查已全部通过", { phase: "ready", percent: 100, etaSeconds: 0 });
   writeInstallCheckpoint(supportDir, { status: "complete", phase: "ready", detail: "安装与启动检查已完成", recoverable: true, targetVersion: payloadVer, percent: 100, etaSeconds: 0 });
 
-  const webUrl = `http://127.0.0.1:${WEB_PORT}`;
+  const webUrl = desktopWebUrl(WEB_PORT, startPath);
   let stopped = false;
   const stop = async () => {
     if (stopped) return;
@@ -1266,6 +1292,9 @@ if (require.main === module) {
 
 module.exports = {
   bootstrap,
+  parseDesktopStartPath,
+  resolveDesktopStartPath,
+  desktopWebUrl,
   installPayloadAtomically,
   writeInstallCheckpoint,
   parseDesktopPort,

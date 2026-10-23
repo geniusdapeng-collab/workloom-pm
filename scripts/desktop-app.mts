@@ -15,15 +15,15 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { chmodSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync } from "node:fs";
 import { createServer, type Server } from "node:net";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join, dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseEnv } from "node:util";
+import { loadProductRuntime, validateProductStartPath } from "./product-runtime.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DEV = process.argv.includes("--dev");
 const SMOKE = process.argv.includes("--smoke");
-const SERVER_PORT = Number(process.env.SERVER_PORT ?? 8787);
-const WEB_PORT = Number(process.env.WEB_PORT ?? (DEV ? 5173 : 4173));
 
 const C = { cyn: "\x1b[1;36m", yel: "\x1b[1;33m", grn: "\x1b[1;32m", red: "\x1b[1;31m", rst: "\x1b[0m" };
 const say = (s: string) => console.log(`${C.cyn}[app]${C.rst} ${s}`);
@@ -164,6 +164,72 @@ export function createSmokeSupportDirectory(baseDirectory = tmpdir()) {
   };
 }
 
+function sourceProductIdentity(sourceRoot: string): { productId: string; displayName: string; portOffset: number; startPath: string } {
+  if (existsSync(join(sourceRoot, "product.manifest.json"))) {
+    const product = loadProductRuntime(sourceRoot);
+    return { productId: product.productId, displayName: product.displayName, portOffset: product.portOffset, startPath: product.startPath };
+  }
+  let pkg: { name?: unknown; productName?: unknown; workloomPortOffset?: unknown; workloomStartPath?: unknown };
+  try { pkg = JSON.parse(readFileSync(join(sourceRoot, "package.json"), "utf8")); }
+  catch { throw new Error("源码产品 package.json 无法读取或解析"); }
+  if (typeof pkg.name !== "string" || !/^[a-z0-9][a-z0-9-]{1,63}$/.test(pkg.name)) throw new Error("源码产品缺少有效的独立 name");
+  const portOffset = Number(pkg.workloomPortOffset ?? 0);
+  if (!Number.isInteger(portOffset) || portOffset < 0 || portOffset > 900) throw new Error("源码产品端口偏移必须为0到900的整数");
+  const displayName = typeof pkg.productName === "string" && pkg.productName.trim() ? pkg.productName : pkg.name;
+  return { productId: pkg.name, displayName, portOffset, startPath: validateProductStartPath(pkg.workloomStartPath) };
+}
+
+/** 源码 Electron 直接以 main.cjs 启动时也必须显式绑定产品 userData，不能借用通用 Electron 目录。 */
+export function sourceSupportDirectory(sourceRoot: string, environment: NodeJS.ProcessEnv,
+  platform: NodeJS.Platform = process.platform, homeDirectory = homedir()): string {
+  if (environment.WORKLOOM_SUPPORT_DIR?.trim()) return resolve(sourceRoot, environment.WORKLOOM_SUPPORT_DIR);
+  const product = sourceProductIdentity(sourceRoot);
+  const appData = platform === "darwin" ? join(homeDirectory, "Library", "Application Support")
+    : platform === "win32" ? environment.APPDATA || join(homeDirectory, "AppData", "Roaming")
+      : environment.XDG_CONFIG_HOME || join(homeDirectory, ".config");
+  return join(appData, product.productId);
+}
+
+export function resolveDesktopLaunchConfig(sourceRoot: string, explicitEnvironment: NodeJS.ProcessEnv = process.env) {
+  let fileEnvironment: Record<string, string> = {};
+  const envPath = join(sourceRoot, ".env");
+  if (existsSync(envPath)) {
+    try { fileEnvironment = parseEnv(readFileSync(envPath, "utf8")); }
+    catch { throw new Error("根 .env 无法读取或解析；未启动任何服务"); }
+  }
+  // Node --env-file 与这里采用相同优先级：进程显式配置优先于文件，不覆盖会话内注入的 Key。
+  const environment: NodeJS.ProcessEnv = { ...fileEnvironment,
+    ...Object.fromEntries(Object.entries(explicitEnvironment).filter(([, value]) => value !== undefined)) };
+  const product = sourceProductIdentity(sourceRoot);
+  const offset = Number(environment.WORKLOOM_PORT_OFFSET ?? product.portOffset);
+  if (!Number.isInteger(offset) || offset < 0 || offset > 900) throw new Error("WORKLOOM_PORT_OFFSET 必须是0到900的整数");
+  const port = (value: string | undefined, fallback: number, label: string): number => {
+    const parsed = value === undefined ? fallback : Number(value);
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 65535) throw new Error(`${label} 必须是1到65535的整数`);
+    return parsed;
+  };
+  const serverPort = port(explicitEnvironment.SERVER_PORT ?? explicitEnvironment.WORKLOOM_SERVER_PORT
+    ?? fileEnvironment.SERVER_PORT ?? fileEnvironment.WORKLOOM_SERVER_PORT, 8787 + offset, "SERVER_PORT");
+  const webPort = port(explicitEnvironment.WEB_PORT ?? explicitEnvironment.WORKLOOM_WEB_PORT
+    ?? fileEnvironment.WEB_PORT ?? fileEnvironment.WORKLOOM_WEB_PORT, 5173 + offset, "WEB_PORT");
+  if (serverPort === webPort) throw new Error("SERVER_PORT 与 WEB_PORT 不能相同");
+  environment.SERVER_PORT = environment.WORKLOOM_SERVER_PORT = String(serverPort);
+  environment.WEB_PORT = environment.WORKLOOM_WEB_PORT = String(webPort);
+  environment.WORKLOOM_PORT_OFFSET = String(offset);
+  environment.WORKLOOM_START_PATH = validateProductStartPath(environment.WORKLOOM_START_PATH ?? product.startPath);
+  environment.WORKLOOM_APP_TITLE ??= product.displayName;
+  environment.WORKLOOM_SUPPORT_DIR = sourceSupportDirectory(sourceRoot, environment);
+  return { product, serverPort, webPort, environment };
+}
+
+/** 模型未就绪不能被源码启动器伪装为真实交付；显式 mock 仍可用于清楚标识的演示。 */
+export function validateDesktopModelConfig(environment: NodeJS.ProcessEnv): void {
+  const provider = environment.LLM_PROVIDER || "deepseek";
+  if (provider === "deepseek" && !(environment.LLM_API_KEY || environment.DEEPSEEK_API_KEY)?.trim()) {
+    throw new Error("DeepSeek 尚未配置：请按 README 的真实模型配置向启动进程注入 DEEPSEEK_API_KEY 或 LLM_API_KEY 后重试；不会自动切换为 mock");
+  }
+}
+
 export function buildElectronEnvironment({
   environment,
   webPort,
@@ -197,7 +263,7 @@ export function buildElectronEnvironment({
   delete result.WORKLOOM_RESOURCES;
   delete result.WORKLOOM_WEB_URL;
   delete result.WORKLOOM_SERVER_URL;
-  if (supportDir) result.WORKLOOM_SUPPORT_DIR = supportDir;
+  result.WORKLOOM_SUPPORT_DIR = supportDir ?? sourceSupportDirectory(sourceRoot, environment);
   return result;
 }
 
@@ -227,13 +293,17 @@ export function portBusy(port: number, serverFactory: () => Server = () => creat
 async function main() {
   say("WorkLoom · 桌面客户端启动中…");
 
-  // ① 环境前置：.env 缺失 = 从未初始化——直接指引（bootstrap 幂等，客户复制即跑）
+  // ① 先准备独立数据库与运行配置，绝不自动复用上游演示容器。
   if (!existsSync(join(ROOT, ".env"))) {
-    warn("检测到本机尚未初始化环境（缺 .env）。请先执行：");
-    console.log(`\n    ${C.grn}pnpm setup${C.rst}     # 一键安装（环境/依赖/数据库/迁移/种子，幂等）\n`);
-    console.log(`    完成后再执行 ${C.grn}pnpm app${C.rst}。\n`);
+    warn("缺少根 .env：请按 README 复制 .env.example，配置本产品独立数据库、迁移与种子，再注入真实模型 Key。");
+    warn("源码启动器不会自动接管已有产品的数据库或后台服务。");
     process.exit(1);
   }
+  const launch = resolveDesktopLaunchConfig(ROOT);
+  validateDesktopModelConfig(launch.environment);
+  const { serverPort: SERVER_PORT, webPort: WEB_PORT, environment: runtimeEnvironment } = launch;
+  say(`${launch.product.displayName} · server :${SERVER_PORT} / web :${WEB_PORT}`);
+  if (runtimeEnvironment.LLM_PROVIDER === "mock") warn("当前显式选择 mock 演示；启动检查不代表真实模型或 PM 团队交付通过。");
 
   // ② Electron 可用性（含自愈：pnpm 默认不跑依赖 postinstall，二进制可能未下载）
   const electronPackage = join(ROOT, "node_modules", "electron");
@@ -252,7 +322,7 @@ async function main() {
     say("Electron 二进制未下载（pnpm 跳过 postinstall）→ 自动补下载（npmmirror 镜像）…");
     const r = spawnSync(process.execPath, [join(ROOT, "node_modules", "electron", "install.js")], {
       cwd: ROOT, stdio: "inherit",
-      env: { ...process.env, ELECTRON_MIRROR: process.env.ELECTRON_MIRROR ?? "https://npmmirror.com/mirrors/electron/" },
+      env: { ...runtimeEnvironment, ELECTRON_MIRROR: runtimeEnvironment.ELECTRON_MIRROR ?? "https://npmmirror.com/mirrors/electron/" },
     });
     try {
       electronBin = resolveElectronExecutable(electronPackage);
@@ -282,7 +352,7 @@ async function main() {
 
   // ④ 源码 server 由编排器启动；正式安装包仍由 Electron bootstrap 管理内嵌运行时。
   say(`启动源码 server（:${SERVER_PORT}）…`);
-  run("pnpm", ["-C", "apps/server", DEV ? "dev" : "start"], "server", { SERVER_PORT: String(SERVER_PORT) });
+  run("pnpm", ["-C", "apps/server", DEV ? "dev" : "start"], "server", runtimeEnvironment);
   if (!(await waitHealth(`http://localhost:${SERVER_PORT}/health`, 60))) {
     warn(`server ${SERVER_PORT} 未就绪`); stopAll(1); return;
   }
@@ -291,13 +361,13 @@ async function main() {
   // ⑤ 起 web（生产=构建+preview；开发=vite dev）
   if (!DEV) {
     say("构建 web 生产包（首次约 1-2 分钟）…");
-    const build = spawnSync("pnpm", ["-C", "apps/web", "build"], { cwd: ROOT, stdio: "inherit", env: process.env, shell: process.platform === "win32" });
+    const build = spawnSync("pnpm", ["-C", "apps/web", "build"], { cwd: ROOT, stdio: "inherit", env: runtimeEnvironment, shell: process.platform === "win32" });
     if (build.status !== 0) { warn("web 构建失败"); stopAll(1); return; }
     say(`启动 web 预览（:${WEB_PORT}）…`);
-    run("pnpm", ["-C", "apps/web", "preview"], "web", { WEB_PORT: String(WEB_PORT), SERVER_PORT: String(SERVER_PORT) });
+    run("pnpm", ["-C", "apps/web", "preview"], "web", runtimeEnvironment);
   } else {
     say(`启动 web dev server（:${WEB_PORT}，HMR）…`);
-    run("pnpm", ["-C", "apps/web", "dev"], "web", { WEB_PORT: String(WEB_PORT), SERVER_PORT: String(SERVER_PORT) });
+    run("pnpm", ["-C", "apps/web", "dev"], "web", runtimeEnvironment);
   }
   if (!(await waitHealth(`http://localhost:${WEB_PORT}/`, 30))) {
     warn(`web ${WEB_PORT} 未就绪`); stopAll(1); return;
@@ -313,7 +383,7 @@ async function main() {
     const e = spawn(electronBin, [...(needNoSandbox ? ["--no-sandbox"] : []), join(ROOT, "apps/desktop/electron/main.cjs")], {
       cwd: ROOT,
       env: buildElectronEnvironment({
-        environment: process.env,
+        environment: runtimeEnvironment,
         webPort: WEB_PORT,
         serverPort: SERVER_PORT,
         sourceRoot,
@@ -341,14 +411,14 @@ async function main() {
   }
 
   // ⑥ 拉起 Electron 原生窗口（窗口关闭 → 主进程退出 → 收掉全部子进程）
-  say(`打开桌面窗口 → http://localhost:${WEB_PORT}`);
+  say(`打开桌面窗口 → http://localhost:${WEB_PORT}${runtimeEnvironment.WORKLOOM_START_PATH}`);
   // Linux root（容器/服务器）需 --no-sandbox；普通桌面用户不受影响
   const needNoSandbox = process.platform === "linux" && typeof process.getuid === "function" && process.getuid() === 0;
   const electronArgs = [...(needNoSandbox ? ["--no-sandbox"] : []), join(ROOT, "apps/desktop/electron/main.cjs")];
   const e = spawn(electronBin, electronArgs, {
     cwd: ROOT,
     env: buildElectronEnvironment({
-      environment: process.env,
+      environment: runtimeEnvironment,
       webPort: WEB_PORT,
       serverPort: SERVER_PORT,
       sourceRoot,
@@ -362,4 +432,7 @@ async function main() {
   say(`${C.grn}客户端已启动：关窗 = 最小化到托盘（夜班持续运行）；托盘菜单「退出」= 彻底退出。${C.rst}`);
 }
 
-if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) void main();
+if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) void main().catch((error) => {
+  warn(error instanceof Error ? error.message : "桌面启动失败");
+  stopAll(1);
+});

@@ -1,19 +1,21 @@
 {
   "schemaVersion": "workloom.acceptance-profile/v2",
-  "repo": "workloom-ai/workloom-im",
-  "productName": "WorkLoom 织元",
-  "lane": "base",
+  "repo": "geniusdapeng-collab/workloom-pm",
+  "productName": "WorkLoom PM",
+  "lane": "industry",
   "primaryBundle": "ai-pm",
   "workspaceId": null,
   "dataMode": "simulated",
   "startup": {
-    "command": "pnpm preview:all",
+    "command": "WORKLOOM_SCHEDULER_MS=0 SERVER_HOST=127.0.0.1 SERVER_PORT=8987 WEB_PORT=5373 WEBB_PORT=5375 WEBC_PORT=5376 pnpm exec concurrently -k -n server,pc,b-mobile,c-mobile \"pnpm -C apps/server start\" \"pnpm -C apps/web exec vite --host 127.0.0.1 --port 5373 --strictPort\" \"pnpm -C apps/webb exec vite --host 127.0.0.1 --port 5375 --strictPort\" \"pnpm -C apps/webc exec vite --host 127.0.0.1 --port 5376 --strictPort\"",
     "ports": {
-      "pc": 3000,
-      "bMobile": 3001,
-      "cMobile": 3002,
-      "server": 8787
-    }
+      "pc": 5373,
+      "bMobile": 5375,
+      "cMobile": 5376,
+      "server": 8987
+    },
+    "entryRoute": "/development",
+    "notes": "显式四进程源码命令：使用现有 server start 与三个 Vite 入口；仅 loopback，前端 strictPort，不迁移、不 seed、不清理或接管已有端口。执行前须配置本产品独立测试数据库与受控模型预算；启动会包含既有恢复逻辑，不能指向原 IM/客户数据库。本轮仅验证声明，未执行此启动命令；这些是声明端口，不是已启动证据。"
   },
   "identity": {
     "workspaceSlug": "ai-pm-demo",
@@ -23,6 +25,7 @@
   },
   "surfaces": {
     "pcRoutes": [
+      "/development",
       "/",
       "/inbox",
       "/tasks",
@@ -95,35 +98,35 @@
       {
         "id": "owner",
         "jtbd": [
-          "每天 10 分钟看清经营与风险"
+          "提出 PM 目标、核对分工与交付文件，看到阻断原因和需要本人批准的事项"
         ],
         "criticality": "P0"
       },
       {
         "id": "manager",
         "jtbd": [
-          "今天要处理什么、谁在做、卡在哪"
+          "检查需求、实现、评测与交付节点的依赖，以及真实产物和验证回执"
         ],
         "criticality": "P0"
       },
       {
         "id": "staff",
         "jtbd": [
-          "接活、交付、有回执"
+          "复核产物内容、文件摘要、独立测试与失败/取消证据"
         ],
         "criticality": "P0"
       },
       {
         "id": "partner",
         "jtbd": [
-          "看清授权边界与资金红线"
+          "确认继承协作界面的授权边界；不把它当本轮 PM DAG 达成证据"
         ],
         "criticality": "P1"
       },
       {
         "id": "guest",
         "jtbd": [
-          "问得清、答得快、能联系到人"
+          "识别继承访客服务的权限与联系路径；本轮 PM 代表目标不派发访客业务任务"
         ],
         "criticality": "P0"
       }
@@ -216,7 +219,7 @@
         "kpis": [
           {
             "name": "需求澄清通过率",
-            "source": "dev_tasks",
+            "source": "pm_runs / pm_tasks / pm_artifacts（需独立真实查询；本配置不填基线或实际值）",
             "baseline": null,
             "target": null
           }
@@ -236,7 +239,7 @@
         "kpis": [
           {
             "name": "澄清单一次通过率",
-            "source": "dev_tasks",
+            "source": "pm_runs / pm_tasks / pm_artifacts（需独立真实查询；本配置不填基线或实际值）",
             "baseline": null,
             "target": null
           }
@@ -255,7 +258,7 @@
         "kpis": [
           {
             "name": "门禁结论与真实门禁一致率",
-            "source": "releases",
+            "source": "pm_runs / pm_tasks / pm_artifacts（需独立真实查询；本配置不填基线或实际值）",
             "baseline": null,
             "target": null
           }
@@ -274,7 +277,7 @@
         "kpis": [
           {
             "name": "红线用例检出率",
-            "source": "eval_reports",
+            "source": "pm_runs / pm_tasks / pm_artifacts（需独立真实查询；本配置不填基线或实际值）",
             "baseline": null,
             "target": null
           }
@@ -289,8 +292,8 @@
       "acceptance/outcomes/industry.yaml"
     ],
     "receipts": [],
-    "fixtureMarker": "suite.rdas.workloom-im",
-    "residualDisclosure": "研发需求澄清验收会保留带 suite.rdas.workloom-im 标记的线程和事件；不会删除审计事件，需单独列入残留清单并排除 ADR/HIR 与经营指标。"
+    "fixtureMarker": "suite.rdas.workloom-pm",
+    "residualDisclosure": "本产品验收若另行获准派单，会保留带 suite.rdas.workloom-pm 标记的线程和事件；不删除审计链，须列明残留并排除 ADR/HIR 与经营指标。本轮 validate-only 不派单、不生成回执。"
   },
   "autonomy": {
     "interventionTaxonomy": "H0-H4",
@@ -325,191 +328,32 @@
     "kind": "local-preview",
     "allowWrites": false,
     "supportDir": null,
-    "target": {},
-    "notes": "本仓档位必须与 CLI/父执行器一致；切换环境需提供同档位的显式 profile。生产默认只读，写入需受控身份、显式授权、夹具标记与残留披露。"
+    "target": {
+      "apiUrl": "http://127.0.0.1:8987",
+      "pcUrl": "http://127.0.0.1:5373",
+      "bMobileUrl": "http://127.0.0.1:5375",
+      "cMobileUrl": "http://127.0.0.1:5376"
+    },
+    "notes": "默认仅声明本产品本地源码预览档位，数据为 simulated、allowWrites=false；不得将其当作已安装客户端或生产验收。本轮只执行只读配置校验，未连接这些目标；真实受控模型评测由独立 PM driver 与逐请求预算证据约束。"
   },
   "live": {
-    "enabled": true,
-    "requireRealModels": false,
+    "enabled": false,
+    "requireRealModels": true,
     "allowDb": false,
     "budgets": {
       "maxLlmCalls": 40,
       "maxLlmTokens": 300000,
-      "maxImages": 8,
-      "maxVideoClips": 3,
+      "maxImages": 0,
+      "maxVideoClips": 0,
       "minVideoSeconds": 10,
       "maxVideoSeconds": 15,
-      "maxVideoSecondsTotal": 45,
+      "maxVideoSecondsTotal": 0,
       "maxCostCny": 120,
       "maxWallClockMin": 45
     },
-    "models": [
-      {
-        "id": "deepseek-v4.1-flash",
-        "kind": "llm",
-        "model": "deepseek-flash",
-        "adapter": "dsh-harness",
-        "apiKeyEnv": "DEEPSEEK_API_KEY",
-        "baseUrlEnv": "DEEPSEEK_BASE_URL"
-      },
-      {
-        "id": "seedream-5.0",
-        "kind": "image",
-        "model": "seedream-5.0",
-        "adapter": "gen-http",
-        "apiKeyEnv": "SEEDREAM_API_KEY",
-        "baseUrlEnv": "SEEDREAM_ENDPOINT"
-      },
-      {
-        "id": "seedance-2.5",
-        "kind": "video",
-        "model": "seedance-2.5",
-        "adapter": "gen-http",
-        "apiKeyEnv": "SEEDANCE_API_KEY",
-        "baseUrlEnv": "SEEDANCE_ENDPOINT"
-      }
-    ],
-    "tasks": [
-      {
-        "id": "LLM-R1",
-        "kind": "llm",
-        "chain": "dsh-harness",
-        "model": "deepseek-v4.1-flash",
-        "criticality": "P0",
-        "title": "内置模型 · 推理任务（dsh harness + 围栏 + 账本）",
-        "prompt": "背景：演示工作区收到一条模糊需求「把产品做得更好用」。请给出：① 你要先澄清的 3 个问题 ② 你会派给哪个岗位 ③ 一条可执行的第一步动作与风险。要求：先结论后依据，最后另起一行输出 TASK_COMPLETE。",
-        "expect": [
-          "澄清|岗位|委派|风险|需求"
-        ],
-        "expectAll": [
-          "TASK_COMPLETE"
-        ]
-      },
-      {
-        "id": "LLM-T1",
-        "kind": "llm",
-        "chain": "dsh-harness",
-        "model": "deepseek-v4.1-flash",
-        "criticality": "P0",
-        "title": "内置模型 · 工具循环（工具调用过围栏瀑布 + 事件落哈希链）",
-        "prompt": "请调用 bash 工具执行 `echo workloom-live`，把命令输出原样贴出来，然后另起一行输出 TASK_COMPLETE。",
-        "expect": [
-          "workloom-live|TASK_COMPLETE"
-        ],
-        "expectAll": [
-          "TASK_COMPLETE"
-        ]
-      },
-      {
-        "id": "LLM-M1",
-        "kind": "llm",
-        "chain": "dsh-harness",
-        "model": "deepseek-v4.1-flash",
-        "criticality": "P1",
-        "fixture": "auto",
-        "title": "内置模型 · 多模态理解（截图/夹具图到达模型）",
-        "prompt": "请打开随附图片，用一句话说明图中主体内容，并原样念出图中最下方徽标里的那一串字符。最后另起一行输出 TASK_COMPLETE。",
-        "expect": [
-          "WORKLOOM|验收|夹具|WORKLOOM"
-        ],
-        "expectAll": [
-          "TASK_COMPLETE"
-        ]
-      },
-      {
-        "id": "LLM-G1",
-        "kind": "llm",
-        "chain": "model-gateway",
-        "model": "deepseek-v4.1-flash",
-        "criticality": "P1",
-        "title": "模型网关 · 结构化输出",
-        "prompt": "只输出一行 JSON：{\"verdict\":\"ok\",\"risk\":\"low\",\"reason\":\"<20 字内>\"}。不要输出任何其他内容。",
-        "expect": [
-          "verdict"
-        ]
-      },
-      {
-        "id": "IMG-01",
-        "kind": "image",
-        "model": "seedream-5.0",
-        "criticality": "P1",
-        "images": 2,
-        "title": "生图 · 产品海报（2 张）",
-        "prompt": "WorkLoom 织元产品海报：深色背景 + 织线/光轨意象，中央标题「WORKLOOM」，下方小字「自主经营系统」。扁平、克制、无人物。",
-        "expect": [
-          "png"
-        ],
-        "minArtifacts": 1
-      },
-      {
-        "id": "IMG-02",
-        "kind": "image",
-        "model": "seedream-5.0",
-        "criticality": "P2",
-        "images": 1,
-        "title": "生图 · 应用图标",
-        "prompt": "一个极简 App 图标：靛蓝底色，白色「织」字样的几何化线条，圆角方形，高对比。",
-        "expect": [
-          "png"
-        ],
-        "minArtifacts": 1
-      },
-      {
-        "id": "VID-01",
-        "kind": "video",
-        "model": "seedance-2.5",
-        "criticality": "P1",
-        "durationSeconds": 12,
-        "title": "生视频 · 12s 产品演示镜头",
-        "prompt": "镜头缓慢推近一块悬浮的半透明数据看板，看板上有流动的光点与折线，背景深空蓝，运镜平稳，无人物，无文字。",
-        "expect": [
-          "mp4"
-        ],
-        "durationRange": [
-          10,
-          15
-        ]
-      },
-      {
-        "id": "VID-02",
-        "kind": "video",
-        "model": "seedance-2.5",
-        "criticality": "P2",
-        "durationSeconds": 12,
-        "title": "生视频 · 12s 门店空镜",
-        "prompt": "清晨的酒店大堂空镜：镜头从左向右匀速横移，暖色灯带、大理石地面反光，无人出现，画面干净。",
-        "expect": [
-          "mp4"
-        ],
-        "durationRange": [
-          10,
-          15
-        ]
-      },
-      {
-        "id": "PROD-01",
-        "kind": "product",
-        "criticality": "P0",
-        "title": "研发需求澄清（经产品入口与线程事件读回）",
-        "input": "suite.rdas.workloom-im：当前模糊研发需求有哪些需要先澄清的问题、承接岗位和风险？请用“需求”标注结论，列出缺失事实与待人工决定项，不实施任何改动。",
-        "presetKey": "chief-pm",
-        "workspaceSlug": "ai-pm-demo",
-        "requireModel": true,
-        "fixtureMarker": "suite.rdas.workloom-im",
-        "residualDisclosure": "研发需求澄清验收会保留带 suite.rdas.workloom-im 标记的线程和事件；不会删除审计事件，需单独列入残留清单并排除 ADR/HIR 与经营指标。",
-        "state_asserts": [
-          {
-            "event": {
-              "action": "ask.answer",
-              "field": "decision.after.text",
-              "contains": "需求",
-              "minLength": 12
-            }
-          }
-        ]
-      }
-    ],
-    "notes": "声明研发需求澄清的模型/产品任务。无受控身份、实际模型或结果回执时保持未验证；配置校验与 HTTP fixture 不构成生产通过。"
+    "models": [],
+    "tasks": [],
+    "notes": "通用 RDAS live 入口尚不承载本产品 PM API 的逐请求预算合同，默认关闭，保持生产能力未验证。原生图/视频/多模态和宿主 bash 工具任务完整保留在 docs/upstream/acceptance-profile.json 及继承资产代码中，不列入本轮 PM 默认授权代表任务，不添加虚构模型或回执。真实 PM 模型/团队验收通过下述 pmEvaluation 的显式命令与独立预算代理进行，不能由配置通过替代。"
   },
   "journeys": [
     {
@@ -573,5 +417,60 @@
       "script": "builtin:dry-run"
     }
   ],
-  "notes": "本仓代表任务是研发需求澄清：正常结果（P0 k=5）、输入错误、无身份权限三路径。profile-check/outcome --validate-only 仅校验配置；真实行业结果、体验、长跑和完整276项仍须独立验收。"
+  "notes": "独立 WorkLoom PM 默认验收声明：/development 为首入口，四端声明使用本产品偏移端口，不复用旧 IM 的 preview:all/默认端口/数据库。276 全清单保留；通用 O 域保留 chief-pm 澄清正常 k=5、输入失败、无身份三路径合同；新 PM 团队代表目标见 pmEvaluation。原生图、视频、宿主 bash 和其它上游任务仅作为继承资产留档，不授权本轮执行。profile-check 与 outcome --validate-only 必须保持业务未验证，真实模型、UI、长跑及完整 RDAS 需独立实际证据。",
+  "isolation": {
+    "independentProduct": true,
+    "isolated": true,
+    "productRepository": "geniusdapeng-collab/workloom-pm",
+    "sourceProfileRepository": "workloom-ai/workloom-im",
+    "upstreamProfile": "docs/upstream/acceptance-profile.json",
+    "upstreamProfileSha256": "f9e92ab4ad94513ed69f7c239e17dc6a3844567265fc975873b9ff71fa6042c8",
+    "notes": "本仓为由上游复制改造的独立 PM 产品；PM 专属实现保留在 industry 层。本配置只声明本产品独立端口与专属测试数据范围，不授权原 IM、其它行业仓或生产目标写入；本轮不执行舰队下发。"
+  },
+  "routes": {
+    "home": "/development"
+  },
+  "pmEvaluation": {
+    "schema": "workloom.pm-evaluation-profile/v1",
+    "driver": "apps/server/src/industry/ai-pm/acceptance/evaluate.mts",
+    "command": "pnpm pm:eval",
+    "documentation": "docs/PM-EVALUATION.md",
+    "executedByDefault": false,
+    "declaredModel": "deepseek-flash",
+    "budgetAuthority": "scripts/pm-budget-proxy.mjs 的同 run 持久化逐物理请求账本；输入使用可信 tokenizer 预占，未知用量冻结，限额以当前 run 回执为准",
+    "representativeGoals": [
+      {
+        "id": "PM-SINGLE-PRD",
+        "caseId": "single-requirement-analyst",
+        "goal": "给定研发团队需求材料，产出包含用户场景、P0/P1/P2、字段与正常/边界/权限验收的 result.md。",
+        "measurementStatus": "not-run-by-profile-validation"
+      },
+      {
+        "id": "PM-TEAM-TODO",
+        "caseId": "team-todo-long",
+        "goal": "四角色依赖链交付需求、todo.mjs、至少六个自身测试、评测和交付说明；独立沙箱验收中文/emoji、ID、翻转/删除、边界和副本隔离，并检查长文尾标保留。",
+        "measurementStatus": "not-run-by-profile-validation"
+      },
+      {
+        "id": "PM-TEAM-LEDGER",
+        "caseId": "team-ledger-long",
+        "goal": "四角色依赖链交付容量账本与至少六个自身测试；独立验收幂等、额度不足不改状态、释放、输入错误、特殊 ID 与副本隔离。",
+        "measurementStatus": "not-run-by-profile-validation"
+      }
+    ],
+    "evidenceRequirements": [
+      "本轮真实 model/responseId/usage，不能由配置或 HTTP200 代替",
+      "原始 goal 与逻辑 case、首次/最新/attempt 分母分别保留",
+      "真实计划节点、依赖祖先材料、实际文件与 SHA-256 读回",
+      "自身测试与可信独立业务断言由 OS 沙箱实际执行",
+      "同一物理请求预算账本及失败/取消/未知计量证据"
+    ],
+    "notes": "通用 outcome 套件继续验证 chief-pm 澄清正常/错误/权限合同；它仍使用 legacy thread read-back，不能冒充新 PM DAG 已完成。14 岗、两复杂团队与模式召回由 driver 单列，未运行的模型召回为 null，规则路由另列。"
+  },
+  "coverageDeclaration": {
+    "checklist": "docs/acceptance/checklist.v3.json",
+    "totalItems": 276,
+    "policy": "完整 276 项继续进入覆盖率分母；本轮 profile-check/outcome --validate-only 只证明配置结构，未运行项保持 not-run/unverified，不生成条目 pass。",
+    "inheritedAssets": "上游 profile 原文与媒体/通用工具实现保留；不参与本轮默认 PM 代表任务，不能从任务移出推导为验收豁免。"
+  }
 }

@@ -1,0 +1,50 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+import YAML from "yaml";
+import { assertPmSkillContract, PM_CONTRACT_SKILLS, TRUSTED_PM_EVIDENCE_POLICY } from "./skill-contracts.js";
+
+const root = new URL("../../../../../bundles/ai-pm/skills/", import.meta.url);
+const text = (name: string) => readFileSync(new URL(`${name}/SKILL.md`, root), "utf8");
+function change(name: string, mutate: (contract: Record<string, unknown>) => void): string {
+  const source = text(name); const match = /^---\n([\s\S]*?)\n---/.exec(source)!;
+  const front = YAML.parse(match[1]!); mutate(front.delivery_contract);
+  return `---\n${YAML.stringify(front)}---${source.slice(match[0].length)}`;
+}
+
+describe("verified AI-PM skill evidence contracts", () => {
+  it.each(PM_CONTRACT_SKILLS)("the real %s asset has a complete fail-closed delivery contract", (name) => {
+    expect(() => assertPmSkillContract(name, text(name))).not.toThrow();
+  });
+  it.each(["changeset-harvest", "release-cut"])("%s cannot be resealed with mock/missing gates or unbound evidence", (name) => {
+    for (const [field, value] of [["missingEvidence", "allow"], ["mockEvidence", "allow"], ["exam", "not-fail"], ["humanApprovalSubstitutesEvidence", true]]) {
+      const source = change(name, (contract) => { contract[field as string] = value; });
+      expect(() => assertPmSkillContract(name, source)).toThrow("技能交付合同");
+    }
+    expect(() => assertPmSkillContract(name, change(name, (contract) => { contract.binding = ["workspace", "task"]; }))).toThrow("技能交付合同");
+  });
+  it("the known-unsafe previous version and absent safe rollback target are never sufficient", () => {
+    expect(() => assertPmSkillContract("prompt-regression", change("prompt-regression", (contract) => { contract.knownBadVersionEligible = true; }))).toThrow();
+    expect(() => assertPmSkillContract("prompt-regression", change("prompt-regression", (contract) => { contract.rollbackEvidence = "previous-version-number"; }))).toThrow();
+    expect(() => assertPmSkillContract("prompt-regression", change("prompt-regression", (contract) => { contract.noSafeVersion = "use-original"; }))).toThrow();
+  });
+  it("a metric point threshold alone and omitted uncertainty cannot certify a causal experiment", () => {
+    expect(() => assertPmSkillContract("metric-digest", change("metric-digest", (contract) => { contract.pointThresholdAloneFalsifies = true; }))).toThrow();
+    expect(() => assertPmSkillContract("metric-digest", change("metric-digest", (contract) => { contract.experimentFields = ["effect", "allocation"]; }))).toThrow();
+  });
+  it("PRD fields cannot omit the consistent nullability/state contract or functional priority tiers", () => {
+    expect(() => assertPmSkillContract("prd-forge", change("prd-forge", (contract) => { contract.fieldStateConsistency = false; }))).toThrow();
+    expect(() => assertPmSkillContract("prd-forge", change("prd-forge", (contract) => { contract.functionalPriorityTiers = ["P0"]; }))).toThrow();
+  });
+  it("a legacy text-only skill document and an unparseable contract stay unverified", () => {
+    const old = "---\nname: changeset-harvest\nversion: 1.0.0\n---\n模型缺配置降级放行并标 mock；verdict=fail 才拦。";
+    expect(() => assertPmSkillContract("changeset-harvest", old)).toThrow("技能交付合同");
+    expect(() => assertPmSkillContract("metric-digest", "---\n[malformed\n---\nbody")).toThrow("技能交付合同");
+    // Other skills retain their existing contracts; this guard covers only the five explicitly reviewed assets.
+    expect(() => assertPmSkillContract("meeting-digest", "existing asset")).not.toThrow();
+  });
+  it("the trusted policy constrains evidence and safe rollback rather than supplying a task answer", () => {
+    expect(TRUSTED_PM_EVIDENCE_POLICY).toContain("可信执行纪律");
+    expect(TRUSTED_PM_EVIDENCE_POLICY).toContain("独立");
+    expect(TRUSTED_PM_EVIDENCE_POLICY).not.toMatch(/1000|40%|产品甲|C\s*>\s*A|No-Go/);
+  });
+});

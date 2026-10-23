@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkLoom 织元 · DeepSeek Harness 企业级 Agent IM —— 你的太空驾驶舱 | Enterprise Agent IM</title>
-<meta name="description" content="WorkLoom 织元：DeepSeek Harness 企业级 Agent IM，同时面向人类与 Agent 的企业级消息协作网络。WorkData 数据大脑、技能市场、本地数据主权。Enterprise Agent IM powered by DeepSeek Harness — humans and AI agents in one workspace, local-first, Apache-2.0 open source.">
+<title>WorkLoom PM · AI 产品经理带领 AI 研发团队</title>
+<meta name="description" content="WorkLoom PM：从用户目标到岗位任务、受限研发执行、真实产物、验证与交付回执。当前以源码运行，继承的界面展示不作真实交付或安装包发布证明。">
 <meta name="keywords" content="Enterprise Agent IM,DeepSeek Harness,企业级Agent,AI Agent协作,多智能体,人机共存,数码员工,事件溯源,组织记忆,pgvector,本地优先,数据主权,技能市场,skill marketplace,WorkData,multi-agent,human-in-the-loop,local-first,event sourcing,Hono,tRPC,React,PostgreSQL,开源,open source">
-<meta property="og:title" content="WorkLoom 织元 · DeepSeek Harness 企业级 Agent IM">
-<meta property="og:description" content="Enterprise Agent IM powered by DeepSeek Harness — humans and AI agents in one workspace. WorkData data brain, skill marketplace, local-first data sovereignty. Apache-2.0.">
+<meta property="og:title" content="WorkLoom PM · AI 产品经理带领 AI 研发团队">
+<meta property="og:description" content="WorkLoom PM：从用户目标到岗位任务、受限研发执行、真实产物、验证与交付回执。当前以源码运行，继承的界面展示不作真实交付或安装包发布证明。">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -102,7 +102,7 @@ p.lede{color:var(--t2);max-width:720px;font-size:15.5px}
 
 /* ============ HERO ============ */
 .hero{min-height:92vh;display:flex;align-items:center;padding:80px 0 60px;position:relative}
-.hero .wrap{position:relative}
+.hero .wrap{position:relative;width:100%}
 .hero-frame{
   position:relative;border-radius:20px;
   padding:clamp(36px,6vw,76px) clamp(28px,6vw,80px);
@@ -133,6 +133,7 @@ p.lede{color:var(--t2);max-width:720px;font-size:15.5px}
 .hero h1 .gold{background:linear-gradient(120deg,var(--gold-hi),var(--gold-a) 45%,var(--gold-b));-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p.sub{color:var(--t2);font-size:clamp(15px,1.6vw,17.5px);max-width:680px;margin-bottom:40px}
 .hero p.sub b{color:var(--t1);font-weight:700}
+@media(max-width:600px){.hero h1{font-size:28px;letter-spacing:0}.hero .btn-gold{padding:18px 24px;font-size:16px}}
 
 /* 主按钮：全站唯一最高级金色按钮（规范 §5.1 铁律） */
 .cta-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
@@ -338,6 +339,7 @@ p.lede{color:var(--t2);max-width:720px;font-size:15.5px}
 .cmp td:first-child{color:var(--t1);font-weight:700;white-space:nowrap}
 .cmp td{color:var(--t2)}
 .cmp td:last-child{color:#dfe6ff}
+@media(max-width:600px){.cmp{table-layout:fixed}.cmp th,.cmp td{padding:8px;overflow-wrap:anywhere;font-size:12px}.cmp td:first-child{white-space:normal}}
 .era{margin-top:26px;border:1px solid rgba(154,123,45,.5);border-radius:12px;padding:18px 22px;background:rgba(154,123,45,.07);font-size:14px;color:var(--t1);line-height:1.9}
 .era b{color:var(--gold-hi)}
 @media(max-width:960px){.eq-grid{grid-template-columns:repeat(2,1fr)}}
@@ -380,18 +382,18 @@ footer a:hover{color:var(--gold-hi)}
         <stop stop-color="#FFE0A3"/><stop offset=".5" stop-color="#FFB545"/><stop offset="1" stop-color="#FF8A3D"/>
       </linearGradient></defs>
     </svg>
-    <div><b>WorkLoom · 织元</b><small>STARLEAGUE</small></div>
+    <div><b>WorkLoom PM</b><small>AI PRODUCT DELIVERY</small></div>
   </div>
   <nav class="top">
-    <span class="pill-status hide-m"><span class="dot"></span>MAC 版 · 开放下载</span>
-    <a href="#download" class="hide-m">下载安装</a>
+    <span class="pill-status hide-m"><span class="dot"></span>PM 源码 · 未发安装包</span>
+    <a href="#download" class="hide-m">源码运行</a>
     <a href="#showcase" class="hide-m">驾驶舱实景</a>
     <a href="#features" class="hide-m">驾驶舱能力</a>
     <a href="#loop" class="hide-m">日循环</a>
     <a href="#newspecies" class="hide-m">新物种</a>
     <a href="#skills" class="hide-m">技能市场</a>
     <a href="en.html" class="hide-m">EN</a>
-    <a href="https://github.com/workloom-ai/workloom-im" target="_blank" rel="noopener">GitHub ↗</a>
+    <a href="https://github.com/geniusdapeng-collab/workloom-pm" target="_blank" rel="noopener">GitHub ↗</a>
   </nav>
 </header>
 
@@ -402,34 +404,19 @@ footer a:hover{color:var(--gold-hi)}
     <div class="hero-frame rise">
       <span class="hud tl"></span><span class="hud tr"></span><span class="hud bl"></span><span class="hud br"></span>
       <div class="hero-grid-lines"></div>
-      <div class="eyebrow">WorkLoom · 织元 —— 企业 Agent IM · 太空驾驶舱</div>
-      <h1>设定目标，<span class="gold">自动达成</span>。<br>关键时刻，人来拍板。</h1>
-      <p class="sub">
-        WorkLoom 是一套同时面向<b>人类与 Agent</b> 的企业级消息协作网络——给业务负责人的一座太空驾驶舱。
-        夜班战队默认 18:00 准时出征（时段随你自定义），清晨 08:30 昨夜战报送达：战果 ✓、待决断 ◆、求援 ▲ 一屏可读。
-        你每天只需 5 分钟，推进 ✓ / 校准 ✎ / 制动 ✗。
-      </p>
+      <div class="eyebrow">WORKLOOM PM · AI 产品研发团队</div>
+      <h1>AI 产品经理领队，<br><span class="gold">让项目有据可交。</span></h1>
+      <p class="sub">你提出目标、边界与预算，产品经理组织岗位任务与依赖；研发在受限目录执行，产物用真实文件、检查与回执核对。当前运行方式和实际评测以仓库 README 与 PM 文档为准。</p>
       <div class="cta-row">
-        <a class="btn-gold" id="btn-download" href="https://github.com/workloom-ai/workloom-im/releases/latest" target="_blank" rel="noopener">
+        <a class="btn-gold" id="btn-download" href="https://github.com/geniusdapeng-collab/workloom-pm#readme" target="_blank" rel="noopener">
           <span class="sheen"></span>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m6 11 6 6 6-6"/><path d="M4 21h16"/></svg>
-          下载 Mac 版
+          查看源码与运行说明
         </a>
-        <a class="btn-ghost" href="#download">查看安装流程 ↓</a>
+        <a class="btn-ghost" href="#download">查看源码运行步骤 ↓</a>
       </div>
-      <div class="dl-meta">
-        <span>macOS 13 Ventura +</span><span class="sep"></span>
-        <span>Apple Silicon（M 系列）· Intel 版后续推出</span><span class="sep"></span>
-        <span>GitHub Release 官方分发</span><span class="sep"></span>
-        <span id="dl-channel">CHANNEL: STABLE</span>
-      </div>
-      <div class="readouts">
-        <div class="readout"><div class="num">≤3s</div><div class="lbl">一句话派遣 · 建立任务线程</div></div>
-        <div class="readout"><div class="num gold">18:00</div><div class="lbl">夜班班组 · 默认出征 · 可自定义</div></div>
-        <div class="readout"><div class="num gold">08:30</div><div class="lbl">昨夜战报 · 准时送达</div></div>
-        <div class="readout"><div class="num">≤60s</div><div class="lbl">紧急制动 · 全端生效</div></div>
-        <div class="readout"><div class="num">100%</div><div class="lbl">全程留痕 · 可回滚可归因</div></div>
-      </div>
+      <div class="dl-meta"><span>Node 24+</span><span class="sep"></span><span>PostgreSQL 17 + pgvector</span><span class="sep"></span><span>真实 Key 仅运行时注入</span><span class="sep"></span><span id="dl-channel">SOURCE ONLY</span></div>
+      <div class="readouts"><div class="readout"><div class="num">14</div><div class="lbl">已声明数字员工岗位</div></div><div class="readout"><div class="num gold">20</div><div class="lbl">已声明技能 SOP</div></div><div class="readout"><div class="num gold">DAG</div><div class="lbl">岗位任务与依赖</div></div><div class="readout"><div class="num">SHA-256</div><div class="lbl">真实产物摘要</div></div><div class="readout"><div class="num">Flash</div><div class="lbl">DeepSeek 默认驱动</div></div></div>
     </div>
   </div>
 </section>
@@ -437,41 +424,15 @@ footer a:hover{color:var(--gold-hi)}
 <!-- ============ 下载安装链路 ============ -->
 <section id="download">
   <div class="wrap">
-    <div class="rise">
-      <div class="eyebrow">DOWNLOAD · 首航检查单</div>
-      <h2 class="sect">三步启航，<em>和装一个 Mac 软件一样简单</em></h2>
-      <p class="lede">WorkLoom Mac 版通过 GitHub Release 官方分发：下载压缩包 → 解压拖入「应用程序」→ 启动首航。全程无需命令行，无需额外环境。</p>
-    </div>
+    <div class="rise"><div class="eyebrow">SOURCE · 源码运行</div><h2 class="sect">先运行源码，<em>按证据验收交付</em></h2><p class="lede">当前不提供已签名 WorkLoom PM 安装包下载。完整命令、独立数据库、模型密钥与端口配置见 <a href="https://github.com/geniusdapeng-collab/workloom-pm#readme">README</a>。</p></div>
     <div class="steps">
-      <div class="step rise">
-        <span class="idx">01</span>
-        <h3>一键下载</h3>
-        <p>点击页面上方金色按钮，跳转到 GitHub Release 页面，下载最新版 <code>WorkLoom-macOS.zip</code>。下载完成后它会出现在你的「下载」文件夹里。</p>
-      </div>
-      <div class="step rise">
-        <span class="idx">02</span>
-        <h3>解压 · 拖入应用程序</h3>
-        <p>在「下载」文件夹中双击 zip 解压，得到 <code>WorkLoom.app</code>，把它拖进「应用程序」（Applications）文件夹——这就是标准 Mac 安装方式，无安装向导、无捆绑。</p>
-      </div>
-      <div class="step rise">
-        <span class="idx">03</span>
-        <h3>启动首航</h3>
-        <p>从「应用程序」打开 WorkLoom，跟随<b style="color:var(--t1)">装配检查单</b>完成起飞前检查，设置你的第一条航道护栏——今晚 18:00，夜班班组即可首次出征。</p>
-        <div class="tip">⚠ 首次打开如提示“无法验证开发者”：<b>按住 Control 点按图标 → 打开</b>，即可正常启动（macOS 对独立分发应用的标准流程）。</div>
-      </div>
-    </div>
-    <div class="term-shot rise">
-      <div class="bar"><i></i><i></i><i></i></div>
-<pre><span class="c"># 标准 Mac 下载链路（浏览器自动完成，无需手输命令）</span>
-<span class="y">①</span> 点击「下载 Mac 版」 <span class="c">→</span> GitHub Release <span class="c">→</span> WorkLoom-macOS.zip 开始下载
-<span class="y">②</span> 访达 <span class="c">→</span> 下载 <span class="c">→</span> 双击解压 <span class="c">→</span> 将 <span class="h">WorkLoom.app</span> 拖入「应用程序」
-<span class="y">③</span> 启动台打开 WorkLoom <span class="c">→</span> 装配检查单 <span class="c">→</span> 首条航道护栏 <span class="c">→</span> <span class="g">✓ 首航就绪</span>
-
-<span class="c"># 偏好命令行的主理人，也可以一行装好：</span>
-$ curl -L <span class="h">https://github.com/workloom-ai/workloom-im/releases/latest/download/WorkLoom-macOS.zip</span> -o ~/Downloads/WorkLoom-macOS.zip</pre>
+      <div class="step rise"><span class="idx">01</span><h3>完整获取仓库</h3><p>克隆 <code>geniusdapeng-collab/workloom-pm</code>，使用 Node 24+ 和仓库固定的 pnpm，以 <code>pnpm install --frozen-lockfile</code> 复现依赖。</p></div>
+      <div class="step rise"><span class="idx">02</span><h3>隔离数据与模型配置</h3><p>为 PM 配置独立 PostgreSQL 17 + pgvector，执行迁移与 AI-PM 种子。真实 DeepSeek Key 仅从启动环境或受控本地密钥管理注入。</p></div>
+      <div class="step rise"><span class="idx">03</span><h3>启动并检查产物</h3><p>按 README 启动桌面或浏览器开发入口，进入 <code>/development</code>。产物、检查、用量和失败原因共同构成交付证据。</p></div>
     </div>
   </div>
 </section>
+<div class="wrap"><div class="safe-band"><h3>上游界面资料快照</h3><p>下方保留 WorkLoom IM 的历史界面与能力展示。旧时延、经营效果与截图不作 PM 当前实测承诺；真实范围见 <a href="https://github.com/geniusdapeng-collab/workloom-pm/blob/main/docs/PM-EVALUATION.md">PM 评测报告</a>。</p></div></div>
 
 <!-- ============ 驾驶舱实景（大图） ============ -->
 <section id="showcase">
@@ -658,25 +619,25 @@ $ curl -L <span class="h">https://github.com/workloom-ai/workloom-im/releases/la
 <section id="docs">
   <div class="wrap rise">
     <div class="eyebrow">MANUALS · 随代码开源</div>
-    <h2 class="sect">三份用户手册，<em>随项目一起下载</em></h2>
+    <h2 class="sect">交付与评测文档，<em>随源码一起保存</em></h2>
     <p class="lede">已内置在开源仓库 <code>docs/</code> 目录，克隆或下载源码即可一并获取。</p>
     <div class="doc-grid">
-      <a class="doc-card" href="https://github.com/workloom-ai/workloom-im/blob/main/docs/01-门店店长使用指南.md" target="_blank" rel="noopener">
-        <div class="doc-tag">FOR 店长 / 门店负责人</div>
-        <h3>门店店长使用指南</h3>
-        <p>下载安装 → 首次配置 → 日常使用，全程无技术术语，约 30 分钟上手。</p>
+      <a class="doc-card" href="https://github.com/geniusdapeng-collab/workloom-pm/blob/main/docs/PM-DELIVERY.md" target="_blank" rel="noopener">
+        <div class="doc-tag">FOR 产品负责人 / 开发者</div>
+        <h3>PM 交付架构</h3>
+        <p>岗位任务图、执行器、产物检查与回执的实际职责。</p>
         <span class="doc-dl">在 GitHub 阅读 ↗</span>
       </a>
-      <a class="doc-card" href="https://github.com/workloom-ai/workloom-im/blob/main/docs/02-新客户首次接入完整流程.md" target="_blank" rel="noopener">
-        <div class="doc-tag">FOR 任意行业新客户</div>
-        <h3>新客户首次接入完整流程</h3>
-        <p>从下载到正式使用的通用接入流程，六步检查单，接入即上岗。</p>
+      <a class="doc-card" href="https://github.com/geniusdapeng-collab/workloom-pm/blob/main/docs/PM-EVALUATION.md" target="_blank" rel="noopener">
+        <div class="doc-tag">FOR 验收 / 质量</div>
+        <h3>PM 真实评测</h3>
+        <p>真实模型、任务集、费用边界、实际结果与未覆盖项。</p>
         <span class="doc-dl">在 GitHub 阅读 ↗</span>
       </a>
-      <a class="doc-card" href="https://github.com/workloom-ai/workloom-im/blob/main/docs/03-功能清单-用户版.md" target="_blank" rel="noopener">
-        <div class="doc-tag">FOR 所有人</div>
-        <h3>功能清单（用户版）</h3>
-        <p>全部功能按使用场景分类：经营掌握 / 派遣 / 审批 / 夜班 / 追溯 / 沉淀。</p>
+      <a class="doc-card" href="https://github.com/geniusdapeng-collab/workloom-pm/blob/main/docs/UPSTREAM-README.md" target="_blank" rel="noopener">
+        <div class="doc-tag">FOR 来源追溯</div>
+        <h3>上游 README 快照</h3>
+        <p>完整保留导入时原文；历史发布与数据不作 PM 当前承诺。</p>
         <span class="doc-dl">在 GitHub 阅读 ↗</span>
       </a>
     </div>
@@ -689,13 +650,13 @@ $ curl -L <span class="h">https://github.com/workloom-ai/workloom-im/releases/la
     <div class="eyebrow" style="text-align:center">READY FOR DEPARTURE</div>
     <h2>舷窗外一片平静。<br>是时候<span style="background:linear-gradient(120deg,var(--gold-hi),var(--gold-a) 45%,var(--gold-b));-webkit-background-clip:text;background-clip:text;color:transparent">启航</span>了。</h2>
     <p>目的地，不是星辰大海——是太空宇宙本身。</p>
-    <a class="btn-gold" href="https://github.com/workloom-ai/workloom-im/releases/latest" target="_blank" rel="noopener">
+    <a class="btn-gold" href="https://github.com/geniusdapeng-collab/workloom-pm#readme" target="_blank" rel="noopener">
       <span class="sheen"></span>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m6 11 6 6 6-6"/><path d="M4 21h16"/></svg>
-      下载 Mac 版 · 免费开始
+      查看 WorkLoom PM 源码
     </a>
     <div class="dl-meta" style="justify-content:center">
-      <span>GitHub Release 官方分发</span><span class="sep"></span><span>zip 解压即用</span><span class="sep"></span><span>无命令行 · 无捆绑</span>
+      <span>源码与验收文档</span><span class="sep"></span><span>未发布安装包</span><span class="sep"></span><span>密钥不随包分发</span>
     </div>
   </div>
 </section>
@@ -705,9 +666,9 @@ $ curl -L <span class="h">https://github.com/workloom-ai/workloom-im/releases/la
   <div class="wrap">
     <div class="mono">WORKLOOM · 织元 —— 企业 AGENT IM ｜ APACHE-2.0 开源 ｜ DEEPSEEK HARNESS 运行时地基</div>
     <div>
-      <a href="https://github.com/workloom-ai/workloom-im" target="_blank" rel="noopener">GitHub 仓库 ↗</a>
+      <a href="https://github.com/geniusdapeng-collab/workloom-pm" target="_blank" rel="noopener">GitHub 仓库 ↗</a>
       &nbsp;·&nbsp;
-      <a href="https://github.com/workloom-ai/workloom-im/releases" target="_blank" rel="noopener">全部版本 ↗</a>
+      <a href="https://github.com/geniusdapeng-collab/workloom-pm#readme" target="_blank" rel="noopener">运行说明 ↗</a>
     </div>
     <div class="mono">© 2026 WORKLOOM TEAM ｜ 深空为幕，金光为令，经营即游戏。</div>
   </div>
@@ -761,7 +722,7 @@ $ curl -L <span class="h">https://github.com/workloom-ai/workloom-im/releases/la
 (function(){
   const el=document.getElementById('dl-channel');
   const mac=/Mac OS X|Macintosh/.test(navigator.userAgent);
-  el.textContent=mac?'CHANNEL: STABLE · 检测到 macOS ✓':'CHANNEL: STABLE · 当前非 macOS 环境';
+  el.textContent='SOURCE ONLY · WorkLoom PM';
 })();
 </script>
 </body>

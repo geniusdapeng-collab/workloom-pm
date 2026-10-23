@@ -20,10 +20,11 @@ interface TaskRow {
   id: string; repo_id: string; repo_name: string; title: string; status: string;
   change_kind: string; assigned_tool: string | null; repair_round: number;
   review_note: string | null; created_at: string; acceptance: string[];
+  release_verified?: boolean;
 }
 interface SessionRow { id: string; tool_key: string; branch: string; exit_reason: string | null; last_message: string | null; started_at: string; ended_at: string | null; usage: { inputTokens?: number; outputTokens?: number } | null }
 interface GateHard { name: string; ok: boolean; log: string }
-interface GateResults { hardGates: GateHard[]; llmReview: { ok: boolean; report: string; mock: boolean }; exam: { examId: string; score: number | null; verdict: string | null; mock: boolean } }
+interface GateResults { schema?: string; contentBinding?: { taskId: string; sessionId: string; snapshot: { sha256: string } }; hardGates: GateHard[]; llmReview: { ok: boolean; report: string; mock: boolean; state?: string }; exam: { examId: string; score: number | null; verdict: string | null; mock: boolean; state?: string; status?: string; totalQuestions?: number; finishedAt?: string | null; error?: string } }
 interface ChangesetRow { id: string; diff_stat: string; files: Array<{ path: string; added: number; deleted: number }>; untracked: string[]; self_summary: string; gate_results: GateResults; gates_passed: boolean; created_at: string }
 interface FenceRow { id: number; cmd: string; verdict: string; rule_id: string | null; note: string | null; created_at: string }
 interface DevEventRow { seq: number; type: string; payload: Record<string, unknown>; created_at: string }
@@ -158,7 +159,7 @@ export default function P25() {
       for (const task of k.tasks) {
       const prev = prevStatus.current.get(task.id);
       if (prev && prev !== task.status) {
-        if (task.status === "pending_approval") {
+        if (task.status === "pending_approval" && task.release_verified === true) {
           VoiceEngine.speak({ role: "release-guardian", persona: "发布守护",
             text: `任务「${task.title}」三道关全过，等您裁决`, priority: "ambient" });
         }
@@ -515,11 +516,12 @@ function TaskCard({ task, act, busy, expanded, onToggle, reload }: {
           )}
           {task.status === "pending_approval" && (
             <>
-              <ActBtn gold disabled={busy} onClick={() => void act(async () => {
+              <ActBtn gold disabled={busy || task.release_verified !== true} onClick={() => void act(async () => {
                 const r = await svc().devtools.approveRelease.mutate({ taskId: task.id });
                 return r;
               }, "已批准发布——版本台账 +1")}>批准发布</ActBtn>
               <ActBtn disabled={busy} onClick={() => setRejectOpen(true)}>打回</ActBtn>
+              {task.release_verified !== true && <span className="self-center text-body text-alert">交付检查未完成，暂不能批准发布</span>}
             </>
           )}
           {["draft", "confirmed", "running", "auditing", "rejected", "failed"].includes(task.status) && (
@@ -602,6 +604,14 @@ function TaskDetailView({ taskId, live, reload: _reload }: { taskId: string; liv
 
   if (!detail) return <div className="border-t border-line px-4 py-3 text-body text-ink2">加载中……</div>;
   const cs = detail.changesets[0];
+  const currentReceipt = cs?.gate_results.schema === "workloom.dev-gates/v3"
+    && cs.gate_results.contentBinding?.taskId === taskId && cs.gate_results.contentBinding.sessionId === detail.sessions[0]?.id;
+  const reviewVerified = currentReceipt && cs?.gate_results.llmReview.state === "passed" && cs.gate_results.llmReview.mock === false && cs.gate_results.llmReview.ok;
+  const exam = cs?.gate_results.exam;
+  const examVerified = currentReceipt && exam?.state === "completed" && exam.mock === false && exam.status === "done"
+    && !!exam.examId && Number.isSafeInteger(exam.totalQuestions) && Number(exam.totalQuestions) > 0
+    && typeof exam.score === "number" && Number.isFinite(exam.score) && exam.score >= 0 && exam.score <= 100
+    && !!exam.finishedAt && Number.isFinite(Date.parse(exam.finishedAt)) && ["pass", "warn", "fail"].includes(exam.verdict ?? "");
 
   return (
     <div className="border-t border-line px-4 py-3">
@@ -628,7 +638,7 @@ function TaskDetailView({ taskId, live, reload: _reload }: { taskId: string; liv
       {cs && (
         <div className="mb-3 rounded-lg border border-line bg-bg900 p-3">
           <div className="mb-2 text-body font-semibold">
-            三道关审计 {cs.gates_passed ? <span className="inline-flex items-center gap-1 text-go"><Icon name="check" size={13} />全过</span> : <span className="inline-flex items-center gap-1 text-alert"><Icon name="error" size={13} />未全过</span>}
+            三道关审计 {detail.task?.release_verified === true ? <span className="inline-flex items-center gap-1 text-go"><Icon name="check" size={13} />全过</span> : <span className="inline-flex items-center gap-1 text-alert"><Icon name="error" size={13} />未全过或未验证</span>}
             <span className="ml-2 font-normal text-ink2">{new Date(cs.created_at).toLocaleString("zh-CN")}</span>
           </div>
           <div className="grid grid-cols-1 gap-2 text-body sm:grid-cols-3">
@@ -641,15 +651,17 @@ function TaskDetailView({ taskId, live, reload: _reload }: { taskId: string; liv
               ))}
             </div>
             <div>
-              <div className="mb-1 font-medium text-ink2">② 智能评审{cs.gate_results.llmReview.mock && <span className="text-warn">（降级）</span>}</div>
-              <div className={`flex items-center gap-1 ${cs.gate_results.llmReview.ok ? "text-go" : "text-alert"}`}><Icon name={cs.gate_results.llmReview.ok ? "check" : "error"} size={13} />{cs.gate_results.llmReview.ok ? "通过" : "未过"}</div>
+              <div className="mb-1 font-medium text-ink2">② 模型摘要评审{(!currentReceipt || cs.gate_results.llmReview.state === "unavailable") && <span className="text-warn">（未验证）</span>}</div>
+              <div className={`flex items-center gap-1 ${reviewVerified ? "text-go" : "text-alert"}`}><Icon name={reviewVerified ? "check" : "error"} size={13} />{reviewVerified ? "通过" : cs.gate_results.llmReview.state === "failed" ? "未通过" : "未验证"}</div>
               <div className="mt-1 whitespace-pre-wrap text-ink2">{cs.gate_results.llmReview.report.slice(0, 300)}</div>
+              <div className="mt-1 text-ink3">仅依据任务、自述与变更统计；完整代码仍需复核。</div>
             </div>
             <div>
-              <div className="mb-1 font-medium text-ink2">③ 上线考{cs.gate_results.exam.mock && <span className="text-warn">（降级）</span>}</div>
-              <div className={cs.gate_results.exam.verdict === "fail" ? "text-alert" : "text-go"}>
-                {cs.gate_results.exam.verdict ? `${cs.gate_results.exam.verdict === "pass" ? "通过" : cs.gate_results.exam.verdict === "fail" ? "未通过" : "结论待确认"} · ${cs.gate_results.exam.score ?? "—"} 分` : "未执行"}
+              <div className="mb-1 font-medium text-ink2">③ 上线考{!examVerified && <span className="text-warn">（未验证）</span>}</div>
+              <div className={!examVerified || cs.gate_results.exam.verdict === "fail" ? "text-alert" : cs.gate_results.exam.verdict === "warn" ? "text-warn" : "text-go"}>
+                {examVerified ? `${cs.gate_results.exam.verdict === "pass" ? "通过" : cs.gate_results.exam.verdict === "fail" ? "未通过" : "需人工复核"} · ${cs.gate_results.exam.score ?? "—"} 分` : "未取得有效收卷回执"}
               </div>
+              {cs.gate_results.exam.error && <div className="mt-1 text-ink2">{cs.gate_results.exam.error}</div>}
             </div>
           </div>
           {cs.diff_stat && (

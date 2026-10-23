@@ -13,6 +13,14 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const SCRIPT_PRODUCT_ROOT = resolve(HERE, "..");
 const BASE_REPOSITORY = "workloom-ai/workloom-im";
 
+/** 产品首屏只接受本地、无编码的路由路径，不能改变 origin 或注入查询参数。 */
+export function validateProductStartPath(value = "/") {
+  if (typeof value !== "string" || !/^\/(?:[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*)?$/u.test(value)) {
+    throw new Error("产品 desktop.startPath 必须是安全的本地绝对路由路径");
+  }
+  return value;
+}
+
 function isOrdinaryFile(path) {
   try {
     const value = lstatSync(path);
@@ -111,6 +119,9 @@ export function loadProductRuntime(start = SCRIPT_PRODUCT_ROOT) {
   const demoWorkspaceSlug = manifest?.demoWorkspaceSlug;
   const demoMemberNo = manifest?.demoMemberNo;
   const portOffset = manifest?.desktop?.portOffset;
+  const startPath = validateProductStartPath(manifest?.desktop?.startPath);
+  const secretaryAutoScan = manifest?.clients?.bPc?.secretaryAutoScan === undefined
+    ? true : manifest.clients.bPc.secretaryAutoScan;
   if (schemaVersion !== "workloom.product/v1") {
     throw new Error("product.manifest.json 缺少受支持的 schemaVersion");
   }
@@ -141,6 +152,9 @@ export function loadProductRuntime(start = SCRIPT_PRODUCT_ROOT) {
   if (!Number.isInteger(portOffset) || portOffset < 0 || portOffset > 900) {
     throw new Error("product.manifest.json 的桌面端口偏移必须是 0 到 900 的整数");
   }
+  if (typeof secretaryAutoScan !== "boolean") {
+    throw new Error("product.manifest.json 的 clients.bPc.secretaryAutoScan 必须是布尔值");
+  }
   return Object.freeze({
     repositoryRoot,
     manifestPath,
@@ -152,6 +166,8 @@ export function loadProductRuntime(start = SCRIPT_PRODUCT_ROOT) {
     demoWorkspaceSlug,
     demoMemberNo,
     portOffset,
+    startPath,
+    secretaryAutoScan,
     serverPort: 8787 + portOffset,
     webPort: 5173 + portOffset,
     pgPort: 5432 + portOffset,
@@ -169,7 +185,7 @@ function main() {
     return;
   }
   if (!field || !Object.hasOwn(product, field) || field === "repositoryRoot" || field === "manifestPath") {
-    throw new Error("用法：node scripts/product-runtime.mjs --manifest-path | --field schemaVersion|productId|role|displayName|repository|demoWorkspaceSlug|demoMemberNo|portOffset|serverPort|webPort|pgPort|natsPort");
+    throw new Error("用法：node scripts/product-runtime.mjs --manifest-path | --field schemaVersion|productId|role|displayName|repository|demoWorkspaceSlug|demoMemberNo|portOffset|startPath|secretaryAutoScan|serverPort|webPort|pgPort|natsPort");
   }
   process.stdout.write(`${product[field]}\n`);
 }

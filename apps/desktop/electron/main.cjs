@@ -23,6 +23,7 @@
  *   WORKLOOM_PG_PORT     PostgreSQL 端口（默认 5432）
  *   WORKLOOM_NATS_PORT   NATS 端口（默认 4222）
  *   WORKLOOM_PORT_OFFSET 产品端口偏移（行业包/构建配置提供，默认 0）
+ *   WORKLOOM_START_PATH  产品首屏本地路由（构建配置提供，默认 /）
  */
 const { app, BrowserWindow, Tray, Menu, Notification, nativeImage, shell, dialog } = require("electron");
 const fs = require("node:fs");
@@ -54,7 +55,7 @@ process.env.WORKLOOM_SERVER_PORT ??= String(8787 + PRODUCT_PORT_OFFSET);
 process.env.WORKLOOM_WEB_PORT ??= String(5173 + PRODUCT_PORT_OFFSET);
 process.env.WORKLOOM_PG_PORT ??= String(5432 + PRODUCT_PORT_OFFSET);
 process.env.WORKLOOM_NATS_PORT ??= String(4222 + PRODUCT_PORT_OFFSET);
-const { bootstrap } = require("./bootstrap.cjs");
+const { bootstrap, resolveDesktopStartPath, desktopWebUrl } = require("./bootstrap.cjs");
 
 const TITLE = process.env.WORKLOOM_APP_TITLE ?? app.getName();
 const APP_SMOKE = process.env.WORKLOOM_APP_SMOKE === "1";
@@ -62,7 +63,12 @@ const RENDER_SMOKE = process.env.WORKLOOM_RENDER_SMOKE === "1";
 const SOURCE_MODE = process.env.WORKLOOM_SOURCE_MODE === "1";
 const SAFE_RENDERING = process.env.WORKLOOM_SAFE_RENDERING === "1" || process.argv.includes("--safe-rendering");
 const WEB_PORT = Number(process.env.WORKLOOM_WEB_PORT || 5173);
-const WEB_URL = `http://127.0.0.1:${WEB_PORT}`;
+const START_PATH = resolveDesktopStartPath({
+  configured: process.env.WORKLOOM_START_PATH,
+  packageFile: path.join(SOURCE_MODE && process.env.WORKLOOM_SOURCE_ROOT
+    ? process.env.WORKLOOM_SOURCE_ROOT : app.getAppPath(), "package.json"),
+});
+const WEB_URL = desktopWebUrl(WEB_PORT, START_PATH);
 
 // 渲染验收必须使用隔离的 Chromium 配置，否则开发机上“已看过欢迎页”的 localStorage
 // 会让冒烟绕过首装流程；CI 与本地执行因此保持完全相同的干净首启条件。
@@ -320,7 +326,8 @@ function createWindow() {
   });
   win.on("closed", () => { win = null; });
 
-  const renderUrl = SAFE_RENDERING ? `${WEB_URL}?render=vector2d` : WEB_URL;
+  const productUrl = handle?.webUrl ?? WEB_URL;
+  const renderUrl = SAFE_RENDERING ? `${productUrl}?render=vector2d` : productUrl;
   void win.loadURL(renderUrl);
 }
 
@@ -580,6 +587,7 @@ app.whenReady().then(async () => {
           resourcesDir,
           supportDir,
           smoke: APP_SMOKE,
+          startPath: START_PATH,
           onStatus: (msg, progress) => { if (splash) showSplash(msg, "", "", progress); },
         });
       }

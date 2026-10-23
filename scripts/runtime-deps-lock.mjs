@@ -70,6 +70,22 @@ const NATIVE_FAMILIES = Object.freeze([
       "win32-x64": "node_modules/lightningcss-win32-x64-msvc",
     }),
   }),
+  Object.freeze({
+    parent: "node_modules/sharp",
+    packages: Object.freeze({
+      "darwin-arm64": "node_modules/@img/sharp-darwin-arm64",
+      "darwin-x64": "node_modules/@img/sharp-darwin-x64",
+      "win32-x64": "node_modules/@img/sharp-win32-x64",
+    }),
+  }),
+  Object.freeze({
+    parent: "node_modules/koffi",
+    packages: Object.freeze({
+      "darwin-arm64": "node_modules/@koromix/koffi-darwin-arm64",
+      "darwin-x64": "node_modules/@koromix/koffi-darwin-x64",
+      "win32-x64": "node_modules/@koromix/koffi-win32-x64",
+    }),
+  }),
 ]);
 
 function json(value) {
@@ -175,7 +191,31 @@ function assertRegistryEntry(path, entry) {
   }
 }
 
-export function verifyRuntimePackageLock(manifest, packageLock) {
+function dependencyCandidates(packagePath, name) {
+  const candidates = [];
+  let cursor = packagePath;
+  while (cursor) {
+    candidates.push(`${cursor}/node_modules/${name}`);
+    const parent = cursor.lastIndexOf("/node_modules/");
+    cursor = parent < 0 ? "" : cursor.slice(0, parent);
+  }
+  candidates.push(`node_modules/${name}`);
+  return candidates;
+}
+
+function assertRequiredPeerClosure(packages) {
+  for (const [packagePath, entry] of Object.entries(packages)) {
+    if (!packagePath) continue;
+    for (const name of Object.keys(entry.peerDependencies ?? {})) {
+      if (entry.peerDependenciesMeta?.[name]?.optional) continue;
+      if (!dependencyCandidates(packagePath, name).some((candidate) => Object.hasOwn(packages, candidate))) {
+        throw new Error(`runtime 缺少必需 peer 依赖：${packagePath} -> ${name}`);
+      }
+    }
+  }
+}
+
+export function verifyRuntimePackageLock(manifest, packageLock, { allowMissingPeers = false } = {}) {
   if (packageLock?.lockfileVersion !== 3 || !packageLock?.packages || typeof packageLock.packages !== "object") {
     throw new Error("runtime package-lock 必须是 npm lockfileVersion 3");
   }
@@ -190,6 +230,7 @@ export function verifyRuntimePackageLock(manifest, packageLock) {
     const path = `node_modules/${name}`;
     if (!packageLock.packages[path]) throw new Error(`runtime package-lock 缺少直接依赖：${name}`);
   }
+  if (!allowMissingPeers) assertRequiredPeerClosure(packageLock.packages);
   for (const family of NATIVE_FAMILIES) {
     if (!packageLock.packages[family.parent]) continue;
     for (const target of RUNTIME_TARGETS) {
@@ -230,6 +271,20 @@ function npmDlx(root, args) {
   });
 }
 
+/** 复用已审阅闭包，避免新增一个依赖时把所有仍满足范围的传递依赖一起升级。 */
+export function copyReviewedRuntimeLock(root, destination) {
+  const paths = lockPaths(root);
+  const hasManifest = existsSync(paths.manifest);
+  const hasLock = existsSync(paths.lock);
+  if (!hasManifest && !hasLock) return false;
+  if (!hasManifest || !hasLock) throw new Error("已有 runtime 依赖锁不完整；不能静默丢弃已审阅版本");
+  const previousManifest = readJson(paths.manifest, "已有 runtime manifest");
+  // 旧锁可能由 legacy-peer-deps 生成；仅把它作版本种子，最终输出仍须通过完整 peer 闭包门禁。
+  const previousLock = verifyRuntimePackageLock(previousManifest, readJson(paths.lock, "已有 runtime package-lock"), { allowMissingPeers: true });
+  writeFileSync(join(destination, "package-lock.json"), json(previousLock));
+  return true;
+}
+
 export function refreshRuntimeDepsLock(root = DEFAULT_ROOT) {
   const resolvedRoot = resolve(root);
   const { product, policy } = productContext(resolvedRoot);
@@ -237,11 +292,13 @@ export function refreshRuntimeDepsLock(root = DEFAULT_ROOT) {
   const temporary = mkdtempSync(join(tmpdir(), "workloom-runtime-lock-"));
   try {
     writeFileSync(join(temporary, "package.json"), json(manifest));
+    copyReviewedRuntimeLock(resolvedRoot, temporary);
     npmDlx(temporary, [
       "install",
       "--package-lock-only",
       "--ignore-scripts",
-      "--legacy-peer-deps",
+      "--legacy-peer-deps=false",
+      "--strict-peer-deps",
       "--include=optional",
       "--no-audit",
       "--no-fund",
@@ -304,7 +361,12 @@ export function verifyInstalledRuntimeTarget(stage, platform, arch, verified = n
       throw new Error(`runtime npm ci 缺少直接依赖：${name}`);
     }
   }
-  for (const item of installedPackages(nodeModules)) {
+  const installed = installedPackages(nodeModules);
+  const installedByPath = Object.fromEntries(installed.map((item) => [
+    `node_modules/${relative(nodeModules, item.directory).split(sep).join("/")}`, item.value,
+  ]));
+  assertRequiredPeerClosure(installedByPath);
+  for (const item of installed) {
     if (!allows(item.value.os, target.platform) || !allows(item.value.cpu, target.arch)) {
       throw new Error(`runtime npm ci 混入非目标原生包：${relative(nodeModules, item.directory)}`);
     }
@@ -316,7 +378,7 @@ export function verifyInstalledRuntimeTarget(stage, platform, arch, verified = n
       throw new Error(`runtime npm ci 缺少目标原生包：${path}`);
     }
   }
-  const inventory = installedPackages(nodeModules)
+  const inventory = installed
     .map((item) => `${relative(nodeModules, item.directory).split(sep).join("/")}@${item.value.version}`)
     .sort();
   return Object.freeze({ target, packages: inventory.length, inventorySha256: sha256(`${inventory.join("\n")}\n`) });
@@ -359,7 +421,8 @@ export function stageRuntimeDependencies(root, stage, platform, arch, registry =
   execFileSync(process.execPath, [npmCli,
     "ci",
     "--ignore-scripts",
-    "--legacy-peer-deps",
+    "--legacy-peer-deps=false",
+    "--strict-peer-deps",
     "--include=optional",
     "--no-audit",
     "--no-fund",

@@ -118,8 +118,8 @@ for pkgjson in "${INTERNAL_PACKAGE_MANIFESTS[@]}"; do
   pdir="$(dirname "$pkgjson")"
   mkdir -p "$R/node_modules/$(dirname "$pname")"
   copy "$pdir" "$R/node_modules/$pname"
+  node scripts/prune-workspace-deps.mjs "$R/node_modules" "$pname"
 done
-find "$R/node_modules" -mindepth 2 -maxdepth 4 -type d -name node_modules -prune -exec rm -rf {} + 2>/dev/null || true
 
 # ---------- 3. Node win-x64 官方二进制 ----------
 echo "→ Node $NODE_VER win-x64…"
@@ -188,6 +188,7 @@ for f in node_modules/tsx/package.json node_modules/hono/package.json scripts/mi
   [ -f "$R/$f" ] || { echo "❌ 应急载荷自检失败：runtime/$f 缺失"; exit 1; }
 done
 node scripts/payload-policy.mjs assert-runtime "$R"
+node scripts/verify-runtime-preview.mjs "$R" "$NM_STAGE/node_modules" --target-os win32 --target-cpu x64
 
 # ---------- 7. 打包 + 校验和 ----------
 echo "→ 压缩…"
