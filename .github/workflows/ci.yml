@@ -40,6 +40,8 @@ jobs:
       LLM_PROVIDER: mock
       IM_DRIVER: mock
       RUN_DB_TESTS: "1"
+      # 本作业的全新 PG service 是显式隔离夹具；测试仍校验三角色同库及回环地址。
+      PM_TEST_DATABASE_ISOLATED: "1"
       TOOL_UNVERIFIED_RATE: "0"
       RELEASE_WORKSPACE_ID: ws-aipm-demo
     steps:

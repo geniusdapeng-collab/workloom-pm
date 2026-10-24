@@ -4,8 +4,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { closeAllPools, getGatewayPool } from "@workloom/db";
 import { eventHash, gatewayAppend } from "@workloom/base/workdata";
 import { registerIndustryQuestPlanner, runQuestForThread } from "./thread-runner.js";
+import { requireIsolatedPgTestConfig } from "../test-support/isolated-pg.js";
 
-const enabled = process.env.RUN_DB_TESTS === "1" && !!process.env.DATABASE_URL && !!process.env.DATABASE_APP_URL && !!process.env.DATABASE_GATEWAY_URL;
+const enabled = process.env.RUN_DB_TESTS === "1";
 const run = enabled ? describe : describe.skip;
 const nonce = randomUUID().slice(0, 8);
 const scope = { tenantId: `tenant-runner-${nonce}`, workspaceId: `ws-runner-${nonce}` };
@@ -32,13 +33,11 @@ run("MC-PM-005 isolated PostgreSQL goal recovery and atomic failure ledger (no m
     return { ...state.rows[0]!, events: events.rows.map((row) => row.payload) };
   }
   beforeAll(async () => {
-    for (const name of ["DATABASE_URL", "DATABASE_APP_URL", "DATABASE_GATEWAY_URL"]) {
-      if (new URL(process.env[name]!).port !== "55437") throw new Error("Runner PG regression requires the root-authorized isolated sandbox on port 55437");
-    }
+    const database = requireIsolatedPgTestConfig();
     vi.stubEnv("LLM_PROVIDER", "mock");
     vi.stubEnv("WORKLOOM_TOOL_EXECUTOR_MODULE", "");
     vi.stubEnv("WORKLOOM_TOOL_EXECUTOR_MODULES", "");
-    owner = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
+    owner = new pg.Pool({ connectionString: database.ownerUrl, max: 5 });
     for (const target of [scope, other]) {
       await owner.query("INSERT INTO tenants(id,name,plan) VALUES($1,'runner test fixture','pro')", [target.tenantId]);
       await owner.query("INSERT INTO workspaces(id,tenant_id,name,slug,industry,stage) VALUES($1,$2,'runner fixture',$1,'runner-fixture','definition')", [target.workspaceId, target.tenantId]);

@@ -110,7 +110,9 @@ pnpm test:pm-dsh
 node --test apps/server/src/industry/ai-pm/acceptance/metrics.node-test.mjs
 ```
 
-真实 PG 用例须显式 `RUN_DB_TESTS=1`，并同时提供本任务隔离端口的 owner/app/gateway 连接。未配置时跳过的用例须保留为 skip，不能写成真实数据库通过。不要对现有任务库重跑 seed/reset 来制造干净成绩。
+真实 PG 用例须显式设置 `RUN_DB_TESTS=1`、`PM_TEST_DATABASE_ISOLATED=1` 与 `NODE_ENV=test`，并提供 `DATABASE_URL`、`DATABASE_APP_URL`、`DATABASE_GATEWAY_URL` 三个完整连接。三者必须指向同一回环主机、显式端口和非系统测试库，使用三个不同角色，不允许 URL query/fragment 覆盖路由；不能仅凭端口号认定数据库隔离。隔离声明由测试操作者提供，仍须先核实它确实属于一次性 CI 服务或明确授权的本机测试库。CI 使用它自己的 PostgreSQL 服务，不访问本轮保留真实模型回执的 55437 数据库。
+
+未请求 DB 测试时，跳过用例须保留为 skip，不能写成真实数据库通过；已经显式请求测试却缺连接、隔离声明或测试环境时，三套专项在建连接前失败，不能静默跳过。不要对现有任务库重跑 seed/reset 来制造干净成绩。代码执行的 OS 专项仅在 macOS + Node24 及以上运行；其它环境仍执行平台无关合同及“不支持时在运行代码前拒绝”的用例，跳过 OS 专项不代表该平台支持代码验证。
 
 `pnpm pm:eval` 对应 `apps/server/src/industry/ai-pm/acceptance/evaluate.mts`，仅在已授权且由持久化 loopback 预算代理保护的启动环境执行。`PM_EVAL_PHASE` 追加修复阶段；`PM_EVAL_ONLY` 可显式选择 case；已通过的员工不会自动重复收费。真实评测失败并不通过退出码或覆盖旧 JSON 来消失；逐例结果与实际请求账本都必须读取。
 
@@ -136,6 +138,6 @@ ADR-0/1/2 与 HIR 不能直接用 13/14 填充：本轮有操作者修代码、�
 ## 自检表
 
 - [是] 覆盖本轮真实评测的成功、失败、未测和语义缺陷，没有只挑容易部分。
-- [是] 必要修复和免费验证继续自主完成；新增收费与远端写身份缺失单独披露。
+- [是] 必要修复和免费验证继续自主完成；新增收费权限与远端集成分别绑定实际授权及回执。
 - [是] 文件、内容、离线夹具、模型计量与生产边界分开，证据等级准确。
 - [是] 指标保留分母、失败和不确定性，可逐回执与代码审查。

@@ -2503,8 +2503,10 @@ h2("onboarding.saveLlmConfig 真实试调 → 落盘生效（OpenAI 兼容 stub 
         const mark = `E2E-LLM-MARK-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
         res.writeHead(200, { "content-type": "application/json" });
         res.end(JSON.stringify({
-          choices: [{ message: { content: `在线确认 ${mark}` } }],
-          usage: { prompt_tokens: body.length, completion_tokens: 20 },
+          id: `chatcmpl-${mark}`, object: "chat.completion", created: Math.floor(Date.now() / 1000),
+          model: "stub-real-1", system_fingerprint: "fp-suite-offline",
+          choices: [{ index: 0, finish_reason: "stop", message: { role: "assistant", content: `在线确认 ${mark}` }, logprobs: null }],
+          usage: { prompt_tokens: body.length, completion_tokens: 20, total_tokens: body.length + 20 },
         }));
       });
     } else {
@@ -2559,8 +2561,14 @@ h2("融合·LLM 装配后节拍真实推理（runBeat via=llm）→ 还原", asy
     if (req.method === "POST" && req.url === "/v1/chat/completions") {
       req.on("data", () => undefined);
       req.on("end", () => {
+        const mark = `E2E-BEAT-MARK-${Date.now().toString(36)}`;
         res.writeHead(200, { "content-type": "application/json" });
-        res.end(JSON.stringify({ choices: [{ message: { content: `晨报：今日经营稳中向好 E2E-BEAT-MARK-${Date.now().toString(36)}` } }], usage: { prompt_tokens: 10, completion_tokens: 20 } }));
+        res.end(JSON.stringify({
+          id: `chatcmpl-${mark}`, object: "chat.completion", created: Math.floor(Date.now() / 1000),
+          model: "stub-real-1", system_fingerprint: "fp-suite-offline",
+          choices: [{ index: 0, finish_reason: "stop", message: { role: "assistant", content: `晨报：今日经营稳中向好 ${mark}` }, logprobs: null }],
+          usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+        }));
       });
     } else { res.writeHead(404); res.end(); }
   });

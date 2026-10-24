@@ -13,8 +13,9 @@ import { PgPmStore } from "./store.js";
 import { PmError, type EmployeeExecutionInput, type EmployeeExecutionResult, type PmAssetBinding, type PmTaskPlan, type PmScope } from "./types.js";
 import { createPmEmployeeCatalog, type PmEmployeeCatalog } from "./employees.js";
 import { TRUSTED_PM_EVIDENCE_POLICY } from "./skill-contracts.js";
+import { requireIsolatedPgTestConfig } from "../../test-support/isolated-pg.js";
 
-const enabled = process.env.RUN_DB_TESTS === "1" && !!process.env.DATABASE_URL && !!process.env.DATABASE_APP_URL;
+const enabled = process.env.RUN_DB_TESTS === "1";
 const run = enabled ? describe : describe.skip;
 const suffix = randomUUID().slice(0, 8);
 const scopeA = { tenantId: `tenant-pmtest-${suffix}-a`, workspaceId: `ws-pmtest-${suffix}-a` };
@@ -46,6 +47,7 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
   let store: PgPmStore;
   let artifactStore: ArtifactStore;
   let artifactRoot: string;
+  let appUser: string;
   const services: PmTeamService[] = [];
   const catalog: PmEmployeeCatalog = {
     async list() { return assets.map((asset) => ({ presetKey: asset.preset_key, name: asset.name, description: asset.description })); },
@@ -76,11 +78,10 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
   }
 
   beforeAll(async () => {
-    if (new URL(process.env.DATABASE_URL!).port !== "55437" || new URL(process.env.DATABASE_APP_URL!).port !== "55437") {
-      throw new Error("PM integration tests require the root-approved isolated sandbox on port55437; no default DB fallback");
-    }
-    owner = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
-    app = new pg.Pool({ connectionString: process.env.DATABASE_APP_URL, max: 20 });
+    const database = requireIsolatedPgTestConfig();
+    appUser = database.users.app;
+    owner = new pg.Pool({ connectionString: database.ownerUrl, max: 5 });
+    app = new pg.Pool({ connectionString: database.appUrl, max: 20 });
     const migration = await readFile(new URL("../../../../../packages/db/migrations/0043_pm_team.sql", import.meta.url), "utf8");
     await owner.query(migration);
     for (const scope of [scopeA, scopeB]) {
@@ -192,7 +193,7 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
     expect(receipts.rows).toHaveLength(2); expect(receipts.rows.every((row) => row.synced)).toBe(true);
   });
 
-  it("the default coding executor completes a real DSH read-write-read-write-final workflow beyond four model calls", async () => {
+  it("the default coding executor produces real DSH files beyond four calls and respects OS verification availability", async () => {
     let calls = 0;
     const scripted: CompletionProvider = { modelId: "fixture-deepseek", complete: vi.fn(async (messages: Parameters<CompletionProvider["complete"]>[0]) => {
       expect(messages.some((message) => message.role === "system" && String(message.content).includes(TRUSTED_PM_EVIDENCE_POLICY))).toBe(true);
@@ -218,13 +219,23 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
       checks: [{ type: "fileExists", path: "sum.mjs" }, { type: "fileExists", path: "sum.test.mjs" }] });
     await current.start(scopeA, detail.run.id);
     const finished = await current.waitForRun(scopeA, detail.run.id);
-    expect(finished.run.status, finished.run.error ?? "coding run must complete").toBe("completed");
     expect(calls).toBe(5);
+    expect(finished.tasks[0]!.status).toBe("completed");
     expect(finished.tasks[0]!.adapterReceipt).toMatchObject({ adapter: "deepseek-harness-headless", modelCalls: 5, exitCode: 0, usageComplete: true,
       assetBinding: fixtureBinding("dev-orchestrator", "a"), assetBindingSource: "verified-catalog" });
     expect(finished.run.usage).toEqual({ promptTokens: 115, completionTokens: 55 });
     expect(finished.artifacts.map((artifact) => artifact.path).sort()).toEqual(["sum.mjs", "sum.test.mjs"]);
     const checks = finished.run.verification!.checks as Array<{ passed: boolean; message: string }>;
+    if (process.platform !== "darwin" || Number(process.versions.node.split(".")[0]) < 24) {
+      // The actual CLI/file loop is portable; generated-code verification is not.
+      // Keep production fail-closed rather than treating a Linux CI run as a
+      // successful macOS Seatbelt execution or skipping this real PG regression.
+      expect(finished.run.status).toBe("failed");
+      expect(finished.run.errorCode).toBe("RUN_CHECK_FAILED");
+      expect(checks.some((check) => !check.passed && check.message.startsWith("OS_SANDBOX_UNAVAILABLE:"))).toBe(true);
+      return;
+    }
+    expect(finished.run.status, finished.run.error ?? "coding run must complete").toBe("completed");
     const executed = checks.find((check) => check.passed && check.message.startsWith("{"));
     expect(executed, "the code must have an actual OS execution receipt, not just two existence checks").toBeDefined();
     const verification = JSON.parse(executed!.message);
@@ -352,7 +363,7 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
       // Wait for a real PostgreSQL lock wait, rather than relying on scheduler timing.
       let waiting = false;
       for (let attempt = 0; attempt < 100 && !waiting; attempt++) {
-        const blocked = await owner.query<{ blocked: boolean }>("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE usename='workloom_app' AND wait_event_type='Lock' AND query LIKE '%pm_runs%') AS blocked");
+        const blocked = await owner.query<{ blocked: boolean }>("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE usename=$1 AND wait_event_type='Lock' AND query LIKE '%pm_runs%') AS blocked", [appUser]);
         waiting = blocked.rows[0]!.blocked;
         if (!waiting) await new Promise((done) => setTimeout(done, 5));
       }

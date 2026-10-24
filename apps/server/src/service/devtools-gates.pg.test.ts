@@ -8,6 +8,7 @@ import { tmpdir } from "node:os";
 import { closeAllPools } from "@workloom/db";
 import { approveRelease, listTasks, taskDetail } from "./devtools.js";
 import { captureDevContent, type DevContentSnapshot } from "./devtools-evidence.js";
+import { requireIsolatedPgTestConfig } from "../test-support/isolated-pg.js";
 
 const writes = vi.hoisted(() => ({ commit: vi.fn(), merge: vi.fn(), tag: vi.fn() }));
 vi.mock("@workloom/base/dev-bridge", () => ({
@@ -18,7 +19,7 @@ vi.mock("@workloom/base/dev-bridge", () => ({
   DeclarativeAdapter: class {}, loadDeclarativeAdapters: () => ({ adapters: [], errors: [] }), customToolDirs: () => [],
 }));
 
-const enabled = process.env.RUN_DB_TESTS === "1" && !!process.env.DATABASE_URL && !!process.env.DATABASE_APP_URL;
+const enabled = process.env.RUN_DB_TESTS === "1";
 const run = enabled ? describe : describe.skip;
 run("IA-07 real isolated PostgreSQL release evidence (git writes are explicit offline fixtures)", { timeout: 30_000 }, () => {
   let owner: pg.Pool;
@@ -31,10 +32,8 @@ run("IA-07 real isolated PostgreSQL release evidence (git writes are explicit of
     exam: { examId, score: 98, verdict: "pass", mock: false, state: "completed", status: "done", totalQuestions: 3, finishedAt: "2026-10-24T00:00:00.000Z" } });
 
   beforeAll(async () => {
-    if (new URL(process.env.DATABASE_URL!).port !== "55437" || new URL(process.env.DATABASE_APP_URL!).port !== "55437") {
-      throw new Error("Dev gate regression requires the root-approved isolated port55437, never a default customer DB");
-    }
-    owner = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+    const database = requireIsolatedPgTestConfig();
+    owner = new pg.Pool({ connectionString: database.ownerUrl });
     await owner.query("INSERT INTO tenants(id,name,plan) VALUES($1,'Dev gate fixture','pro')", [tenantId]);
     for (const id of [workspace, other]) await owner.query("INSERT INTO workspaces(id,tenant_id,name,slug,industry,stage) VALUES($1,$2,'Dev gate fixture',$1,'ai-pm','delivery')", [id, tenantId]);
     writes.commit.mockResolvedValue(true); writes.merge.mockResolvedValue("c".repeat(40)); writes.tag.mockResolvedValue(undefined);
