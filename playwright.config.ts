@@ -61,7 +61,7 @@ export default defineConfig({
     },
     {
       name: "b-pc",
-      command: "VITE_ENABLE_UI_DIAGNOSTICS=true pnpm -C apps/web dev --host 127.0.0.1 --strictPort",
+      command: "VITE_ENABLE_UI_DIAGNOSTICS=true node scripts/ui-e2e-preview.mjs web",
       env: {
         WEB_PORT: "3100",
         SERVER_PORT: "8877",
@@ -73,7 +73,7 @@ export default defineConfig({
     },
     {
       name: "b-mobile",
-      command: "pnpm -C apps/webb dev --host 127.0.0.1 --strictPort",
+      command: "node scripts/ui-e2e-preview.mjs webb",
       env: {
         WEBB_PORT: "3101",
         SERVER_PORT: "8877",
@@ -85,7 +85,7 @@ export default defineConfig({
     },
     {
       name: "c-mobile",
-      command: "pnpm -C apps/webc dev --host 127.0.0.1 --strictPort",
+      command: "node scripts/ui-e2e-preview.mjs webc",
       env: {
         WEBC_PORT: "3102",
         SERVER_PORT: "8877",

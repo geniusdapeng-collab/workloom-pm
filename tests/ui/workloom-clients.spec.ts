@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { installStaticComponentFixture } from "./static-component-fixture";
 
 const productManifest = JSON.parse(readFileSync(new URL("../../product.manifest.json", import.meta.url), "utf8")) as {
   productId?: unknown;
@@ -581,10 +582,13 @@ test("C 端移动完整主流程页面在窄屏、长中文与 200% 文字下不
 });
 
 test("三端静态视觉基线", async ({ page }) => {
+  const fixture = await installStaticComponentFixture(page);
   await page.setViewportSize({ width: 1024, height: 640 });
   await page.goto("http://127.0.0.1:3100/dev");
   await waitForStableUi(page);
+  await fixture.ready();
   await expect(page).toHaveScreenshot("b-pc-reference.png", { fullPage: true });
+  fixture.assertNoUnexpectedCalls();
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("http://127.0.0.1:3101");
