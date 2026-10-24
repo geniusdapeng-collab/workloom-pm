@@ -1,8 +1,8 @@
 {
  "schema": "workloom.capabilities/v2",
- "repo": "workloom-im",
- "description": "WorkLoom IM · 企业级 Agent IM 底座（智能班组 + 围栏 + 人审 + 夜班）",
- "generatedAt": "2026-10-05T04:09:22.956Z",
+ "repo": "workloom-pm",
+ "description": "WorkLoom PM · AI 产品经理带领 AI 研发团队，从用户意图到真实产物、验证与交付回执",
+ "generatedAt": "2026-10-24T06:51:25.821Z",
  "demoPages": [
   "service-front-b-mobile.html",
   "service-front-b-pc.html",
@@ -52,6 +52,42 @@
      "how": "`pnpm preview:all` → http://localhost:3002",
      "desc": "对话/服务/工单/消息入口；目录存在不代表已验证",
      "id": "cap:5bb91f07f8363f76",
+     "availability": {
+      "discoverable": true,
+      "callable": "unverified",
+      "verified": "unverified",
+      "environment": null,
+      "lastSuccess": null,
+      "evidence": null,
+      "reason": "仅目录与入口元数据；没有对应运行证据"
+     }
+    }
+   ]
+  },
+  {
+   "icon": "🧭",
+   "title": "PM 任务调用（CLI / MCP）",
+   "items": [
+    {
+     "name": "PM JSON CLI",
+     "how": "`pnpm pm:agent --help`；docs/pm-agent.md",
+     "desc": "通过已有成员会话调用 PM 任务和产物 API；权限、围栏、预算与语义验收继续生效",
+     "id": "cap:3be28ac627c8a356",
+     "availability": {
+      "discoverable": true,
+      "callable": "unverified",
+      "verified": "unverified",
+      "environment": null,
+      "lastSuccess": null,
+      "evidence": null,
+      "reason": "仅目录与入口元数据；没有对应运行证据"
+     }
+    },
+    {
+     "name": "PM MCP stdio",
+     "how": "`pnpm pm:agent:mcp`；docs/pm-agent.md",
+     "desc": "按初始化协议提供十个 PM 工具；会话仅来自进程环境，不接收模型密钥",
+     "id": "cap:292dfcf731777dbf",
      "availability": {
       "discoverable": true,
       "callable": "unverified",

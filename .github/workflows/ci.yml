@@ -71,6 +71,9 @@ jobs:
       - name: 依赖
         run: pnpm install --frozen-lockfile
 
+      - name: PM Codex 调用契约
+        run: pnpm pm:agent:test
+
       - name: 桌面运行时锁与三目标原生依赖门禁
         run: |
           pnpm runtime:deps:verify

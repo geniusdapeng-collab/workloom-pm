@@ -1,7 +1,7 @@
-# workloom-im · 能力导览（人类版）
+# workloom-pm · 能力导览（人类版）
 
-> WorkLoom IM · 企业级 Agent IM 底座（智能班组 + 围栏 + 人审 + 夜班）
-> 本文件由 `node scripts/generate-capabilities.mjs` 从代码事实**自动生成**（2026-10-05），
+> WorkLoom PM · AI 产品经理带领 AI 研发团队，从用户意图到真实产物、验证与交付回执
+> 本文件由 `node scripts/generate-capabilities.mjs` 从代码事实**自动生成**（2026-10-24），
 > 请勿手改——能力变更后重跑生成器即可。Agent 版机器清单见 docs/capability-map.md。
 > 目录可发现、实际能调用、结果已验证是三个不同字段。缺少同提交运行证据时，调用与结果一律显示“未验证”；演示入口不代表客户业务可用。
 
@@ -19,7 +19,7 @@ pnpm install && pnpm preview:all
 
 体验路径使用模拟种子与离线模型；依赖和数据库准备见 mock/README.md，连接真实业务前需另做环境与结果验收。
 
-## 📦 能力总览（33 项）
+## 📦 能力总览（35 项）
 
 ### 🖥 三端应用入口
 
@@ -28,6 +28,13 @@ pnpm install && pnpm preview:all
 | **PC 端 · B 端工作台** | 经营主页/任务中心/规则中心/装配中心，目录描述不代表运行通过 | `pnpm preview:all` → http://localhost:3000 | 是 | 未验证 | 未验证 |
 | **移动端 · B 端高保真** | 6 页演示资产；运行状态须验收 | `pnpm preview:all` → http://localhost:3001 | 是 | 未验证 | 未验证 |
 | **移动端 · C 端 AI 服务前台** | 对话/服务/工单/消息入口；目录存在不代表已验证 | `pnpm preview:all` → http://localhost:3002 | 是 | 未验证 | 未验证 |
+
+### 🧭 PM 任务调用（CLI / MCP）
+
+| 能力 | 一句话 | 怎么体验 | 可发现 | 可调用 | 结果已验证 / 环境 |
+|---|---|---|---|---|---|
+| **PM JSON CLI** | 通过已有成员会话调用 PM 任务和产物 API；权限、围栏、预算与语义验收继续生效 | `pnpm pm:agent --help`；docs/pm-agent.md | 是 | 未验证 | 未验证 |
+| **PM MCP stdio** | 按初始化协议提供十个 PM 工具；会话仅来自进程环境，不接收模型密钥 | `pnpm pm:agent:mcp`；docs/pm-agent.md | 是 | 未验证 | 未验证 |
 
 ### 🏨 行业 Bundle（垂直能力包）
 
