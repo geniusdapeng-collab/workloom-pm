@@ -1,9 +1,64 @@
-import { describe, expect, it } from "vitest";
-import { CreatePmRunSchema, parseTeamPlan, parseModelJson, safeArtifactPath, validateEmployeeResult } from "./contract.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { assertNoSecrets, CreatePmRunSchema, parseTeamPlan, parseModelJson, safeArtifactPath, validateEmployeeResult } from "./contract.js";
+
+afterEach(() => vi.unstubAllEnvs());
 
 const task = (id: string, dependsOn: string[] = [], path = `${id}.md`) => ({
   id, presetKey: "doc-writer", goal: `完成${id}的明确文档目标`, dependsOn,
   acceptance: ["包含可测量验收标准"], outputRefs: [path],
+});
+
+describe("credential boundaries in complete employee data and DSH receipts", () => {
+  const formats = [
+    ["model key", "s" + "k-" + "f".repeat(32)],
+    ["project model key", "s" + "k-proj-" + "q".repeat(48)],
+    ...["p", "o", "u", "s", "r"].map((kind) => [`GitHub ${kind} token`, "gh" + kind + "_" + "q".repeat(32)]),
+    ["fine-grained GitHub token", "github_" + "pat_" + "q".repeat(32)],
+    ["AWS access key", "AK" + "IA" + "Z".repeat(16)],
+    ["Bearer token", "Bearer " + "q".repeat(32)],
+    ["PEM private key", "-----BEGIN " + "PRIVATE KEY-----\nfixture\n-----END PRIVATE KEY-----"],
+  ];
+  const prefixes = ["", " ", '"', "'", ":", "=", "(", "\n", "密钥：", "前缀"];
+
+  it.each(formats)("still rejects %s after delimiters in raw text and nested JSON", (_name, credential) => {
+    for (const prefix of prefixes) {
+      for (const value of [prefix + credential, { receipt: { sessionEvidence: [{ path: prefix + credential }] } }]) {
+        let failure: unknown;
+        try { assertNoSecrets(value); } catch (error) { failure = error; }
+        expect(failure).toMatchObject({ code: "SECRET_DETECTED", message: "内容疑似包含秘密，已阻断保存和出站" });
+        expect(String(failure)).not.toContain(credential);
+      }
+    }
+  });
+
+  it("accepts the actual short-workspace DSH project-key shape without skipping receipt scanning", () => {
+    const path = "sessions/--private-tmp-pm-receipt-repro-fixture-" + "a".repeat(64) + "-" + "b".repeat(64)
+      + "-pm-00000000-0000-4000-8000-000000000000-scratch-employee-task-00000000-0000-4000-8000-000000000000--/session-fixture/session.v4.jsonl";
+    const receipt = { sessionEvidence: [{ path, sha256: "a".repeat(64), bytes: 500 }], final: true };
+    expect(() => assertNoSecrets({ receipt })).not.toThrow();
+    const good = { files: [{ path: "sum.mjs", content: "export const sum = 1;" }], summary: "真实文件回执", usage: { promptTokens: 115, completionTokens: 55 }, modelId: "fixture-deepseek", receipt };
+    expect(validateEmployeeResult(good, ["sum.mjs"]).receipt).toEqual(receipt);
+    expect(() => assertNoSecrets({ receipt: { ...receipt, nestedCredential: formats[0]![1] } })).toThrow("已阻断");
+  });
+
+  it.each(["DEEPSEEK_API_KEY", "LLM_API_KEY", "GH_TOKEN", "GITHUB_TOKEN"])("rejects the configured %s anywhere despite a letter prefix", (key) => {
+    const credential = "s" + "k-" + "c".repeat(32);
+    vi.stubEnv(key, credential);
+    expect(() => assertNoSecrets("prefix" + credential + "suffix")).toThrow("已阻断");
+    expect(() => assertNoSecrets({ receipt: { sessionEvidence: [{ path: "prefix" + credential + "suffix" }] } })).toThrow("已阻断");
+  });
+
+  it("also rejects configured values that are JSON-escaped and never echoes them", () => {
+    const credential = 'fixture-configured-"quoted"\ncredential';
+    vi.stubEnv("LLM_API_KEY", credential);
+    const check = (value: unknown) => {
+      let failure: unknown;
+      try { assertNoSecrets(value); } catch (error) { failure = error; }
+      expect(failure).toMatchObject({ code: "SECRET_DETECTED" });
+      expect(String(failure)).not.toContain(credential);
+    };
+    check("prefix" + credential); check({ receipt: { data: "prefix" + credential } });
+  });
 });
 
 describe("MC-PM-002 团队合同与DAG边界", () => {

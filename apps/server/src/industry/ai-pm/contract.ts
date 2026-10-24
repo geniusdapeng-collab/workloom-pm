@@ -6,14 +6,40 @@ export const MAX_TOTAL_FILE_BYTES = 1024 * 1024;
 export const MAX_FILES = 12;
 export const MAX_TASKS = 8;
 
-const SECRET_PATTERN = /(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN(?: [A-Z]+)* PRIVATE KEY-----|Bearer\s+[A-Za-z0-9._-]{20,})/;
+// DSH encodes a workspace path into its session-evidence directory. A normal
+// "employee-task-<uuid>" segment must not be mistaken for an embedded "sk-" key.
+// Delimiters (including Unicode text) still admit a credential-shaped token.
+const SECRET_PATTERN = /(?:(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN(?: [A-Z]+)* PRIVATE KEY-----|Bearer\s+[A-Za-z0-9._-]{20,})/;
+const CONFIGURED_CREDENTIAL_KEYS = ["DEEPSEEK_API_KEY", "LLM_API_KEY", "GH_TOKEN", "GITHUB_TOKEN"] as const;
 
 /** Fail closed before persistence, model input or artifact publication. Never echo the matched text. */
 export function assertNoSecrets(value: unknown): void {
   let text: string;
   try { text = typeof value === "string" ? value : JSON.stringify(value); }
   catch { throw new PmError("INVALID_DATA", "数据不能安全序列化"); }
-  if (SECRET_PATTERN.test(text)) throw new PmError("SECRET_DETECTED", "内容疑似包含秘密，已阻断保存和出站");
+  // Known runtime credentials are denied anywhere, even when concatenated to a
+  // word. Compare both raw and JSON-escaped forms without copying values into
+  // errors, logs or receipts; only the four relevant runtime variables are read.
+  const configuredSecret = typeof text === "string" && CONFIGURED_CREDENTIAL_KEYS.some((key) => {
+    const secret = process.env[key]?.trim();
+    return !!secret && (text.includes(secret) || text.includes(JSON.stringify(secret).slice(1, -1)));
+  });
+  let shapedSecret = SECRET_PATTERN.test(text);
+  if (!shapedSecret && typeof value !== "string" && typeof text === "string") {
+    // Check every decoded key/string too: JSON encodes a newline as backslash+n,
+    // and that final ASCII n must not hide a token's actual whitespace boundary.
+    // Walk the serialized representation so toJSON cannot omit itself from scan.
+    const pending: unknown[] = [JSON.parse(text)];
+    while (pending.length && !shapedSecret) {
+      const current = pending.pop();
+      if (typeof current === "string") shapedSecret = SECRET_PATTERN.test(current);
+      else if (Array.isArray(current)) { for (const item of current) pending.push(item); }
+      else if (current && typeof current === "object") {
+        for (const [key, item] of Object.entries(current)) { pending.push(key); pending.push(item); }
+      }
+    }
+  }
+  if (configuredSecret || shapedSecret) throw new PmError("SECRET_DETECTED", "内容疑似包含秘密，已阻断保存和出站");
 }
 
 /** A single portable file namespace; no hidden runtime configuration, URLs or path traversal. */
