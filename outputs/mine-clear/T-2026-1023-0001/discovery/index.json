@@ -1,0 +1,46 @@
+{
+  "schema": "workloom.pm-discovery-artifacts/v1",
+  "auditCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+  "artifacts": [
+    {
+      "path": "discovery/pm-code-independent-before.json",
+      "sha256": "1204afc759068c7b2ccd011b94a2bda93ab0f0b6f08d14dbaf111ae3fd24c980",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复过程中真实运行/回放的原始留痕；不是审计提交中存在的源码，也不是干净修复基线的正式MCD验收运行。"
+    },
+    {
+      "path": "discovery/pm-oneshot-live-replay.json",
+      "sha256": "be7d1e70c9bdb9eaa75d6ed0038ddac7f63bcd65993f3f3a95042b1a66afbef0",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复过程中真实运行/回放的原始留痕；不是审计提交中存在的源码，也不是干净修复基线的正式MCD验收运行。"
+    },
+    {
+      "path": "discovery/pm-service-limits-before.json",
+      "sha256": "3199990f3b0c31217d05b527ad3cfec2afa0d61853273869686c8147c873d92e",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复过程中真实运行/回放的原始留痕；不是审计提交中存在的源码，也不是干净修复基线的正式MCD验收运行。"
+    },
+    {
+      "path": "discovery/pm-nested-before.log",
+      "sha256": "c067a796d5985f72c311318ca5dfab60fd6c266f981ce9271c070f327808de81",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复过程中真实运行/回放的原始留痕；不是审计提交中存在的源码，也不是干净修复基线的正式MCD验收运行。"
+    }
+  ]
+}

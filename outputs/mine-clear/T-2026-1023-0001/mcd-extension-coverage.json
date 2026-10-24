@@ -1,0 +1,61 @@
+{
+  "schema": "workloom.pm-additional-coverage/v1",
+  "scope": "Root product instructions/lazy PM router/actual existing auth test and delivery-evaluation docs independent review",
+  "counts": {
+    "total": 6,
+    "A": 6,
+    "B": 0,
+    "C": 0,
+    "D": 0
+  },
+  "files": [
+    {
+      "path": "AGENTS.override.md",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "e595cedd8e827fa132780a11d618caef42ab92e25f87d68bd86052735e56d50c",
+      "lines": 26,
+      "reading": "Complete current-file semantic reading by /root/intent_audit; root implementation/docs reviewed independently, not edited by this reviewer"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/router.ts",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "dc2cf39156a9b7e4a34a8984be9aea546158f2a68d106fbedd6f37e110c92e58",
+      "lines": 134,
+      "reading": "Complete current-file semantic reading by /root/intent_audit; root implementation/docs reviewed independently, not edited by this reviewer"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/router.test.ts",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "17fa4df4187a7a1b807bfe70760ed7fcca50d388c3b18b922fd8a6ca571b2451",
+      "lines": 83,
+      "reading": "Complete current-file semantic reading by /root/intent_audit; root implementation/docs reviewed independently, not edited by this reviewer"
+    },
+    {
+      "path": "apps/server/test/demo-login.test.ts",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "9ebd0d062e623ce8138266e72095c5de59cfe180ff4360e54aca69233c489d65",
+      "lines": 55,
+      "reading": "Complete current-file semantic reading by /root/intent_audit; root implementation/docs reviewed independently, not edited by this reviewer"
+    },
+    {
+      "path": "docs/PM-DELIVERY.md",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "a8c11b6d285dbe266af2dde71450ee72286b3390901c55d3df299c5aefbb6d1e",
+      "lines": 141,
+      "reading": "Complete current-file semantic reading by /root/intent_audit; root implementation/docs reviewed independently, not edited by this reviewer"
+    },
+    {
+      "path": "docs/PM-EVALUATION.md",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "f1f7e19b3db3a0aa5220fe5c439618ec157f1b62bc432dd77665f171d2e53eb6",
+      "lines": 141,
+      "reading": "Complete current-file semantic reading by /root/intent_audit; root implementation/docs reviewed independently, not edited by this reviewer"
+    }
+  ]
+}

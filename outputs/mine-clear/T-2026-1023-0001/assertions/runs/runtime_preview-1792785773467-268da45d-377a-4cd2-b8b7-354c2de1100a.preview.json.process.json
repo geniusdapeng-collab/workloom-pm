@@ -1,0 +1,20 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "runtime_preview",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/verify-runtime-preview.mjs",
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm",
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-runtime-stage/node_modules",
+    "--clients",
+    "web,webb,webc"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm",
+  "startedAt": "2026-10-23T20:02:53.469Z",
+  "finishedAt": "2026-10-23T20:02:53.784Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"schemaVersion\":\"workloom.runtime-preview/v1\",\"mode\":\"native-http\",\"targetOs\":\"darwin\",\"targetCpu\":\"arm64\",\"vitestAvailable\":false,\"clients\":[{\"client\":\"web\",\"configurationBoundary\":true,\"httpPreview\":200,\"indexSha256\":\"b1b9de66323c5e4eb44e2d05e4e1217db546314386fcb0a90c1a229d7dd7f469\"},{\"client\":\"webb\",\"configurationBoundary\":true,\"httpPreview\":200,\"indexSha256\":\"0cc5c477e60b6ea7e0f5d4845fdc220dc0d43e6d10c83412889c584f4e4a15ea\"},{\"client\":\"webc\",\"configurationBoundary\":true,\"httpPreview\":200,\"indexSha256\":\"de3b17729c1cbe31573fd5d80ff6705be2498d2680e03f72c89d3ceb4243af0f\"}]}\n",
+  "stderr": ""
+}

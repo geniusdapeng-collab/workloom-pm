@@ -1,0 +1,79 @@
+{
+  "schema": "workloom.pm-guest-independent-review/v1",
+  "actor": "/root/intent_audit",
+  "sourceCommit": "cc86cf9dee7101131912cd0e427b78a90d3494aa",
+  "counts": {
+    "total": 8,
+    "A": 8,
+    "B": 0,
+    "C": 0,
+    "D": 0
+  },
+  "files": [
+    {
+      "path": "apps/web/src/shell/NavigationAccess.tsx",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "c3f3a8b59e0eb1709b5461508e50884701a7b5d970aa6e143cc678d5d8c5841f",
+      "lines": 276,
+      "reading": "Complete semantic reading of this current file; third-party and unrelated transitive implementations not freshly audited."
+    },
+    {
+      "path": "apps/web/src/shell/IndustryRoutes.tsx",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "24187ad17f2b54fdc4d322ac4e3ebbda252d1ba991f5462744abe29cb9faff0f",
+      "lines": 230,
+      "reading": "Complete semantic reading of this current file; third-party and unrelated transitive implementations not freshly audited."
+    },
+    {
+      "path": "apps/web/src/shell/NavigationAccess.guest.test.tsx",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "99a98f2adb58225ebef1a1b7a7537c0508ba1cb2da69c2e5f82d0a734fb8a48b",
+      "lines": 85,
+      "reading": "Complete semantic reading of this current file; third-party and unrelated transitive implementations not freshly audited."
+    },
+    {
+      "path": "apps/web/src/shell/IndustryRoutes.test.tsx",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "a30c57624784ce7901e2ab21c51f3fb7806fc74841c947eb77f0301d66227064",
+      "lines": 181,
+      "reading": "Complete semantic reading of this current file; third-party and unrelated transitive implementations not freshly audited."
+    },
+    {
+      "path": "apps/web/src/shell/NavMenu.tsx",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "a33ce1051af288f257d05cff60930e9dfcecee9aacdf19c6437d8af17310b311",
+      "lines": 41,
+      "reading": "Complete semantic reading of this current file; third-party and unrelated transitive implementations not freshly audited."
+    },
+    {
+      "path": "apps/web/src/shell/NavMenu.test.ts",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "016abdbfa71951c8442cd92cdf0f7a1466e536f42c24f1946fc34a3896c83fd5",
+      "lines": 57,
+      "reading": "Complete semantic reading of this current file; third-party and unrelated transitive implementations not freshly audited."
+    },
+    {
+      "path": "apps/web/src/lib/trpc.ts",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "292cd48a997b79e71cccabc03ef002837aba21b432b261ec49c3b640cbee5812",
+      "lines": 144,
+      "reading": "Complete semantic reading of this current file; third-party and unrelated transitive implementations not freshly audited."
+    },
+    {
+      "path": "apps/web/package.json",
+      "grade": "A",
+      "coverage": "fully_read",
+      "sha256": "be14a57489c5687f6fb209975bf6f6d0041a214f670bf638bf7e37d631a232e0",
+      "lines": 45,
+      "reading": "Complete semantic reading of this current file; third-party and unrelated transitive implementations not freshly audited."
+    }
+  ],
+  "exclusions": "React/router/UI package implementations and unrelated frontend routes were not freshly semantically audited. Existing original intent/MCD coverage remains separate; this record does not upgrade their evidence."
+}

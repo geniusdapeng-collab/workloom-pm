@@ -1,0 +1,20 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "dsh_unit",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/node_modules/vitest/vitest.mjs",
+    "run",
+    "src/industry/ai-pm/dsh-adapter.test.ts",
+    "--reporter=json",
+    "--outputFile=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/dsh_unit-1792778262628-6e0aaf0f-2d18-4028-86fc-0a6b079b06e8.vitest.json"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server",
+  "startedAt": "2026-10-23T17:57:42.629Z",
+  "finishedAt": "2026-10-23T17:57:43.074Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "JSON report written to /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/dsh_unit-1792778262628-6e0aaf0f-2d18-4028-86fc-0a6b079b06e8.vitest.json\n",
+  "stderr": ""
+}

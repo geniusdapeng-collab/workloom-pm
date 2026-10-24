@@ -1,0 +1,77 @@
+{
+  "schema": "workloom.evidence-run/v1",
+  "id": "MC-115-0-1792784823976",
+  "command": "node --test assertions/budget.test.mjs (outer TestsStream + nested actual test-count validation)",
+  "exec": {
+    "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "args": [
+      "--test-reporter=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/delivery/node-test-reporter.mjs",
+      "--test-reporter-destination=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/evidence/MC-115-0-1792784823976-node-tests.jsonl",
+      "--test-reporter=tap",
+      "--test-reporter-destination=stdout",
+      "--test",
+      "--test-concurrency=1",
+      "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/budget.test.mjs"
+    ]
+  },
+  "requested_exec": {
+    "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "args": [
+      "--test",
+      "--test-concurrency=1",
+      "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/budget.test.mjs"
+    ]
+  },
+  "node_observer": {
+    "schema": "workloom.node-test-observer/v1",
+    "reporter_path": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/delivery/node-test-reporter.mjs",
+    "reporter_sha256": "286448a4dee571759fc1703564477d27bf5319bcb05ff66db2186deda60bc78f",
+    "destination": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/evidence/MC-115-0-1792784823976-node-tests.jsonl",
+    "summary": {
+      "path": "evidence/MC-115-0-1792784823976-node-tests.jsonl",
+      "sha256": "d50eed83830b50b9a37864bcd541b31b332dec8875cdc9859682f4edf8a9c89b",
+      "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+    }
+  },
+  "node_executable": {
+    "path": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "sha256": "2bf0da35856edc1840d7cbc90e937811bf23a03d44aea07e4b491be44af18d91"
+  },
+  "actor": "/root",
+  "role": "repair",
+  "subject": {
+    "card_id": "MC-115",
+    "assertion_index": 0
+  },
+  "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa",
+  "working_tree_dirty": false,
+  "started_at": "2026-10-23T19:47:03.976Z",
+  "finished_at": "2026-10-23T19:47:05.571Z",
+  "exit_code": 0,
+  "signal": null,
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "testSummary": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  },
+  "result": "pass",
+  "outputs": [
+    {
+      "path": "evidence/MC-115-0-1792784823976.txt",
+      "sha256": "2625317249b53aef87963ab00e2fdf0bc5dc232a3f6b5a4a8a81ced37dd6e05b",
+      "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+    },
+    {
+      "path": "evidence/MC-115-0-1792784823976-node-tests.jsonl",
+      "sha256": "d50eed83830b50b9a37864bcd541b31b332dec8875cdc9859682f4edf8a9c89b",
+      "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+    }
+  ]
+}

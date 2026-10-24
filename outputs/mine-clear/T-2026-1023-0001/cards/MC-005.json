@@ -1,0 +1,54 @@
+{
+  "id": "MC-005",
+  "kind": "problem",
+  "title": "GitHub凭据会随API回退发送给第三方端点",
+  "severity": "P0",
+  "level": "L3",
+  "batch": 0,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "apps/server/src/service/aipm.ts:36@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    },
+    {
+      "type": "code",
+      "ref": "apps/server/src/service/aipm.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+      "note": "A: token-bearing headers are shared with every fallback base"
+    }
+  ],
+  "root_cause": {
+    "file": "apps/server/src/service/aipm.ts",
+    "line": 36,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "ghFetch/githubPulse"
+  },
+  "trigger_path": "已读取GitHubBearer，官方端点失败或重定向后，旧默认fallback继续携带相同headers。只允许假token夹具复现。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "已读取GitHubBearer，官方端点失败或重定向后，旧默认fallback继续携带相同headers。只允许假token夹具复现。",
+      "expect": "带凭据请求只能访问固定官方GitHub API并拒绝redirect；第三方端点从未收到Authorization；匿名开发夹具仍可用。",
+      "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/aipm.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+}

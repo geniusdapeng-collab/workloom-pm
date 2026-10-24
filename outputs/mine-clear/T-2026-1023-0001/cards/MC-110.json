@@ -1,0 +1,73 @@
+{
+  "id": "MC-110",
+  "kind": "fix",
+  "covers": [
+    "MC-009"
+  ],
+  "title": "派生独立PM身份和源码默认端口资料目录",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "product.manifest.json:3@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "cd79d5cb5627b55fb7fc2d0547e45fb5fc0c3e611adcc066b3432a20a1ea7e2d",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    }
+  ],
+  "fix_plan": "保持完整内容和原README归档；由manifest派生产品身份、端口偏移和userData/support目录，更新PM产品说明。",
+  "blast_radius": "不改变源仓；原二进制/源端口继续独立，避免新产品污染旧资料。",
+  "conflict_paths": [
+    "product.manifest.json",
+    "package.json",
+    "electron-builder.yml",
+    "scripts/desktop-app.mts",
+    "README.md",
+    "README.en.md",
+    "AGENTS.override.md"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+      "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+      "command": "node --test assertions/identity.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/identity.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    },
+    {
+      "kind": "property",
+      "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+      "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+      "command": "node --test assertions/desktop.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/desktop.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/identity.test.mjs then node --test assertions/desktop.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root/deepseek_research",
+  "eligible_acceptance_actors": [
+    "/root/intent_audit"
+  ],
+  "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。 本地AGENTS.override.md声明独立PM产品和隔离边界，上游AGENTS.repo/产品上下文逐字保留；此文件由/root追加，故/root不得独立验整卡，/root/intent_audit仍独立。"
+}

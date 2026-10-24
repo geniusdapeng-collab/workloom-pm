@@ -1,0 +1,80 @@
+{
+  "id": "MC-014",
+  "kind": "problem",
+  "title": "生产Vite配置运行时导入dev-only Vitest导致真实载荷启动失败",
+  "severity": "P1",
+  "level": "L3",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "apps/web/vite.config.ts:4@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "df78fa7098772cb1e10d344a14461290c8005676e545491962a93f0e87e98307",
+      "note": "A: 已全文读原始Vite配置；value import在真实无Vitest生产stage无法解析。"
+    }
+  ],
+  "root_cause": {
+    "file": "apps/web/vite.config.ts",
+    "line": 4,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "Vite defineConfig runtime import"
+  },
+  "trigger_path": "源码环境装有Vitest时preview正常；真正仅生产依赖的.app首启在web健康阶段失败，ERR_MODULE_NOT_FOUND。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+      "expect": "当前锁定真实native npm stage不可解析Vitest，三个客户端实际启动preview并HTTP200，返回正文SHA等于当前dist首页。异宿主config-only不计native通过。",
+      "command": "node --test assertions/runtime_preview.test.mjs",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runtime_preview.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/runtime_preview.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "dynamic_discovery": [
+    {
+      "path": "discovery/pm-vite-runtime-before.json",
+      "sha256": "2b2a472d363715a7faf13815d2fcb305b8df0a6869775458a370a8be89227cf1",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+    },
+    {
+      "path": "discovery/pm-vite-runtime-before.log",
+      "sha256": "179c3e35660b00c12195d93e7d60a894f77a418ac2a3b5f6020a7266625ea692",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+    },
+    {
+      "path": "discovery/pm-packaged-desktop-first-failure.json",
+      "sha256": "6aae3f6e4df68dd4368214f1d277037b14cb3dcc6df1881f0d45a230a05ef889",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+    }
+  ],
+  "notes": "原始e5问题，真实.app失败在修复阶段补录。仅HTTP preview不能替代最终安装包/首启登录/数据库验收；正式MCD仍待clean commit。"
+}

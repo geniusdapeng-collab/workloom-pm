@@ -1,0 +1,97 @@
+{
+  "schema": "workloom.pm-mcd-actor-batch/v1",
+  "actor": "/root",
+  "role": "repair",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "startedAt": "2026-10-23T19:55:19.607Z",
+  "finishedAt": "2026-10-23T19:55:30.020Z",
+  "declaredCards": [
+    "MC-004",
+    "MC-005",
+    "MC-105",
+    "MC-106",
+    "MC-112",
+    "MC-115",
+    "MC-119"
+  ],
+  "results": [
+    {
+      "id": "MC-004",
+      "actor": "/root",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:55:19.643Z",
+      "finishedAt": "2026-10-23T19:55:20.609Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-005",
+      "actor": "/root",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:55:20.637Z",
+      "finishedAt": "2026-10-23T19:55:21.578Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-105",
+      "actor": "/root",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:55:21.606Z",
+      "finishedAt": "2026-10-23T19:55:22.371Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-106",
+      "actor": "/root",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:55:22.402Z",
+      "finishedAt": "2026-10-23T19:55:23.167Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-112",
+      "actor": "/root",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:55:23.193Z",
+      "finishedAt": "2026-10-23T19:55:26.510Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-115",
+      "actor": "/root",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:55:26.537Z",
+      "finishedAt": "2026-10-23T19:55:27.464Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-119",
+      "actor": "/root",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:55:27.491Z",
+      "finishedAt": "2026-10-23T19:55:30.019Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "complete": true
+}

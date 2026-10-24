@@ -422,6 +422,26 @@
         }
       ],
       "reason": "生成的 npm 运行时锁在 dependencies/peerDependencies 中含上游包名 @deepseek-ai/dsh-llm-deepseek-api-key；三处值均为已锁定 npm 版本 0.2.0-rc.2，被 api-key 字段启发式误报，不是运行凭据。保留原始锁字节与全部高置信规则，仅对本文件 SHA 和三处规则/行号登记审阅。"
+    },
+    "outputs/mine-clear/T-2026-1023-0001/assertions/run-group.mjs": {
+      "sha256": "a63cf1db48ac91c0794594a50a2e3f3df3043535a24dc519e4a44c0b00269c9c",
+      "findings": [
+        {
+          "rule": "literal-sensitive-assignment",
+          "line": 18
+        }
+      ],
+      "reason": "原字节保留的 686 提交历史验收脚本第18行仅为无密码、无密钥的 127.0.0.1:55437 隔离测试 PostgreSQL DATABASE_URL，数据库身份为合成 pm_sandbox；不是外部或生产凭据。仅登记本完整文件 SHA 的该规则/行号误报，不更改旧证据、扫描规则或其它路径。"
+    },
+    "outputs/mine-clear/T-2026-1023-0001/composition-limits-report.md": {
+      "sha256": "67532af29a0ba59b65cf2e369d6ba64e7cafea058b0d45fcc5fead1c8dccd4ad",
+      "findings": [
+        {
+          "rule": "literal-sensitive-assignment",
+          "line": 22
+        }
+      ],
+      "reason": "原字节保留的 686 提交历史验收报告第22行仅记录无密码、无密钥的 127.0.0.1:55437 隔离测试 PostgreSQL DATABASE_URL，数据库身份为合成 pm_sandbox；不是外部或生产凭据。仅登记本完整文件 SHA 的该规则/行号误报，不更改旧报告、扫描规则或其它路径。"
     }
   },
   "adoptMigrations": {

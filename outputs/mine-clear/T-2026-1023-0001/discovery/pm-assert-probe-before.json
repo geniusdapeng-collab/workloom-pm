@@ -1,0 +1,40 @@
+{
+  "backend": "macos-seatbelt-node24",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "\nPM_TEST_RECEIPT:3e2285681b84ec69e2c33b63d4f1ad92baa75750796c3879d650113ecccc5822:{\"success\":true,\"counts\":{\"tests\":1,\"failed\":0,\"passed\":1,\"cancelled\":0,\"skipped\":0,\"todo\":0,\"topLevel\":1,\"suites\":0},\"completedTests\":1}\n",
+  "stderr": "(node:68009) SecurityWarning: The flag --allow-child-process must be used with extreme caution. It could invalidate the permission model.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "timedOut": false,
+  "cancelled": false,
+  "outputLimited": false,
+  "stdoutSha256": "318b56b4f74b2ddfc114b6935cd3efb57e61fa869af4a619b5f79182bd8c624a",
+  "stderrSha256": "d030bf25bb219472c35f323e3527b4232853ed1cf2f64f33e3af9ec7f1919031",
+  "testSummary": {
+    "success": true,
+    "counts": {
+      "tests": 1,
+      "failed": 0,
+      "passed": 1,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "topLevel": 1,
+      "suites": 0
+    },
+    "completedTests": 1
+  },
+  "files": [
+    {
+      "path": "malicious.mjs",
+      "sha256": "595125c5d24e3baf7e2d87721e40f82dfd24bf8e1b91c44e031464da2654b467"
+    },
+    {
+      "path": "trusted.test.mjs",
+      "sha256": "b6d96d4a25fcacd10251772c860059f1dc9b9b60fbc377c87692769b46524ada"
+    }
+  ],
+  "tests": [
+    "trusted.test.mjs"
+  ],
+  "testOrigin": "trusted-evaluator"
+}

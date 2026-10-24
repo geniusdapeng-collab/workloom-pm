@@ -1,0 +1,59 @@
+{
+  "id": "MC-011",
+  "kind": "problem",
+  "title": "prompt回退技能未要求回退版本独立通过安全红线",
+  "severity": "P1",
+  "level": "L3",
+  "batch": 2,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "bundles/ai-pm/skills/prompt-regression/SKILL.md:20@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "7f94d384f624c534d903a6a520a970d3a76ef59bb754158101088bd8bfe6d13d",
+      "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+    }
+  ],
+  "semantic_discovery": {
+    "path": "discovery/pm-semantic-review.json",
+    "sha256": "471d1d9503677993c9dd455a5408c9fc13f61567872a93ec563bd494edab417e",
+    "evidenceGrade": "B",
+    "sourceRevision": {
+      "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "workingTreeDirty": true,
+      "committedRepairSha": null
+    },
+    "note": "原真实付费产物的完整正文人工语义审查及UTF8摘要回读；不是审计提交的动态执行，也不是修复后的新真实模型验收。"
+  },
+  "root_cause": {
+    "file": "bundles/ai-pm/skills/prompt-regression/SKILL.md",
+    "line": 20,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "prompt-regression source execution discipline"
+  },
+  "trigger_path": "prompt-curator真实产物建议回退材料中已知存在漏洞的v1，并无证称为上一通过版本；旧技能只说旧版保留可回滚。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+      "expect": "技能要求独立同红线/历史坏例合格版本，无安全版本停用转人工；放宽knownBadVersionEligible或rollbackEvidence的合同拒装配。",
+      "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/asset_evidence.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "修复中新增发现并补卡；保留原audit dirty_count1，正式repair/acceptance仍未建立。自动断言只验证来源合同、完整性、服务端可信指令/回执与失败关闭，不把合同标签当作模型正文语义通过证明。"
+}

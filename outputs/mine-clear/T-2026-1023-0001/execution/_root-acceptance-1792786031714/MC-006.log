@@ -1,0 +1,18 @@
+{
+  "id": "MC-006",
+  "actor": "/root",
+  "role": "acceptance",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-006-0-1792786031901.json",
+        "sha256": "16046db631f19e670b3d26664151e5c617d57e352a5db74752a4d2eaa5bc907e",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

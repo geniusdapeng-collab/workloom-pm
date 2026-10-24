@@ -1,0 +1,18 @@
+{
+  "id": "MC-106",
+  "actor": "/root/intent_audit",
+  "role": "acceptance",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-106-0-1792785774912.json",
+        "sha256": "935058f674e5a3e8954692b24a9c38c1c6c519b16e2d6508ab311d057e999810",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

@@ -1,0 +1,21 @@
+TAP version 13
+# {"schema":"workloom.pm-mcd-nested-summary/v1","group":"asset_evidence","kind":"vitest","report":"/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/asset_evidence-1792786060607-4170cd5d-a4d9-4b29-801d-b44b27b4e4ed.vitest.json","sha256":"4d0e5f78b6d9e3371d292a9ad70677d3b6e2bc30f0454fc42ea4d404f2bf894a","actualPassed":36,"actualTotal":36,"pending":0,"files":["/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server/src/industry/ai-pm/asset-evidence.test.ts","/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server/src/industry/ai-pm/team.pg.test.ts"]}
+# Subtest: MCD asset_evidence: actual assertions, no paid I/O
+ok 1 - MCD asset_evidence: actual assertions, no paid I/O
+  ---
+  duration_ms: 2901.92075
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2945.327625
+
+
+exit_code=0 signal=none error=none
+assertion_validation={"ok":true,"errors":[],"testSummary":{"total":1,"passed":1,"failed":0,"cancelled":0,"skipped":0,"todo":0}}

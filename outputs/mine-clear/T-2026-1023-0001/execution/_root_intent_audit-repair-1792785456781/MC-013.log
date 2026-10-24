@@ -1,0 +1,18 @@
+{
+  "id": "MC-013",
+  "actor": "/root/intent_audit",
+  "role": "repair",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-013-0-1792785485377.json",
+        "sha256": "3fb606e962afe11372d630cd17286ef80508ea6c30dd47031f0736baf975c620",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

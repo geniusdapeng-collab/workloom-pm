@@ -1,0 +1,26 @@
+{
+  "id": "MC-114",
+  "actor": "/root/deepseek_research",
+  "role": "acceptance",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-114-0-1792785882363.json",
+        "sha256": "a33eb6777ff4717f823f600f530b7dad6fd011450e84e94aeb68368a3229c7e4",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-114-1-1792785883886.json",
+        "sha256": "022e41f184b24b82ccae65ccf5cff1b2960cd0b464da52f2f5b7f0e8f26bfd52",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

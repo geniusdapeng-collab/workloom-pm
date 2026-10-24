@@ -1,0 +1,26 @@
+{
+  "id": "MC-110",
+  "actor": "/root/intent_audit",
+  "role": "acceptance",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-110-0-1792785778903.json",
+        "sha256": "eac47bafe44b9bf7e916dec894a0f075f0d1a6ad29a4dab9a045eec2f83632d5",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-110-1-1792785779240.json",
+        "sha256": "3b1427fe6a0b19c25457654920744d091844360890b8e2ce599ef65dfe1783ac",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

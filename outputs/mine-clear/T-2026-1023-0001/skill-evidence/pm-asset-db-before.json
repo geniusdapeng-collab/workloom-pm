@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-23T18:51:35.105Z",
+  "database": "127.0.0.1:55437/workloom_pm_sandbox",
+  "mode": "READ ONLY",
+  "protectedWorkspace": "ws-aipm-demo",
+  "tables": {
+    "skills": {
+      "rows": 20,
+      "sha256": "a273483b3bfd7bab207930363375820219a630d4fd2685c2d8c48427513d2aa9"
+    },
+    "skill_installs": {
+      "rows": 20,
+      "sha256": "3b899628002ca20dddffea31c816634426d6950cd106ff53310a806f24710ce8"
+    },
+    "bundle_installs": {
+      "rows": 1,
+      "sha256": "59e34a13f81087bbd6f037bdb9e82cabb04dcbf7ae7ff5063ee4a32c6cae44e1"
+    },
+    "agents": {
+      "rows": 14,
+      "sha256": "0dab72ee04f07260ea8909e45345862eefcc1b08bbdd8b24e532ec0a5dd40522"
+    },
+    "workspaces": {
+      "rows": 1,
+      "sha256": "5d2fe86f4db65c022e019f448a264ea735cd85fc16c6ffb85a1b4500de7e2243"
+    },
+    "pm_runs": {
+      "rows": 25,
+      "sha256": "973ab0c38997880b1e067c8532a45a2138f3fd24b012c32a812d721974cc38db"
+    },
+    "pm_tasks": {
+      "rows": 32,
+      "sha256": "12acda0f61f8d2b2d70cb5716c3b6090c0c5f90f5c7ebae9d86c721b239c0e67"
+    },
+    "pm_artifacts": {
+      "rows": 16,
+      "sha256": "7f9da816a5ec6b72be913ac41a64b173824e6f0c438f839b2dc87b45fd656439"
+    },
+    "biz_events": {
+      "rows": 120,
+      "sha256": "c9f5709a867468d10678c1f101839b2118740e54ac0f956b06f1875d9fd58958"
+    }
+  }
+}

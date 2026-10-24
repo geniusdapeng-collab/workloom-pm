@@ -1,0 +1,92 @@
+{
+  "id": "MC-119",
+  "kind": "fix",
+  "covers": [
+    "MC-002"
+  ],
+  "title": "PM HTTP路由按鉴权后的实际请求惰性创建数据库worker",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    },
+    {
+      "type": "code",
+      "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+      "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+    }
+  ],
+  "fix_plan": "createPmTeamRouter装配时只创建Hono/auth结构；有效请求通过成员中间件后调用getService，服务按路由实例缓存；注入service兼容，所有endpoint均保持scope/权限/输入合同。",
+  "blast_radius": "本轮新增PM路由急切构造服务导致旧认证only测试在模块导入时要求DATABASE_APP_URL；新文件不存在于e5。该修复不移除已鉴权实际请求的数据库要求。",
+  "conflict_paths": [
+    "apps/server/src/industry/ai-pm/router.ts",
+    "apps/server/src/industry/ai-pm/router.test.ts"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "清空模型环境，仅任务PG55437；新负向用例自己把DATABASE_APP_URL置空并恢复，原demo登录门禁不写数据库。",
+      "expect": "导入/装配通用路由不创建PM DB服务；无DB配置匿名/status仍401；已注入service与实时权限scope等原4用例不变；生产/非loopback演示登录仍拒，2文件8实际passed0skip。",
+      "command": "node --test assertions/router_lazy.test.mjs",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/router_lazy.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/router_lazy.test.mjs then assertions/team.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚含惰性修复的真实提交，保留原付费回执；不能通过注入假DB配置或移除认证测试让急切加载故障消失。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root",
+  "eligible_acceptance_actors": [
+    "/root/intent_audit",
+    "/root/deepseek_research"
+  ],
+  "introduced_during_repair": true,
+  "introduced_regression_evidence": [
+    {
+      "path": "discovery/pm-router-lazy-red.json",
+      "sha256": "0370891354572d24d564a6387518b8c0190d4eb5857ff6d20e719be77ac9cb2c",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "新PM路由在修复期间引入的急切DB初始化；红5例4过1失败，绿含原demo-login3例共8/8。不是e5存在该PM代码的证据。"
+    },
+    {
+      "path": "discovery/pm-router-lazy-green.json",
+      "sha256": "1c3b15bd14d71b5903502df70f7d86ff33f71f0701b6223373cd1855edea80f8",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "新PM路由在修复期间引入的急切DB初始化；红5例4过1失败，绿含原demo-login3例共8/8。不是e5存在该PM代码的证据。"
+    }
+  ],
+  "independent_source_review": {
+    "actor": "/root/intent_audit",
+    "evidenceGrade": "A",
+    "files": [
+      "apps/server/src/industry/ai-pm/router.ts",
+      "apps/server/src/industry/ai-pm/router.test.ts"
+    ],
+    "notes": "两文件完整阅读，所有handler仅在auth中间件后调用getService；const service??=首次构造失败可由onError返回500，未放宽实际数据库/权限要求。源码未由该独立审查者修改。"
+  },
+  "notes": "仍open/not-run等待干净提交与真实修复/独立角色运行；旧文档/原history保留。"
+}

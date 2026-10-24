@@ -1,0 +1,1623 @@
+{
+  "schema": "workloom.mine-clear/handoff@1",
+  "task_id": "T-2026-1023-0001",
+  "repo": "workloom-pm",
+  "generated_at": "2026-10-23T20:10:50.389Z",
+  "audit_baseline": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+  "repair_baseline": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "acceptance_baseline": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "environment_claim": "local-preview",
+  "invariants": [
+    {
+      "id": "INV-1",
+      "text": "租户边界覆盖数据库 RLS、运行时上下文、事件、缓存和外部连接器。",
+      "source": "AGENTS.md#4.1"
+    },
+    {
+      "id": "INV-2",
+      "text": "经营事件、审批和关键回执只增不改；纠正通过新事件表达，不静默覆盖证据。",
+      "source": "AGENTS.md#4.2"
+    },
+    {
+      "id": "INV-3",
+      "text": "所有外部或变更性动作及其子调用，统一经过权限、PII、围栏和审批链路。",
+      "source": "AGENTS.md#4.3"
+    },
+    {
+      "id": "INV-4",
+      "text": "涉钱、敏感数据、群发、公开发布、交易和破坏性变更必须按高风险处理并由人审批。",
+      "source": "AGENTS.md#4.4"
+    },
+    {
+      "id": "INV-5",
+      "text": "没有真实回执就不能标记完成；mock、模拟和体验模式在数据结构与界面上都要明确区分。",
+      "source": "AGENTS.md#4.5"
+    },
+    {
+      "id": "INV-6",
+      "text": "客户原始经营数据不得上行；蜂群只接受白名单化、最小化、匿名化且可审计的元数据或派生经验。",
+      "source": "AGENTS.md#4.6"
+    },
+    {
+      "id": "INV-7",
+      "text": "租户覆盖层只能收紧围栏，不能放宽平台不可变红线。",
+      "source": "AGENTS.md#4.7"
+    },
+    {
+      "id": "INV-8",
+      "text": "模型、提示词、技能、bundle、策略和热更新必须先评测再灰度，且始终可回滚。",
+      "source": "AGENTS.md#4.8"
+    },
+    {
+      "id": "INV-9",
+      "text": "platform-ops、平台账户运营和平台秘密只属于 Andromeda。",
+      "source": "AGENTS.md#4.9"
+    },
+    {
+      "id": "INV-10",
+      "text": "Tiger 在获得单独的合规审查和用户明确授权前，只能模拟或纸面交易。",
+      "source": "AGENTS.md#4.10"
+    },
+    {
+      "id": "INV-11",
+      "text": "令牌、密码、API key、私钥、客户凭证和私密客户数据不得进入源码、文档、上下文、提示词、日志或提交。",
+      "source": "AGENTS.md#4.11"
+    },
+    {
+      "id": "INV-12",
+      "text": "个性化与行业扩展不得形成公共机制的第二事实源。",
+      "source": "AGENTS.md#4.12"
+    }
+  ],
+  "closed_problems": [
+    {
+      "id": "MC-001",
+      "title": "原模型提供方缺少DeepSeek工具与完整计量协议",
+      "verified_by": "/root/sandbox_prepare",
+      "verified_at": "2026-10-23T20:06:35.180Z",
+      "verification_evidence": {
+        "path": "runs/MC-001-0-1792785993512.json",
+        "sha256": "e72d541cdbc81ac02a471646bb3f72ae94f0e8a7cbb5068ab3ec2a511fdc2f5e",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "需要function tools/search/fetch或thinking工具循环时，原接口只发送文本并只读content，usage缺失记0。",
+          "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+          "command": "node --test assertions/providers.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/providers.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-001-0-1792785993512.txt",
+            "sha256": "4ab587094fdf4f47f2fb4236fd12d55dea572e27bc52967b1c97804dba766c80",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-001-0-1792785993512.json",
+            "sha256": "e72d541cdbc81ac02a471646bb3f72ae94f0e8a7cbb5068ab3ec2a511fdc2f5e",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "需要function tools/search/fetch或thinking工具循环时，原接口只发送文本并只读content，usage缺失记0。",
+          "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+          "command": "node --test assertions/budget.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/budget.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-001-1-1792785994413.txt",
+            "sha256": "a5c5db0f60cf6a681c4a06a7b40fa8c2cbc499ef66769853fac02970ebc36f0d",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-001-1-1792785994413.json",
+            "sha256": "43c551f004479d3b727db033efcd91e9607ec91e57aac3aba268c14b2b64b3aa",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-002",
+      "title": "原Quest缺少AI产品经理驱动的员工DAG与真实依赖交付",
+      "verified_by": "/root/deepseek_research",
+      "verified_at": "2026-10-23T20:04:19.209Z",
+      "verification_evidence": {
+        "path": "runs/MC-002-0-1792785835630.json",
+        "sha256": "3d623634b516da82f3225cf7068dacd3b5ae04f41d092d6401b7e9ce1e44b430",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/team.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/team.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-002-0-1792785835630.txt",
+            "sha256": "524464de95c711d283f6334fed821da7bd11aa1ad0d39f543c9e5574eaa02092",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-002-0-1792785835630.json",
+            "sha256": "3d623634b516da82f3225cf7068dacd3b5ae04f41d092d6401b7e9ce1e44b430",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/dsh_process.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/dsh_process.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-002-1-1792785843681.txt",
+            "sha256": "818cdbbe8d80a786d1b79733c39a356d8ebee53c224ed99f099957a1901f5d69",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-002-1-1792785843681.json",
+            "sha256": "cc309823cba320629f5d1f65c7d3b88d7a13102f4c356121097694b6e3555fd3",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/code.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/code.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-002-2-1792785854549.txt",
+            "sha256": "78ca9a8118af62394ba3f0d99f2ddd3b32a62f8f54f35095a32b26565d620a44",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-002-2-1792785854549.json",
+            "sha256": "52c3a9474a466c7514959ea54fbb5b0e99422777d10b080692c9dbdee71b9405",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/oneshot.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/oneshot.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-002-3-1792785857055.txt",
+            "sha256": "b701e549f4f3d0cebd6622fc68d1278d3dec3c8f6e1d8da7780ea5561389ea48",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-002-3-1792785857055.json",
+            "sha256": "676e97deb94091b485b0fdd4f68745e2c48be2aaedc78cc628aab5d7abcc0b46",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/closure.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/closure.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-002-4-1792785858666.txt",
+            "sha256": "81f4005bf459bcfa94336afe81e18349d2bb9ac19f2adaea5162ac95eec979a6",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-002-4-1792785858666.json",
+            "sha256": "3276d493d45445957fe45b009a7a51b1c270c1a35ba6bfbf32dc0a26bd96c3cf",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-003",
+      "title": "客户端载荷清理会删除第三方必需的nested依赖",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:02:49.900Z",
+      "verification_evidence": {
+        "path": "runs/MC-003-0-1792785768999.json",
+        "sha256": "d017d06d56b3e9677fa4318a19086e595ddd4acc1c0ea0b221d4d7179b0d64fa",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "运行期npm闭包具有第三方内部node_modules时，旧find按目录名批量删除，使已安装DSH等依赖无法加载。",
+          "expect": "只删除复制的一方工作区node_modules；第三方nested依赖可真实import；锁文件与运行期清单一致。",
+          "command": "node --test assertions/payload.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-003-0-1792785768999.txt",
+            "sha256": "b3bc558e0dc1c50ada3e77a4350e29a5f6a77360016d0a697bbdcf3f612228e4",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-003-0-1792785768999.json",
+            "sha256": "d017d06d56b3e9677fa4318a19086e595ddd4acc1c0ea0b221d4d7179b0d64fa",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-004",
+      "title": "AI-PM来源抓取失败被标为真实成功",
+      "verified_by": "/root/deepseek_research",
+      "verified_at": "2026-10-23T20:04:20.068Z",
+      "verification_evidence": {
+        "path": "runs/MC-004-0-1792785859384.json",
+        "sha256": "d303f96c2aef901b3108d76d7765b7f4a22554e6a849253ddf009ce3d5b6578c",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "竞品URL返回404/500/空正文，或所有RSS失败但LLM配置存在，仍可能mock:false且空事实。",
+          "expect": "失败/空来源标未核实且错误可见；有效来源与持久化真实结果分别统计，不把模型配置当来源成功。",
+          "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-004-0-1792785859384.txt",
+            "sha256": "ed6d5af386a927100b247460b4d2830f88ed8e9602e892be4b409c53078f1adc",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-004-0-1792785859384.json",
+            "sha256": "d303f96c2aef901b3108d76d7765b7f4a22554e6a849253ddf009ce3d5b6578c",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-005",
+      "title": "GitHub凭据会随API回退发送给第三方端点",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:02:50.942Z",
+      "verification_evidence": {
+        "path": "runs/MC-005-0-1792785770117.json",
+        "sha256": "498b508e6c9a24d92df355e70c51afb58f1b5cd9a84998abdbe81650b0c3ceb0",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "已读取GitHubBearer，官方端点失败或重定向后，旧默认fallback继续携带相同headers。只允许假token夹具复现。",
+          "expect": "带凭据请求只能访问固定官方GitHub API并拒绝redirect；第三方端点从未收到Authorization；匿名开发夹具仍可用。",
+          "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-005-0-1792785770117.txt",
+            "sha256": "d29077918f340e43bdb8606a794930962ac68338ded815cb3d4d34d066340a58",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-005-0-1792785770117.json",
+            "sha256": "498b508e6c9a24d92df355e70c51afb58f1b5cd9a84998abdbe81650b0c3ceb0",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-006",
+      "title": "长目标引用在调度与普通续跑首次规划时丢失",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:07:13.689Z",
+      "verification_evidence": {
+        "path": "runs/MC-006-0-1792786031901.json",
+        "sha256": "16046db631f19e670b3d26664151e5c617d57e352a5db74752a4d2eaa5bc907e",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "dispatch保存goal_ref/版本但排队或恢复入口只传短title；统一执行器直接使用input.goal，不回读绑定全文。",
+          "expect": "queued/paused恢复将精确长目标送真实规划入口；缺失、无版本或版本漂移先拒绝并留回执，不用短标题冒充原目标。",
+          "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-006-0-1792786031901.txt",
+            "sha256": "514e62860806fdbee559389ac6926cac62c6b327a50b86550e6adc24bc6d88dd",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-006-0-1792786031901.json",
+            "sha256": "16046db631f19e670b3d26664151e5c617d57e352a5db74752a4d2eaa5bc907e",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-007",
+      "title": "线程已认领后装配或规划异常可遗留running僵尸",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:07:15.220Z",
+      "verification_evidence": {
+        "path": "runs/MC-007-0-1792786033874.json",
+        "sha256": "ab64161d3b1066b00c932caec298a7eb41625b742911a68b5b8b6379e3c60995",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "CAS置running后resolvePreset、部署工具、词表或runQuest抛错，旧统一执行器无终态失败保护。",
+          "expect": "有权限且本worker认领的异常线程进入可见失败并同事务写WorkData；不覆盖其它worker或真实pending_review；哈希链有效。",
+          "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-007-0-1792786033874.txt",
+            "sha256": "5d73c6db4ccaf45f0bc3fe48eab8ffc9e6bd3b3e46fc883c1ac7cb2111c0bdd6",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-007-0-1792786033874.json",
+            "sha256": "ab64161d3b1066b00c932caec298a7eb41625b742911a68b5b8b6379e3c60995",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-008",
+      "title": "开发质量门禁把缺失模型评审和考试当作通过",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:07:29.094Z",
+      "verification_evidence": {
+        "path": "runs/MC-008-0-1792786035388.json",
+        "sha256": "ef1b8ee30553d7465b63c294263fd51b6c4a2b2490f0ce119d3e72e15891bf55",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "模型评审未配置/抛错或runExam异常时，原ok:true/null verdict仍使gatesPassed为true，旧bool可到发布。",
+          "expect": "缺失、模拟、失败、错scope/任务/会话/分数/答案的考试或变更后内容摘要均不能通过；真实同scope考试与worktree摘要一致才可到git边界。",
+          "command": "node --test assertions/devtools.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/devtools.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-008-0-1792786035388.txt",
+            "sha256": "7896ce8bffb7279a5d5223485e3680c242a8e0a7121ee015177f1ebf992102fa",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-008-0-1792786035388.json",
+            "sha256": "ef1b8ee30553d7465b63c294263fd51b6c4a2b2490f0ce119d3e72e15891bf55",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-009",
+      "title": "完整复制后沿用源产品身份会碰撞客户端资料与端口",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:02:53.134Z",
+      "verification_evidence": {
+        "path": "runs/MC-009-0-1792785771131.json",
+        "sha256": "2219187186c67429d425828fca938ab544bcc6dce09714395397fed762e9691b",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "把源完整复制成workloom-pm而不派生manifest时，仍为workloom-im/base/com.workloom.im/offset0，不能成为独立PM产品。原仓身份本身并非错误。",
+          "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+          "command": "node --test assertions/identity.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/identity.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-009-0-1792785771131.txt",
+            "sha256": "d08c11073bac9e26df8779fbb9aa5ce9d5daec779853832aac58cc8d8afa7dee",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-009-0-1792785771131.json",
+            "sha256": "2219187186c67429d425828fca938ab544bcc6dce09714395397fed762e9691b",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "把源完整复制成workloom-pm而不派生manifest时，仍为workloom-im/base/com.workloom.im/offset0，不能成为独立PM产品。原仓身份本身并非错误。",
+          "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+          "command": "node --test assertions/desktop.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/desktop.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-009-1-1792785771653.txt",
+            "sha256": "f288679bc370690b0812a458c0d5f34fa17e3d8cc91dc37e59bd631d34f140e6",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-009-1-1792785771653.json",
+            "sha256": "ec2e7671bf1b200143694488537a996e7f733616d9f92742fb74ff05d70d1fa4",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-101",
+      "title": "DeepSeek完整completion/function tools协议",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:07:44.572Z",
+      "verification_evidence": {
+        "path": "runs/MC-101-0-1792786063902.json",
+        "sha256": "fa6e7c602cc59f417214849fea7b8013fee0a1f994a73931fe869c83b1117fc7",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+          "command": "node --test assertions/providers.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/providers.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-101-0-1792786063902.txt",
+            "sha256": "47558a3e36c991dc6b5899929e8f5b05b0bcbd8080c12acd02128f66bc27f87b",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-101-0-1792786063902.json",
+            "sha256": "fa6e7c602cc59f417214849fea7b8013fee0a1f994a73931fe869c83b1117fc7",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-102",
+      "title": "行业团队DAG与租户状态持久化",
+      "verified_by": "/root/deepseek_research",
+      "verified_at": "2026-10-23T20:04:26.889Z",
+      "verification_evidence": {
+        "path": "runs/MC-102-0-1792785860225.json",
+        "sha256": "a597b1e6857acf45b3fc05c057aacbce793678ce1b80df58aa92f6f56d9af20f",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/team.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/team.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-102-0-1792785860225.txt",
+            "sha256": "4702c277477ee1ac01fec285d9755a0c5bd2dfe640ae9b31267a9c2832bac537",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-102-0-1792785860225.json",
+            "sha256": "a597b1e6857acf45b3fc05c057aacbce793678ce1b80df58aa92f6f56d9af20f",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-103",
+      "title": "真实DSH受限员工执行器与预算错误归类",
+      "verified_by": "/root/deepseek_research",
+      "verified_at": "2026-10-23T20:04:37.898Z",
+      "verification_evidence": {
+        "path": "runs/MC-103-0-1792785867052.json",
+        "sha256": "3e6ed81c0fe217d27d92173192e14563dffba792de16749d068fad8bc4e3b5be",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/dsh_unit.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/dsh_unit.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-103-0-1792785867052.txt",
+            "sha256": "cd5f79dd77fc63c818a416b1215d365f30f072145c136e3b2b8389dafc0f2bff",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-103-0-1792785867052.json",
+            "sha256": "3e6ed81c0fe217d27d92173192e14563dffba792de16749d068fad8bc4e3b5be",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/dsh_process.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/dsh_process.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-103-1-1792785867907.txt",
+            "sha256": "1f23421509a70ded05c9ef83e7ac4dfedfc732cdb5b50cc6dca145b9439218de",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-103-1-1792785867907.json",
+            "sha256": "94fc32228ee0a85b714ca059d11b978ab102e36bb513a30d9f0cf1034ec830a3",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-104",
+      "title": "运行期第三方nested与peer闭包保留",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:02:54.748Z",
+      "verification_evidence": {
+        "path": "runs/MC-104-0-1792785774138.json",
+        "sha256": "2399d4b5fac255a4bcd93f121581b806568d5501a222220b7aa6fbf54a3cf49f",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "只删除复制的一方工作区node_modules；第三方nested依赖可真实import；锁文件与运行期清单一致。",
+          "command": "node --test assertions/payload.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-104-0-1792785774138.txt",
+            "sha256": "329433e108ae141d5fe93a922882c7a46bbadf9860c90570edd68ff0b4259531",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-104-0-1792785774138.json",
+            "sha256": "2399d4b5fac255a4bcd93f121581b806568d5501a222220b7aa6fbf54a3cf49f",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-105",
+      "title": "来源与快照持久化结果分别诚实回执",
+      "verified_by": "/root/deepseek_research",
+      "verified_at": "2026-10-23T20:04:38.865Z",
+      "verification_evidence": {
+        "path": "runs/MC-105-0-1792785878098.json",
+        "sha256": "971c8506da46fc6e4e92b17fabba36814e697a8ae3f17e343954af53ee2c77b2",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "失败/空来源标未核实且错误可见；有效来源与持久化真实结果分别统计，不把模型配置当来源成功。",
+          "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-105-0-1792785878098.txt",
+            "sha256": "4d1050c667f70a652411fb1905b4d153e45606df920740646c510de15a88cc98",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-105-0-1792785878098.json",
+            "sha256": "971c8506da46fc6e4e92b17fabba36814e697a8ae3f17e343954af53ee2c77b2",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-106",
+      "title": "GitHub凭据限定官方源且禁止redirect",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:02:55.611Z",
+      "verification_evidence": {
+        "path": "runs/MC-106-0-1792785774912.json",
+        "sha256": "935058f674e5a3e8954692b24a9c38c1c6c519b16e2d6508ab311d057e999810",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "带凭据请求只能访问固定官方GitHub API并拒绝redirect；第三方端点从未收到Authorization；匿名开发夹具仍可用。",
+          "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-106-0-1792785774912.txt",
+            "sha256": "a3e54e98d46e36d098348d5d86f0cf707cb924c805cbc955b68385b481c432e2",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-106-0-1792785774912.json",
+            "sha256": "935058f674e5a3e8954692b24a9c38c1c6c519b16e2d6508ab311d057e999810",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-107",
+      "title": "统一执行入口恢复绑定的完整目标与版本",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:02:57.203Z",
+      "verification_evidence": {
+        "path": "runs/MC-107-0-1792785775779.json",
+        "sha256": "4dc9e2f09a45d580a6f0cd404d8b58c00bcf459e6dbbde314e27b992207ee48b",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "queued/paused恢复将精确长目标送真实规划入口；缺失、无版本或版本漂移先拒绝并留回执，不用短标题冒充原目标。",
+          "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-107-0-1792785775779.txt",
+            "sha256": "4c0910b14de1e055195c3c0d9595bc7cefa2339c507335a01d3f144a6c5f726b",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-107-0-1792785775779.json",
+            "sha256": "4dc9e2f09a45d580a6f0cd404d8b58c00bcf459e6dbbde314e27b992207ee48b",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-108",
+      "title": "认领后失败同事务写线程终态与WorkData",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:02:58.737Z",
+      "verification_evidence": {
+        "path": "runs/MC-108-0-1792785777379.json",
+        "sha256": "dc1299171b3440ed704c79c9cf2a2becc33a740e75f4b40dc4bcf8ff5fd87fec",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "有权限且本worker认领的异常线程进入可见失败并同事务写WorkData；不覆盖其它worker或真实pending_review；哈希链有效。",
+          "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-108-0-1792785777379.txt",
+            "sha256": "0da3d2bb3fd14c43e435cfa44264a01d36b08dd38bf6fc71595a9a7e4896a7d7",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-108-0-1792785777379.json",
+            "sha256": "dc1299171b3440ed704c79c9cf2a2becc33a740e75f4b40dc4bcf8ff5fd87fec",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-109",
+      "title": "三关失败关闭并绑定真实考试和变更内容",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:07:58.704Z",
+      "verification_evidence": {
+        "path": "runs/MC-109-0-1792786064731.json",
+        "sha256": "fb40471393c3f71ffdf2f74cd9ad15c7875f2d934b66d27bcb1e322da3823ff6",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "缺失、模拟、失败、错scope/任务/会话/分数/答案的考试或变更后内容摘要均不能通过；真实同scope考试与worktree摘要一致才可到git边界。",
+          "command": "node --test assertions/devtools.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/devtools.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-109-0-1792786064731.txt",
+            "sha256": "bb8a75e989b815ed8efcb3f1365f060f5ef82daf9e3c8d9f8c8bee54ab02e423",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-109-0-1792786064731.json",
+            "sha256": "fb40471393c3f71ffdf2f74cd9ad15c7875f2d934b66d27bcb1e322da3823ff6",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-110",
+      "title": "派生独立PM身份和源码默认端口资料目录",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:03:00.883Z",
+      "verification_evidence": {
+        "path": "runs/MC-110-0-1792785778903.json",
+        "sha256": "eac47bafe44b9bf7e916dec894a0f075f0d1a6ad29a4dab9a045eec2f83632d5",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+          "command": "node --test assertions/identity.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/identity.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-110-0-1792785778903.txt",
+            "sha256": "14535c48400253a865c53c36512b039d84435bbb5e16aa63270dc0dc925bb90f",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-110-0-1792785778903.json",
+            "sha256": "eac47bafe44b9bf7e916dec894a0f075f0d1a6ad29a4dab9a045eec2f83632d5",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+          "command": "node --test assertions/desktop.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/desktop.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-110-1-1792785779240.txt",
+            "sha256": "7971b743e29469e8608247611fcc8a62a17604fbf6cd0a0d137dd8e779b4828b",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-110-1-1792785779240.json",
+            "sha256": "3b1427fe6a0b19c25457654920744d091844360890b8e2ce599ef65dfe1783ac",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-111",
+      "title": "单文件正文与多文件无歧义协议恢复",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:08:01.061Z",
+      "verification_evidence": {
+        "path": "runs/MC-111-0-1792786078904.json",
+        "sha256": "a3e510c5c22625356d960abbb6da407a462912550250d0407117607636085524",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/oneshot.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/oneshot.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-111-0-1792786078904.txt",
+            "sha256": "3bfd96ee5325143964154f9d6f015d229ab9fd98fec5defca9f5b0157f63d83c",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-111-0-1792786078904.json",
+            "sha256": "a3e510c5c22625356d960abbb6da407a462912550250d0407117607636085524",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-112",
+      "title": "生成代码必须真实OS隔离执行并防伪造TAP",
+      "verified_by": "/root/deepseek_research",
+      "verified_at": "2026-10-23T20:04:41.476Z",
+      "verification_evidence": {
+        "path": "runs/MC-112-0-1792785879025.json",
+        "sha256": "25e0517ae235518d7bf6610facaa361611b9dae204854d1c2c14e0d2539b8895",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/code.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/code.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-112-0-1792785879025.txt",
+            "sha256": "c5f7123e49953d8771d9a0f04473391866b6d1061c4dc7d51f575cb1b9a2ba24",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-112-0-1792785879025.json",
+            "sha256": "25e0517ae235518d7bf6610facaa361611b9dae204854d1c2c14e0d2539b8895",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-113",
+      "title": "产品HTTP挂载移回排除的行业组合根",
+      "verified_by": "/root/deepseek_research",
+      "verified_at": "2026-10-23T20:04:42.199Z",
+      "verification_evidence": {
+        "path": "runs/MC-113-0-1792785881642.json",
+        "sha256": "ec840c9c95f89c015c4d9fcee6146af010b41776454994dd7b9a0e7491dc81c9",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/closure.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/closure.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-113-0-1792785881642.txt",
+            "sha256": "a34486ebeb8b4b75968be256d89dcd660257f6c5ef253d9f4b361a064af2635b",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-113-0-1792785881642.json",
+            "sha256": "ec840c9c95f89c015c4d9fcee6146af010b41776454994dd7b9a0e7491dc81c9",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-114",
+      "title": "默认DSH8轮与评测官单文件8192限额",
+      "verified_by": "/root/deepseek_research",
+      "verified_at": "2026-10-23T20:04:47.236Z",
+      "verification_evidence": {
+        "path": "runs/MC-114-0-1792785882363.json",
+        "sha256": "a33eb6777ff4717f823f600f530b7dad6fd011450e84e94aeb68368a3229c7e4",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/oneshot.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/oneshot.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-114-0-1792785882363.txt",
+            "sha256": "7449a2f9dd936766db5f20f975a4b2356f7a80706cb47bf451daa33a1b81d943",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-114-0-1792785882363.json",
+            "sha256": "a33eb6777ff4717f823f600f530b7dad6fd011450e84e94aeb68368a3229c7e4",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+          "command": "node --test assertions/team.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/team.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-114-1-1792785883886.txt",
+            "sha256": "bb8b95dff16151c1fee5a867a072a04ef854422159f597ae61d0d5ee4429117a",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-114-1-1792785883886.json",
+            "sha256": "022e41f184b24b82ccae65ccf5cff1b2960cd0b464da52f2f5b7f0e8f26bfd52",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-115",
+      "title": "物理请求前预占和费用硬闸",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:03:01.818Z",
+      "verification_evidence": {
+        "path": "runs/MC-115-0-1792785781068.json",
+        "sha256": "ac6c1ab5c8f0e04bc1bff6dcd078230f4e9e793266a2684800e2a2a4a76adcb3",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+          "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+          "command": "node --test assertions/budget.test.mjs (outer TestsStream + nested actual test-count validation)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/budget.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-115-0-1792785781068.txt",
+            "sha256": "3fae0a4a4bf59fef352cddc4ab131148778371a2a21815665013fff43ef39e7d",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-115-0-1792785781068.json",
+            "sha256": "ac6c1ab5c8f0e04bc1bff6dcd078230f4e9e793266a2684800e2a2a4a76adcb3",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-010",
+      "title": "技能原文允许缺模型mock放行与非fail考试放行",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:07:33.295Z",
+      "verification_evidence": {
+        "path": "runs/MC-010-0-1792786049313.json",
+        "sha256": "c719891b55e6e079b12c35e59e9d0598931abbca0352fbfda9399d48176c6252",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+          "expect": "旧无合同技能及放宽mock/非fail/跳过Git前复核的重摘要合同均拒；新技能明示同scope/task/session/content的真实证据，服务端可信纪律覆盖入口。",
+          "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-010-0-1792786049313.txt",
+            "sha256": "87616931e28679acdea7746e731487a1b829c4475daf15be5979596aa709f1e7",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-010-0-1792786049313.json",
+            "sha256": "c719891b55e6e079b12c35e59e9d0598931abbca0352fbfda9399d48176c6252",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-011",
+      "title": "prompt回退技能未要求回退版本独立通过安全红线",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:07:36.651Z",
+      "verification_evidence": {
+        "path": "runs/MC-011-0-1792786053488.json",
+        "sha256": "ac29856bedfa3c707217f5169e7cf0aa41f4044e14c2374ac6e0004b0024a2f5",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+          "expect": "技能要求独立同红线/历史坏例合格版本，无安全版本停用转人工；放宽knownBadVersionEligible或rollbackEvidence的合同拒装配。",
+          "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-011-0-1792786053488.txt",
+            "sha256": "ca812c44fa37af808859209b8ec0c1078ae3c7182ce9f413d6bbf7c40eaadcfc",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-011-0-1792786053488.json",
+            "sha256": "ac29856bedfa3c707217f5169e7cf0aa41f4044e14c2374ac6e0004b0024a2f5",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-012",
+      "title": "统计技能缺少汇总归因和可证伪实验的证据合同",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:07:40.276Z",
+      "verification_evidence": {
+        "path": "runs/MC-012-0-1792786056822.json",
+        "sha256": "51d0dc3469d92303b3c29fb3f505a9e88df05b58b59b404eae2f6a800597f9bb",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+          "expect": "技能区分计算/观察/假设，要求分母窗口与统计不确定性；零分母或点阈值可直接证伪的重摘要合同拒装配。新模型正文质量仍待另行授权真实复验。",
+          "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-012-0-1792786056822.txt",
+            "sha256": "b1d4614e057ea889c0acb4ae7c90b63926680232e35093ea97afa71be43d1c06",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-012-0-1792786056822.json",
+            "sha256": "51d0dc3469d92303b3c29fb3f505a9e88df05b58b59b404eae2f6a800597f9bb",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-013",
+      "title": "PRD技能骨架未要求功能分级与字段状态一致",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:07:43.735Z",
+      "verification_evidence": {
+        "path": "runs/MC-013-0-1792786060446.json",
+        "sha256": "33f7f20b1b6bb18f163e44e3fa99daee7cce74852b0e86a7172faa54d7c50662",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+          "expect": "技能要求3场景、功能P0/P1/P2、字段空值/默认/状态权限一致及真实入库回执；放宽场景/一致性的合同拒装配。正文语义仍需人工或另行授权真实模型复验。",
+          "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-013-0-1792786060446.txt",
+            "sha256": "02ce3399df7d19b980cb84720cf10995a312081b8f2112c00ec92e3760c7d6d7",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-013-0-1792786060446.json",
+            "sha256": "33f7f20b1b6bb18f163e44e3fa99daee7cce74852b0e86a7172faa54d7c50662",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-116",
+      "title": "纠正五技能证据纪律并绑定每次员工实际装配来源",
+      "verified_by": "/root",
+      "verified_at": "2026-10-23T20:08:04.539Z",
+      "verification_evidence": {
+        "path": "runs/MC-116-0-1792786081263.json",
+        "sha256": "2eb1c3b1ca7122e4c2cb2d8d02cf7f261c7b860fd6ae41932414325234ef9583",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+          "expect": "校验安全合同和实际14岗sourceSHA；合法重摘要的unsafe合同仍拒；真实PG保留成功/已知失败/恢复版本/规划/DSH回执且worker篡改不能自证；DI无binding仍能完成并移除伪造来源。",
+          "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-116-0-1792786081263.txt",
+            "sha256": "b71bea4c8340ea705979e3538d2a0848ac6348f57471ff257ae2f68a376eb80f",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-116-0-1792786081263.json",
+            "sha256": "2eb1c3b1ca7122e4c2cb2d8d02cf7f261c7b860fd6ae41932414325234ef9583",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-014",
+      "title": "生产Vite配置运行时导入dev-only Vitest导致真实载荷启动失败",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:02:53.972Z",
+      "verification_evidence": {
+        "path": "runs/MC-014-0-1792785773301.json",
+        "sha256": "69684ffd4eabef372511e655f90d7323410c0bfaa903ab8cf4a1cac63c19cf02",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+          "expect": "当前锁定真实native npm stage不可解析Vitest，三个客户端实际启动preview并HTTP200，返回正文SHA等于当前dist首页。异宿主config-only不计native通过。",
+          "command": "node --test assertions/runtime_preview.test.mjs",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runtime_preview.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-014-0-1792785773301.txt",
+            "sha256": "021f3354e577d75add6054fc7cd69eda1b65db97d8269e030aba08e287b2827b",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-014-0-1792785773301.json",
+            "sha256": "69684ffd4eabef372511e655f90d7323410c0bfaa903ab8cf4a1cac63c19cf02",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-117",
+      "title": "冻结沙箱内可信断言与加载器出口防生成代码篡改独立验收",
+      "verified_by": "/root/deepseek_research",
+      "verified_at": "2026-10-23T20:04:49.805Z",
+      "verification_evidence": {
+        "path": "runs/MC-117-0-1792785887395.json",
+        "sha256": "116b0f3e5ffc3604f3d5b35de5345069c21edf852d7af908e82e4a44fac903f5",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+          "expect": "实际Seatbelt+Node24中direct assert/noop、ESM、CJS、反射、加载器、cache与hook攻击不能把独立错断言变绿；正常上下文/CJS仍运行。两套至少17真实passed，0skip，maxWorkers1。",
+          "command": "node --test assertions/code.test.mjs",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/code.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-117-0-1792785887395.txt",
+            "sha256": "e2b371caab0b99dd46b5471b4aaaf7420a24141b4e1b30aab7248f50b4064467",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-117-0-1792785887395.json",
+            "sha256": "116b0f3e5ffc3604f3d5b35de5345069c21edf852d7af908e82e4a44fac903f5",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-118",
+      "title": "三条发行线统一保留nested依赖并用无Vitest的生产preview验真",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:03:03.418Z",
+      "verification_evidence": {
+        "path": "runs/MC-118-0-1792785781997.json",
+        "sha256": "98bfc96b6e8af7c5fcc5c3a2c9068daf41378c7149ee98249edc2d71ea3d69e2",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+          "expect": "三发行线均调用workspace-only prune与preview gate；真正required nested模块清理后仍可import，required peer/runtime lock合同至少13通过。",
+          "command": "node --test assertions/payload.test.mjs",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-118-0-1792785781997.txt",
+            "sha256": "09b930df8337b058c8996b55d68e4c053e6b8002250bf546704f8557fb4cc506",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-118-0-1792785781997.json",
+            "sha256": "98bfc96b6e8af7c5fcc5c3a2c9068daf41378c7149ee98249edc2d71ea3d69e2",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        },
+        {
+          "kind": "property",
+          "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+          "expect": "当前锁定真实native npm stage不可解析Vitest，三个客户端实际启动preview并HTTP200，返回正文SHA等于当前dist首页。异宿主config-only不计native通过。",
+          "command": "node --test assertions/runtime_preview.test.mjs",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runtime_preview.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-118-1-1792785782708.txt",
+            "sha256": "b8910c8eb5e2603a3e91d545ab439648a43135afd772fc9eed6a4da80b9abb15",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-118-1-1792785782708.json",
+            "sha256": "bdde89a4623db25b842cd03fdc97d324a7ada8b0a6c83f20fc1bc38078614d6d",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-119",
+      "title": "PM HTTP路由按鉴权后的实际请求惰性创建数据库worker",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:03:06.356Z",
+      "verification_evidence": {
+        "path": "runs/MC-119-0-1792785783588.json",
+        "sha256": "effad1e491bf607c3603fc214836cbd0630a4826839a7b4fab96d6fb37f5236e",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "清空模型环境，仅任务PG55437；新负向用例自己把DATABASE_APP_URL置空并恢复，原demo登录门禁不写数据库。",
+          "expect": "导入/装配通用路由不创建PM DB服务；无DB配置匿名/status仍401；已注入service与实时权限scope等原4用例不变；生产/非loopback演示登录仍拒，2文件8实际passed0skip。",
+          "command": "node --test assertions/router_lazy.test.mjs",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/router_lazy.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-119-0-1792785783588.txt",
+            "sha256": "4a09065e3d6bce2c70cb73d4834c67e1d849f06d54e9042dd562eebb56848595",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-119-0-1792785783588.json",
+            "sha256": "effad1e491bf607c3603fc214836cbd0630a4826839a7b4fab96d6fb37f5236e",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MC-120",
+      "title": "正式首装游客在受限产品入口获得正式登录路径",
+      "verified_by": "/root/intent_audit",
+      "verified_at": "2026-10-23T20:03:08.725Z",
+      "verification_evidence": {
+        "path": "runs/MC-120-0-1792785786556.json",
+        "sha256": "1013f9a0ba34452f8b2df308e38c45b8bdff7a42c89f6a02a9751c2d9a968e16",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      },
+      "assertions": [
+        {
+          "kind": "property",
+          "given": "清env、mock服务端access响应；真实guest/member/授权成员与权限查询错误在React DOM中分别渲染；不请求模型或正式登录后门。",
+          "expect": "游客在通用/行业受限入口只见正式/login?next=%2Fdevelopment链接、没有私有内容；成员无权仍管理员提示；只有服务端授予行业权限才渲染；身份事件重新查询权限、失败关闭；三文件22实际通过0skip，既有路由注册表与导航权限合同不变。",
+          "command": "node --test assertions/guest_access.test.mjs",
+          "exec": {
+            "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+            "args": [
+              "--test",
+              "--test-concurrency=1",
+              "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/guest_access.test.mjs"
+            ]
+          },
+          "last_result": "pass",
+          "evidence": {
+            "path": "evidence/MC-120-0-1792785786556.txt",
+            "sha256": "e567a95231a1780992510e194bed7716de3727c0c9527a44c42a4d75abf14b42",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          },
+          "run": {
+            "path": "runs/MC-120-0-1792785786556.json",
+            "sha256": "1013f9a0ba34452f8b2df308e38c45b8bdff7a42c89f6a02a9751c2d9a968e16",
+            "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+          }
+        }
+      ]
+    }
+  ],
+  "open_problems": [],
+  "acceptance_commands": [
+    "pnpm acceptance:profile:check",
+    "node scripts/acceptance/fleet-run.mjs --repo workloom-pm --env local-preview",
+    "node scripts/acceptance/fleet-run.mjs --repo workloom-pm --env local-preview --live-only   # 生产最小侵入档"
+  ],
+  "notes": "环境档位为 local-preview：报告只能写『本机预览结构验收』，不得写『生产实测通过』（RDAS v3.1 §0）"
+}

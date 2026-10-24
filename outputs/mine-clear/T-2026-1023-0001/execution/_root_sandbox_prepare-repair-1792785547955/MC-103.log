@@ -1,0 +1,26 @@
+{
+  "id": "MC-103",
+  "actor": "/root/sandbox_prepare",
+  "role": "repair",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-103-0-1792785564938.json",
+        "sha256": "afa40c240ba7008f995634c3b0a74c6db1b39c8b37780ffe3298528636e7b546",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-103-1-1792785565702.json",
+        "sha256": "3ae7b51ae4bda3e6550d7539575ce2d9b892d17127505a4af2ae29a1ebeecaad",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

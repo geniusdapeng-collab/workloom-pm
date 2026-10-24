@@ -1,0 +1,141 @@
+{
+  "schema": "workloom.pm-frozen-source/v1",
+  "at": "2026-10-23T19:20:47.080Z",
+  "files": [
+    {
+      "path": "apps/server/src/industry/ai-pm/asset-binding.ts",
+      "grade": "A",
+      "edited": true,
+      "bytes": 880,
+      "lines": 13,
+      "sha256": "86554be5f067b7e0d844cd3d3892bf4dc76ef969a330f99a73ed71302e43d32f",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/asset-evidence.test.ts",
+      "grade": "A",
+      "edited": true,
+      "bytes": 6372,
+      "lines": 84,
+      "sha256": "957c4a7736a825ef24c6b1ed167dec363a2eacaf2691da21fe6db2398008d5c9",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/dsh-adapter.ts",
+      "grade": "A",
+      "edited": true,
+      "bytes": 28232,
+      "lines": 388,
+      "sha256": "d2c525eea2fa8460c01e48c15bf59fdb8bd94b403b58df4c731b1cf31355b9f6",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/employees.ts",
+      "grade": "A",
+      "edited": true,
+      "bytes": 5397,
+      "lines": 80,
+      "sha256": "edb51ed1d9cd644fd045b86d0d1e611fffd21da92d93adb5e537e94795d98173",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/service.ts",
+      "grade": "A",
+      "edited": true,
+      "bytes": 29949,
+      "lines": 394,
+      "sha256": "2b963431efaebfa7be0b628e925ef8d56c915a97e528ba48369fd28ecb6a900e",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/skill-contracts.ts",
+      "grade": "A",
+      "edited": true,
+      "bytes": 4075,
+      "lines": 52,
+      "sha256": "a6d97abbe56a02cde739a8721e938454c455ad892dd2f4900a74c9f4910e8db6",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/store.ts",
+      "grade": "A",
+      "edited": true,
+      "bytes": 30098,
+      "lines": 387,
+      "sha256": "03b47005f67962a9bf21493299258afdf0ea5876715e3e70b6a883b09ffa2a5b",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/team.pg.test.ts",
+      "grade": "A",
+      "edited": true,
+      "bytes": 34357,
+      "lines": 448,
+      "sha256": "0a3e7544a636f451c70cac680ad64e9a6fc8456724e26609d2c7abf6f3df027d",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/types.ts",
+      "grade": "A",
+      "edited": true,
+      "bytes": 4318,
+      "lines": 100,
+      "sha256": "08fa22797e5714234225e6eb9a6718b1fce978d31c474f3bfc1fae477354b9c8",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "bundles/ai-pm/bundle.json",
+      "grade": "A",
+      "edited": true,
+      "bytes": 12066,
+      "lines": 260,
+      "sha256": "e3090ee52012cc63be99d83af24635829fdc89ae0e97ed680a1566a5ab5404cf",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "bundles/ai-pm/skills/changeset-harvest/SKILL.md",
+      "grade": "A",
+      "edited": true,
+      "bytes": 3103,
+      "lines": 39,
+      "sha256": "2e62a86d122a03bdfc50ba3e3abbd404ec5f644dc596aff0dc52dbb57968f2b0",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "bundles/ai-pm/skills/metric-digest/SKILL.md",
+      "grade": "A",
+      "edited": true,
+      "bytes": 2492,
+      "lines": 35,
+      "sha256": "3fdce7ec1b0029b0c8f8d325060bee6a7f09a6de79ef9eec3a0e467812265fb3",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "bundles/ai-pm/skills/prd-forge/SKILL.md",
+      "grade": "A",
+      "edited": true,
+      "bytes": 2370,
+      "lines": 36,
+      "sha256": "60cd0f34181ffd902834f05967d2f102d2f75e4714fd53bca2f7f8e2c8f8046f",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "bundles/ai-pm/skills/prompt-regression/SKILL.md",
+      "grade": "A",
+      "edited": true,
+      "bytes": 2406,
+      "lines": 36,
+      "sha256": "660ad31238c4685faba193a15d50fc1a9ec0d847d83950bbaf136ee251da939c",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    },
+    {
+      "path": "bundles/ai-pm/skills/release-cut/SKILL.md",
+      "grade": "A",
+      "edited": true,
+      "bytes": 2632,
+      "lines": 39,
+      "sha256": "e822a9629f230cc331b7706b2b05cf565bbf6242d7532e434ad50596d38b5e0b",
+      "reading": "Whole-file semantic reading in this ongoing task, then exact current patch review"
+    }
+  ]
+}

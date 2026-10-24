@@ -1,0 +1,25 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "payload",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "--test-reporter=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/delivery/node-test-reporter.mjs",
+    "--test-reporter-destination=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/payload-1792785687980-2bee1c1b-b740-46c9-949e-191a2eeee023.node.jsonl",
+    "--test-reporter=tap",
+    "--test-reporter-destination=stdout",
+    "--import",
+    "tsx",
+    "--test",
+    "--test-concurrency=1",
+    "scripts/prune-workspace-deps.test.mjs",
+    "scripts/runtime-deps-lock.test.mjs"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm",
+  "startedAt": "2026-10-23T20:01:27.980Z",
+  "finishedAt": "2026-10-23T20:01:28.254Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "TAP version 13\n# Subtest: workspace cleanup preserves a genuinely required third-party nested module\nok 1 - workspace cleanup preserves a genuinely required third-party nested module\n  ---\n  duration_ms: 61.032875\n  type: 'test'\n  ...\n# Subtest: cleanup refuses escaping names, mismatched manifests and linked package roots\nok 2 - cleanup refuses escaping names, mismatched manifests and linked package roots\n  ---\n  duration_ms: 2.78375\n  type: 'test'\n  ...\n# Subtest: a copied workspace node_modules symlink is unlinked without changing its target\nok 3 - a copied workspace node_modules symlink is unlinked without changing its target\n  ---\n  duration_ms: 2.709083\n  type: 'test'\n  ...\n# Subtest: all three packaging paths preserve npm nested boundaries and verify production preview\nok 4 - all three packaging paths preserve npm nested boundaries and verify production preview\n  ---\n  duration_ms: 0.814167\n  type: 'test'\n  ...\n# Subtest: 运行依赖锁输入摘要忽略 Git 工作树 LF/CRLF 差异\nok 5 - 运行依赖锁输入摘要忽略 Git 工作树 LF/CRLF 差异\n  ---\n  duration_ms: 0.604292\n  type: 'test'\n  ...\n# Subtest: 正式装配跨平台直接调用 Node 随附 npm CLI\nok 6 - 正式装配跨平台直接调用 Node 随附 npm CLI\n  ---\n  duration_ms: 0.276209\n  type: 'test'\n  ...\n# Subtest: 仓库提交的每产品 runtime lock 与当前依赖输入完全一致\nok 7 - 仓库提交的每产品 runtime lock 与当前依赖输入完全一致\n  ---\n  duration_ms: 19.584292\n  type: 'test'\n  ...\n# Subtest: package-lock 必须锁定完整三目标原生包与 registry integrity\nok 8 - package-lock 必须锁定完整三目标原生包与 registry integrity\n  ---\n  duration_ms: 0.415417\n  type: 'test'\n  ...\n# Subtest: 刷新保留已审阅的依赖闭包；损坏或残缺旧锁不能静默重解算\nok 9 - 刷新保留已审阅的依赖闭包；损坏或残缺旧锁不能静默重解算\n  ---\n  duration_ms: 1.2095\n  type: 'test'\n  ...\n# Subtest: DSH 的 sharp 与 koffi 原生闭包必须覆盖三个发行目标\nok 10 - DSH 的 sharp 与 koffi 原生闭包必须覆盖三个发行目标\n  ---\n  duration_ms: 0.16825\n  type: 'test'\n  ...\n# Subtest: 锁与安装目录都拒绝缺失必需peer；嵌套寻址和optional peer遵守包合同\nok 11 - 锁与安装目录都拒绝缺失必需peer；嵌套寻址和optional peer遵守包合同\n  ---\n  duration_ms: 1.942791\n  type: 'test'\n  ...\n# Subtest: 安装后目标校验拒绝宿主架构原生包并生成稳定 inventory 摘要\nok 12 - 安装后目标校验拒绝宿主架构原生包并生成稳定 inventory 摘要\n  ---\n  duration_ms: 1.808042\n  type: 'test'\n  ...\n# Subtest: 正式与应急装配线统一使用每产品 lock、目标 OS/CPU 和身份闭包\nok 13 - 正式与应急装配线统一使用每产品 lock、目标 OS/CPU 和身份闭包\n  ---\n  duration_ms: 0.36325\n  type: 'test'\n  ...\n1..13\n# tests 13\n# suites 0\n# pass 13\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 228.007125\n",
+  "stderr": ""
+}

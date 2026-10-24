@@ -1,0 +1,24 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "dsh_process",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "--test-reporter=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/delivery/node-test-reporter.mjs",
+    "--test-reporter-destination=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/dsh_process-1792778542902-3fd2d154-6858-4e93-9ec2-f2ed625e3c7d.node.jsonl",
+    "--test-reporter=tap",
+    "--test-reporter-destination=stdout",
+    "--import",
+    "tsx",
+    "--test",
+    "--test-concurrency=1",
+    "apps/server/src/industry/ai-pm/acceptance/dsh-integration.mts"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm",
+  "startedAt": "2026-10-23T18:02:22.902Z",
+  "finishedAt": "2026-10-23T18:02:32.737Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "TAP version 13\n# Subtest: real DSH performs read -> write -> final, with durable session and measured receipts\nok 1 - real DSH performs read -> write -> final, with durable session and measured receipts\n  ---\n  duration_ms: 841.937917\n  type: 'test'\n  ...\n# Subtest: real DSH preserves Unicode across large subprocess output chunks\nok 2 - real DSH preserves Unicode across large subprocess output chunks\n  ---\n  duration_ms: 503.331625\n  type: 'test'\n  ...\n# Subtest: a five-request two-file employee fails at four and completes within eight\nok 3 - a five-request two-file employee fails at four and completes within eight\n  ---\n  duration_ms: 858.204708\n  type: 'test'\n  ...\n# Subtest: provider quota refusal stays a blocked budget outcome without a retry\nok 4 - provider quota refusal stays a blocked budget outcome without a retry\n  ---\n  duration_ms: 372.151792\n  type: 'test'\n  ...\n# Subtest: real DSH denies host paths, unowned outputs and shell calls, then can finish legitimate output\nok 5 - real DSH denies host paths, unowned outputs and shell calls, then can finish legitimate output\n  ---\n  duration_ms: 409.24575\n  type: 'test'\n  ...\n# Subtest: real DSH cannot exceed model-call budget or claim a final without files\nok 6 - real DSH cannot exceed model-call budget or claim a final without files\n  ---\n  duration_ms: 738.097292\n  type: 'test'\n  ...\n# Subtest: real DSH freezes after missing usage and persists an incomplete accounting receipt\nok 7 - real DSH freezes after missing usage and persists an incomplete accounting receipt\n  ---\n  duration_ms: 379.8745\n  type: 'test'\n  ...\n# Subtest: real DSH propagates cancellation and timeout, aborts the model, and retains partial JSON events\nok 8 - real DSH propagates cancellation and timeout, aborts the model, and retains partial JSON events\n  ---\n  duration_ms: 5469.959584\n  type: 'test'\n  ...\n1..8\n# tests 8\n# suites 0\n# pass 8\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 9791.561083\n",
+  "stderr": ""
+}

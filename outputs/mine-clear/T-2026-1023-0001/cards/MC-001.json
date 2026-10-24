@@ -1,0 +1,63 @@
+{
+  "id": "MC-001",
+  "kind": "problem",
+  "title": "原模型提供方缺少DeepSeek工具与完整计量协议",
+  "severity": "P1",
+  "level": "L3",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "packages/base/model-router/providers.ts:97@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "8bbd358b29e2d4f6ba174be3530d0cd0b42a9547ec730ec44033d98c619a64a9",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    }
+  ],
+  "root_cause": {
+    "file": "packages/base/model-router/providers.ts",
+    "line": 97,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "OpenAiCompatibleProvider.chat"
+  },
+  "trigger_path": "需要function tools/search/fetch或thinking工具循环时，原接口只发送文本并只读content，usage缺失记0。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "需要function tools/search/fetch或thinking工具循环时，原接口只发送文本并只读content，usage缺失记0。",
+      "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+      "command": "node --test assertions/providers.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/providers.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    },
+    {
+      "kind": "property",
+      "given": "需要function tools/search/fetch或thinking工具循环时，原接口只发送文本并只读content，usage缺失记0。",
+      "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+      "command": "node --test assertions/budget.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/budget.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/providers.test.mjs then node --test assertions/budget.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+}

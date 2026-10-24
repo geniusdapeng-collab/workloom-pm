@@ -1,0 +1,155 @@
+{
+  "providers": {
+    "kind": "vitest",
+    "cwd": "packages/base",
+    "files": [
+      "model-router/providers-deepseek.test.ts",
+      "model-router/deepseek-tools.test.ts"
+    ],
+    "minTests": 62
+  },
+  "team": {
+    "kind": "vitest",
+    "cwd": "apps/server",
+    "files": [
+      "src/industry/ai-pm/contract.test.ts",
+      "src/industry/ai-pm/policy.test.ts",
+      "src/industry/ai-pm/artifacts.test.ts",
+      "src/industry/ai-pm/router.test.ts",
+      "src/industry/ai-pm/team.pg.test.ts"
+    ],
+    "minTests": 38
+  },
+  "dsh_unit": {
+    "kind": "vitest",
+    "cwd": "apps/server",
+    "files": [
+      "src/industry/ai-pm/dsh-adapter.test.ts"
+    ],
+    "minTests": 8
+  },
+  "dsh_process": {
+    "kind": "node",
+    "files": [
+      "apps/server/src/industry/ai-pm/acceptance/dsh-integration.mts"
+    ],
+    "minTests": 8
+  },
+  "payload": {
+    "kind": "node",
+    "files": [
+      "scripts/prune-workspace-deps.test.mjs",
+      "scripts/runtime-deps-lock.test.mjs"
+    ],
+    "minTests": 13
+  },
+  "aipm": {
+    "kind": "vitest",
+    "cwd": "apps/server",
+    "files": [
+      "src/industry/ai-pm/aipm-integrity.test.ts"
+    ],
+    "minTests": 13
+  },
+  "legacy": {
+    "kind": "vitest",
+    "cwd": "apps/server",
+    "files": [
+      "src/runtime/thread-runner.test.ts",
+      "src/runtime/thread-runner.pg.test.ts"
+    ],
+    "minTests": 17
+  },
+  "devtools": {
+    "kind": "vitest",
+    "cwd": "apps/server",
+    "files": [
+      "src/service/devtools-gates.test.ts",
+      "src/service/devtools-gates.pg.test.ts",
+      "src/service/devtools-evidence.test.ts"
+    ],
+    "minTests": 65
+  },
+  "desktop": {
+    "kind": "node",
+    "files": [
+      "scripts/desktop-app.test.mts",
+      "scripts/product-runtime.test.mjs"
+    ],
+    "minTests": 14
+  },
+  "identity": {
+    "kind": "identity"
+  },
+  "oneshot": {
+    "kind": "vitest",
+    "cwd": "apps/server",
+    "files": [
+      "src/industry/ai-pm/contract.test.ts",
+      "src/industry/ai-pm/one-shot-response.test.ts",
+      "src/industry/ai-pm/one-shot-text.test.ts"
+    ],
+    "minTests": 29
+  },
+  "code": {
+    "kind": "vitest",
+    "cwd": "apps/server",
+    "files": [
+      "src/industry/ai-pm/code-verifier.test.ts",
+      "src/industry/ai-pm/code-verifier-independent.test.ts"
+    ],
+    "minTests": 17,
+    "maxWorkers": 1
+  },
+  "closure": {
+    "kind": "closure"
+  },
+  "budget": {
+    "kind": "node",
+    "files": [
+      "scripts/pm-budget-proxy.test.mjs"
+    ],
+    "minTests": 14
+  },
+  "asset_evidence": {
+    "kind": "vitest",
+    "cwd": "apps/server",
+    "files": [
+      "src/industry/ai-pm/asset-evidence.test.ts",
+      "src/industry/ai-pm/team.pg.test.ts"
+    ],
+    "minTests": 36
+  },
+  "metrics_native": {
+    "kind": "node",
+    "files": [
+      "apps/server/src/industry/ai-pm/acceptance/metrics.node-test.mjs"
+    ],
+    "minTests": 10
+  },
+  "runtime_preview": {
+    "kind": "runtime-preview",
+    "nodeModulesRoot": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-runtime-stage/node_modules"
+  },
+  "router_lazy": {
+    "kind": "vitest",
+    "cwd": "apps/server",
+    "files": [
+      "src/industry/ai-pm/router.test.ts",
+      "test/demo-login.test.ts"
+    ],
+    "minTests": 8,
+    "maxWorkers": 1
+  },
+  "guest_access": {
+    "kind": "vitest",
+    "cwd": "apps/web",
+    "files": [
+      "src/shell/NavigationAccess.guest.test.tsx",
+      "src/shell/IndustryRoutes.test.tsx",
+      "src/shell/NavMenu.test.ts"
+    ],
+    "minTests": 22,
+    "maxWorkers": 1
+  }
+}

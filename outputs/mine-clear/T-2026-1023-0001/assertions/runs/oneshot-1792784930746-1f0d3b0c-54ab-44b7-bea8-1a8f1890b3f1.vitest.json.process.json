@@ -1,0 +1,22 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "oneshot",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/node_modules/vitest/vitest.mjs",
+    "run",
+    "src/industry/ai-pm/contract.test.ts",
+    "src/industry/ai-pm/one-shot-response.test.ts",
+    "src/industry/ai-pm/one-shot-text.test.ts",
+    "--reporter=json",
+    "--outputFile=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/oneshot-1792784930746-1f0d3b0c-54ab-44b7-bea8-1a8f1890b3f1.vitest.json"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server",
+  "startedAt": "2026-10-23T19:48:50.748Z",
+  "finishedAt": "2026-10-23T19:48:52.627Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "JSON report written to /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/oneshot-1792784930746-1f0d3b0c-54ab-44b7-bea8-1a8f1890b3f1.vitest.json\n",
+  "stderr": ""
+}

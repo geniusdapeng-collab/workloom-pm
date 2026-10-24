@@ -1,0 +1,21 @@
+TAP version 13
+# {"schema":"workloom.pm-mcd-nested-summary/v1","group":"providers","kind":"vitest","report":"/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/providers-1792786064056-06924d52-38ae-40cc-943b-cfcf5d29696c.vitest.json","sha256":"d9820837b9a172255e6e26c2cc8efdedfd643da3a992c058959c534845ee44bc","actualPassed":62,"actualTotal":62,"pending":0,"files":["/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/packages/base/model-router/deepseek-tools.test.ts","/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/packages/base/model-router/providers-deepseek.test.ts"]}
+# Subtest: MCD providers: actual assertions, no paid I/O
+ok 1 - MCD providers: actual assertions, no paid I/O
+  ---
+  duration_ms: 329.486959
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 371.511917
+
+
+exit_code=0 signal=none error=none
+assertion_validation={"ok":true,"errors":[],"testSummary":{"total":1,"passed":1,"failed":0,"cancelled":0,"skipped":0,"todo":0}}

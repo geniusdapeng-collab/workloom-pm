@@ -61,7 +61,7 @@ jobs:
 
   mirror-backup:
     # 每次 main 推送后镜像备份（工蜂/CNB 双托管；凭据走 secrets）
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.repository == 'geniusdapeng-collab/workloom-im' && github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     needs: static-and-tests
     steps:

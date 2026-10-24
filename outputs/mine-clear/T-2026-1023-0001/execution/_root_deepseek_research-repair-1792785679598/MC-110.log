@@ -1,0 +1,26 @@
+{
+  "id": "MC-110",
+  "actor": "/root/deepseek_research",
+  "role": "repair",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-110-0-1792785685615.json",
+        "sha256": "777a0876fec519d41202c6a48bc2a06afa2e8b0a7a427df3b72db6562890fe39",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-110-1-1792785686225.json",
+        "sha256": "e45b8832520c9b775696a38619cdd82798c66266d2d4a2f77a6195a2f7fc80e8",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

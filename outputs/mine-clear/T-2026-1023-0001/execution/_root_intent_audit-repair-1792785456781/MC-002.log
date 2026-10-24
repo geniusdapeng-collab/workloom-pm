@@ -1,0 +1,50 @@
+{
+  "id": "MC-002",
+  "actor": "/root/intent_audit",
+  "role": "repair",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-0-1792785456933.json",
+        "sha256": "c7110e6813144f89c14e851243178f442018a4e1753f60a8d04f2c92045e5828",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-1-1792785460625.json",
+        "sha256": "3bdcb130a067a6c81ee880093c4d96ef454a9704e12dc87c21e56380c04629f3",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-2-1792785470098.json",
+        "sha256": "b1adbe5b1c7dc8caffd31398cb4b4ed385a0b183f13fef17ff0c283a04744772",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-3-1792785472453.json",
+        "sha256": "1fa8337f733855c44ff82184ad39653649426a1e12b9e1a05123f363ff1df53c",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-4-1792785474218.json",
+        "sha256": "4fa1eb6e3a52f08f77305a6bbceba77c9dc7f8b9ec284f421cc8d44636f87070",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

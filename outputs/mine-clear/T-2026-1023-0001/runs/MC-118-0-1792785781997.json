@@ -1,0 +1,77 @@
+{
+  "schema": "workloom.evidence-run/v1",
+  "id": "MC-118-0-1792785781997",
+  "command": "node --test assertions/payload.test.mjs",
+  "exec": {
+    "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "args": [
+      "--test-reporter=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/delivery/node-test-reporter.mjs",
+      "--test-reporter-destination=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/evidence/MC-118-0-1792785781997-node-tests.jsonl",
+      "--test-reporter=tap",
+      "--test-reporter-destination=stdout",
+      "--test",
+      "--test-concurrency=1",
+      "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+    ]
+  },
+  "requested_exec": {
+    "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "args": [
+      "--test",
+      "--test-concurrency=1",
+      "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+    ]
+  },
+  "node_observer": {
+    "schema": "workloom.node-test-observer/v1",
+    "reporter_path": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/delivery/node-test-reporter.mjs",
+    "reporter_sha256": "286448a4dee571759fc1703564477d27bf5319bcb05ff66db2186deda60bc78f",
+    "destination": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/evidence/MC-118-0-1792785781997-node-tests.jsonl",
+    "summary": {
+      "path": "evidence/MC-118-0-1792785781997-node-tests.jsonl",
+      "sha256": "d50eed83830b50b9a37864bcd541b31b332dec8875cdc9859682f4edf8a9c89b",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+    }
+  },
+  "node_executable": {
+    "path": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "sha256": "2bf0da35856edc1840d7cbc90e937811bf23a03d44aea07e4b491be44af18d91"
+  },
+  "actor": "/root/intent_audit",
+  "role": "acceptance",
+  "subject": {
+    "card_id": "MC-118",
+    "assertion_index": 0
+  },
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "working_tree_dirty": false,
+  "started_at": "2026-10-23T20:03:01.997Z",
+  "finished_at": "2026-10-23T20:03:02.670Z",
+  "exit_code": 0,
+  "signal": null,
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "testSummary": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  },
+  "result": "pass",
+  "outputs": [
+    {
+      "path": "evidence/MC-118-0-1792785781997.txt",
+      "sha256": "09b930df8337b058c8996b55d68e4c053e6b8002250bf546704f8557fb4cc506",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+    },
+    {
+      "path": "evidence/MC-118-0-1792785781997-node-tests.jsonl",
+      "sha256": "d50eed83830b50b9a37864bcd541b31b332dec8875cdc9859682f4edf8a9c89b",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+    }
+  ]
+}

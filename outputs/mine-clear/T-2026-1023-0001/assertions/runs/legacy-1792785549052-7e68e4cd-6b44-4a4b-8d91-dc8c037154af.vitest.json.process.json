@@ -1,0 +1,21 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "legacy",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/node_modules/vitest/vitest.mjs",
+    "run",
+    "src/runtime/thread-runner.test.ts",
+    "src/runtime/thread-runner.pg.test.ts",
+    "--reporter=json",
+    "--outputFile=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/legacy-1792785549052-7e68e4cd-6b44-4a4b-8d91-dc8c037154af.vitest.json"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server",
+  "startedAt": "2026-10-23T19:59:09.052Z",
+  "finishedAt": "2026-10-23T19:59:10.034Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "JSON report written to /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/legacy-1792785549052-7e68e4cd-6b44-4a4b-8d91-dc8c037154af.vitest.json\n",
+  "stderr": ""
+}

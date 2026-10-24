@@ -1,0 +1,114 @@
+{
+  "id": "MC-002",
+  "kind": "problem",
+  "title": "原Quest缺少AI产品经理驱动的员工DAG与真实依赖交付",
+  "severity": "P1",
+  "level": "L3",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    },
+    {
+      "type": "code",
+      "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+      "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+    }
+  ],
+  "root_cause": {
+    "file": "packages/runtime/src/loop.ts",
+    "line": 56,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "QuestStep/runQuest"
+  },
+  "trigger_path": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+      "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+      "command": "node --test assertions/team.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/team.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    },
+    {
+      "kind": "property",
+      "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+      "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+      "command": "node --test assertions/dsh_process.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/dsh_process.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    },
+    {
+      "kind": "property",
+      "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+      "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+      "command": "node --test assertions/code.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/code.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    },
+    {
+      "kind": "property",
+      "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+      "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+      "command": "node --test assertions/oneshot.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/oneshot.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    },
+    {
+      "kind": "property",
+      "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+      "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+      "command": "node --test assertions/closure.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/closure.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/team.test.mjs then node --test assertions/dsh_process.test.mjs then node --test assertions/code.test.mjs then node --test assertions/oneshot.test.mjs then node --test assertions/closure.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+}

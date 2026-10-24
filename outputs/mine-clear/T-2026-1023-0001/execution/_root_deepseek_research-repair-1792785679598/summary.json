@@ -1,0 +1,97 @@
+{
+  "schema": "workloom.pm-mcd-actor-batch/v1",
+  "actor": "/root/deepseek_research",
+  "role": "repair",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "startedAt": "2026-10-23T20:01:19.599Z",
+  "finishedAt": "2026-10-23T20:01:31.365Z",
+  "declaredCards": [
+    "MC-001",
+    "MC-009",
+    "MC-014",
+    "MC-101",
+    "MC-110",
+    "MC-118",
+    "MC-120"
+  ],
+  "results": [
+    {
+      "id": "MC-001",
+      "actor": "/root/deepseek_research",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:01:19.643Z",
+      "finishedAt": "2026-10-23T20:01:21.364Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-009",
+      "actor": "/root/deepseek_research",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:01:21.390Z",
+      "finishedAt": "2026-10-23T20:01:23.207Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-014",
+      "actor": "/root/deepseek_research",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:01:23.232Z",
+      "finishedAt": "2026-10-23T20:01:24.126Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-101",
+      "actor": "/root/deepseek_research",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:01:24.151Z",
+      "finishedAt": "2026-10-23T20:01:25.396Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-110",
+      "actor": "/root/deepseek_research",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:01:25.425Z",
+      "finishedAt": "2026-10-23T20:01:27.639Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-118",
+      "actor": "/root/deepseek_research",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:01:27.667Z",
+      "finishedAt": "2026-10-23T20:01:29.145Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-120",
+      "actor": "/root/deepseek_research",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:01:29.172Z",
+      "finishedAt": "2026-10-23T20:01:31.365Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "complete": true
+}

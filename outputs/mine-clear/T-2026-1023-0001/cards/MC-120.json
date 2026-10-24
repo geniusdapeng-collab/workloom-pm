@@ -1,0 +1,108 @@
+{
+  "id": "MC-120",
+  "kind": "fix",
+  "covers": [
+    "MC-009"
+  ],
+  "title": "正式首装游客在受限产品入口获得正式登录路径",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "apps/web/src/shell/NavigationAccess.tsx:245@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "b77125a40da6af752f1da8e60112ce2752c7e19058f2271c954c5776d25d2757",
+      "note": "A: 完整读取原审计提交NavigationAccess；原禁止页只给fallback，原产品本身权限拒绝不是错误。派生PM默认首屏变为/development后暴露首次使用登录路径不清的交付缺口。"
+    }
+  ],
+  "fix_plan": "复用NavigationAccessDenied按服务端subject.kind仅对guest展示正式/login并携带encodeURIComponent后的当前path/search/hash；通用导航、能力边界、行业边界共用。禁止页不创建token、不调用loginAs、不授予任何permission。",
+  "blast_radius": "三个客户端文件中的PC公共受限呈现与新7例DOM回归；服务端权限、角色、Bundle安装/路径校验、错误失败关闭均不改。正式guest包装首装是否通过另取真实.app回执，本断言只证明代码与DOM授权合同。",
+  "conflict_paths": [
+    "apps/web/src/shell/NavigationAccess.tsx",
+    "apps/web/src/shell/IndustryRoutes.tsx",
+    "apps/web/src/shell/NavigationAccess.guest.test.tsx"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "清env、mock服务端access响应；真实guest/member/授权成员与权限查询错误在React DOM中分别渲染；不请求模型或正式登录后门。",
+      "expect": "游客在通用/行业受限入口只见正式/login?next=%2Fdevelopment链接、没有私有内容；成员无权仍管理员提示；只有服务端授予行业权限才渲染；身份事件重新查询权限、失败关闭；三文件22实际通过0skip，既有路由注册表与导航权限合同不变。",
+      "command": "node --test assertions/guest_access.test.mjs",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/guest_access.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/guest_access.test.mjs then assertions/desktop.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚含该修复的真实提交；保持服务端只读游客限制和正式登录流程，不使用开发登录或伪造owner token替代。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root/deepseek_research",
+  "eligible_acceptance_actors": [
+    "/root/intent_audit"
+  ],
+  "introduced_during_repair": true,
+  "introduced_regression_evidence": [
+    {
+      "path": "discovery/pm-packaged-guest-before.json",
+      "sha256": "afe3115d5c86dfc4d49f30c4368d1dc51410254d836ff97ef4309c2dd7f5f661",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "真实派生PM产品fresh production guest首装/development禁止页观察；发生在修复期间，不是e5原产品首装失败的动态证明。"
+    },
+    {
+      "path": "discovery/packaged-guest-access-before.png",
+      "sha256": "6e2311309bd9324dc563e21f4d122fae327218cee45f0ec63feec61fe47ebb1b",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "真实派生PM产品fresh production guest首装/development禁止页观察；发生在修复期间，不是e5原产品首装失败的动态证明。"
+    },
+    {
+      "path": "discovery/pm-guest-entry-author-green.json",
+      "sha256": "b4275fe1f47d08a9c3558cfe508f7029c92db9798e6506fdb6f37f3e910cbecc",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "实际三个文件22/22通过、0skip。作者修复工作树回归与独立最终clean SHA回归分别保留；均非正式MCD角色运行记录。"
+    },
+    {
+      "path": "discovery/pm-guest-entry-independent-green.json",
+      "sha256": "d43a16d720171386c4ab9a4c520bf802e88f7044360199f623216e1681e5a7bb",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": false,
+        "committedRepairSha": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+      },
+      "provenance": "实际三个文件22/22通过、0skip。作者修复工作树回归与独立最终clean SHA回归分别保留；均非正式MCD角色运行记录。"
+    }
+  ],
+  "independent_source_review": {
+    "actor": "/root/intent_audit",
+    "evidenceGrade": "A",
+    "sourceCommit": "cc86cf9dee7101131912cd0e427b78a90d3494aa",
+    "files": [
+      "apps/web/src/shell/NavigationAccess.tsx",
+      "apps/web/src/shell/IndustryRoutes.tsx",
+      "apps/web/src/shell/NavigationAccess.guest.test.tsx"
+    ],
+    "notes": "三文件完整阅读并复核原before receipt/截图。guest CTA只由服务端subject.kind选择；member、未安装、误配置、查询错误仍走原失败路径。独立clean SHA实际22/22通过0skip；此审查者没有修改三个源文件。"
+  },
+  "notes": "MC-009派生产品交付面的子修复，补卡于实际修复后且公开来源。仍open/not-run，后续只能由真实修复者及未参与源码修复的独立会话以最终clean SHA分别运行正式MCD；截图/免费DOM回归不等于签名发行或生产实测。"
+}

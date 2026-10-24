@@ -1,0 +1,18 @@
+{
+  "id": "MC-109",
+  "actor": "/root",
+  "role": "acceptance",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-109-0-1792786064731.json",
+        "sha256": "fb40471393c3f71ffdf2f74cd9ad15c7875f2d934b66d27bcb1e322da3823ff6",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

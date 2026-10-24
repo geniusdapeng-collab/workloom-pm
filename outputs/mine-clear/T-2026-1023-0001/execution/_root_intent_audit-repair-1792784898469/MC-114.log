@@ -1,0 +1,26 @@
+{
+  "id": "MC-114",
+  "actor": "/root/intent_audit",
+  "role": "repair",
+  "result": "pass",
+  "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-114-0-1792784959180.json",
+        "sha256": "a6e99b0dc4767b64b0551f99733dc84c99bbedc7850142bdb28ee866b852a36f",
+        "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-114-1-1792784965715.json",
+        "sha256": "67cbf08ba5b7a4f66f39d94f2ec2df845ac4a1f4cf4f3801387f7053ec9ffc53",
+        "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+      }
+    }
+  ]
+}
+

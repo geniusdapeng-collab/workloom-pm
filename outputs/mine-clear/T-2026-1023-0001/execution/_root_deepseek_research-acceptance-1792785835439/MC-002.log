@@ -1,0 +1,50 @@
+{
+  "id": "MC-002",
+  "actor": "/root/deepseek_research",
+  "role": "acceptance",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-0-1792785835630.json",
+        "sha256": "3d623634b516da82f3225cf7068dacd3b5ae04f41d092d6401b7e9ce1e44b430",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-1-1792785843681.json",
+        "sha256": "cc309823cba320629f5d1f65c7d3b88d7a13102f4c356121097694b6e3555fd3",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-2-1792785854549.json",
+        "sha256": "52c3a9474a466c7514959ea54fbb5b0e99422777d10b080692c9dbdee71b9405",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-3-1792785857055.json",
+        "sha256": "676e97deb94091b485b0fdd4f68745e2c48be2aaedc78cc628aab5d7abcc0b46",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-002-4-1792785858666.json",
+        "sha256": "3276d493d45445957fe45b009a7a51b1c270c1a35ba6bfbf32dc0a26bd96c3cf",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+
