@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
+import { AsyncState, Badge, BannerAlert, Button, Card, Icon, Select, Textarea, clientChineseText, clientIdentifierText, clientStatusLabel, clientValueText } from "@workloom/ui";
 import { ensureDemoLogin, getToken } from "../../lib/trpc";
 import P25 from "./P25";
 import "./PmDelivery.css";
@@ -24,19 +25,31 @@ const LABEL: Record<string, string> = {
   blocked: "遇到边界，已阻断", failed: "本次未交付", completed: "产物已交齐", cancelled: "已取消", pending: "等待上游",
 };
 const EXAMPLES = [
-  { tag: "需求定义", title: "把想法写成可验证的需求", goal: "为一家小型研发团队设计需求收集功能。请分析用户场景、明确P0范围，输出需求文档和包含正常、边界、异常的验收用例。所有产物保存在本次沙箱中。" },
+  { tag: "需求定义", title: "把想法写成可验证的需求", goal: "为一家小型研发团队设计需求收集功能。请分析用户场景、明确首期范围，输出需求文档和包含正常、边界、异常的验收用例。所有产物保存在本次沙箱中。" },
   { tag: "研发协作", title: "从需求走到代码与测试", goal: "实现一个零依赖的JavaScript待办清单模块，支持新增、完成、删除、中文和空输入校验。请由产品经理组织需求定义、研发实现、测试与交付说明，输出可用node --test运行的测试。所有文件限于本次沙箱，不执行外部发布。" },
   { tag: "质量改进", title: "把问题变成回归用例", goal: "分析需求中“删除任务后统计数字没有更新”的问题，写出最小复现、根因排查步骤、覆盖空列表和重复删除的回归用例，以及团队交付检查单。请分别安排适合的员工，引用上游产物。" },
 ];
 
 function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : "请求未完成，请重试。";
+  return clientChineseText(error instanceof Error ? error.message : null, "请求未完成，请重试；如仍失败，请联系管理员查看诊断记录。");
 }
 function timeOf(value: string): string {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "时间未记录" : date.toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false });
 }
-function byteText(value: number): string { return value < 1024 ? `${value} B` : `${(value / 1024).toFixed(1)} KB`; }
+function byteText(value: number): string { return value < 1024 ? `${value} 字节` : `${(value / 1024).toFixed(1)} 千字节`; }
+function modelName(value: string | null | undefined): string {
+  if (value === "deepseek-flash") return "深度求索·快速模型";
+  if (value === "deepseek-chat") return "深度求索·对话模型";
+  return value ? "已配置模型" : "模型待配置";
+}
+function statusTone(value: string): "neutral" | "success" | "warning" | "danger" | "info" {
+  if (value === "completed") return "success";
+  if (value === "failed" || value === "blocked") return "danger";
+  if (value === "paused") return "warning";
+  if (value === "running" || value === "planning") return "info";
+  return "neutral";
+}
 
 async function pmRequest<T>(path: string, options: { body?: unknown; signal?: AbortSignal } = {}): Promise<T> {
   const token = getToken();
@@ -68,6 +81,7 @@ export default function PmDelivery() {
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [notice, setNotice] = useState("");
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const [file, setFile] = useState<FileView | null>(null);
   const [fileBusy, setFileBusy] = useState("");
   const busyRef = useRef(false);
@@ -113,7 +127,7 @@ export default function PmDelivery() {
     };
     void poll();
     return () => { controller.abort(); if (timer) clearTimeout(timer); };
-  }, [selected, notice]);
+  }, [selected, refreshVersion]);
 
   async function createRun(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -134,7 +148,8 @@ export default function PmDelivery() {
       setSelected(created.run.id); selectedRef.current = created.run.id; setDetail(created);
       setRuns((previous) => [created!.run, ...previous.filter((run) => run.id !== created!.run.id)]);
       await pmRequest(`/runs/${encodeURIComponent(created.run.id)}/start`, { body: {} });
-      setNotice(`已提交 · ${created.run.id}`);
+      setNotice(`目标已提交，${clientIdentifierText(created.run.id)}。团队将开始执行。`);
+      setRefreshVersion((value) => value + 1);
     } catch (failure) {
       setFormError(created ? `目标已保存，启动尚未完成：${messageOf(failure)}。可在任务详情中重试开始。` : messageOf(failure));
     } finally { busyRef.current = false; setBusy(false); }
@@ -145,7 +160,8 @@ export default function PmDelivery() {
     busyRef.current = true; setBusy(true); setError("");
     try {
       await pmRequest(`/runs/${encodeURIComponent(selected)}/${action}`, { body: {} });
-      setNotice(`${action === "cancel" ? "已请求取消" : action === "resume" ? "已请求恢复" : "已请求开始"} · ${Date.now()}`);
+      setNotice(action === "cancel" ? "已请求取消，正在读取最终状态。" : action === "resume" ? "已请求恢复，正在读取团队进展。" : "已请求开始，正在读取团队计划。");
+      setRefreshVersion((value) => value + 1);
     } catch (failure) { setError(messageOf(failure)); }
     finally { busyRef.current = false; setBusy(false); }
   }
@@ -166,90 +182,90 @@ export default function PmDelivery() {
     finally { setFileBusy(""); }
   }
 
-  const employeeName = (key: string) => status?.employees.find((item) => item.presetKey === key)?.name ?? key;
+  const employeeName = (key: string) => clientChineseText(status?.employees.find((item) => item.presetKey === key)?.name, "待确认员工");
   const completed = runs.filter((run) => run.status === "completed").length;
   const active = runs.filter((run) => ["planning", "running"].includes(run.status)).length;
 
-  if (view === "machines") return <><div className="pm-legacy-return"><button type="button" onClick={() => setView("delivery")}>← 返回产品交付团队</button></div><P25 /></>;
+  if (view === "machines") return <><div className="pm-legacy-return"><Button onClick={() => setView("delivery")}><Icon name="chevron" className="pm-back-icon" />返回产品交付团队</Button></div><P25 /></>;
 
   return <main className="pm-console" aria-label="AI产品经理交付工作台">
     <header className="pm-header">
-      <div><p className="pm-eyebrow"><span aria-hidden="true" /> WORKLOOM PM · 产品交付团队</p>
+      <div><p className="pm-eyebrow"><span aria-hidden="true" /> 产品交付团队</p>
         <h1>给团队一个目标，<br /><em>带回可验收的交付。</em></h1>
         <p className="pm-intro">产品经理负责拆解与分工，数字员工沿着依赖协作。<br className="pm-desktop-break" />需求、代码、验证记录和交付文件，保存在同一条任务里。</p></div>
-      <button type="button" className="pm-secondary pm-machines" onClick={() => setView("machines")}>研发设备与仓库 <span aria-hidden="true">↗</span></button>
+      <Button className="pm-machines" onClick={() => setView("machines")}>研发设备与仓库<Icon name="chevron" /></Button>
     </header>
 
-    <div className="pm-stats" aria-label="任务概况">
-      <div><strong>{loading ? "—" : status?.employees.length ?? 0}</strong><span>已就绪员工</span><small>按岗位与技能分别装配</small></div>
-      <div><strong>{loading ? "—" : active}</strong><span>正在交付</span><small>后台运行，过程可回读</small></div>
-      <div><strong>{loading ? "—" : completed}</strong><span>产物已交齐</span><small>文件与回执摘要已核验</small></div>
-      <div className="pm-model-stat"><span className={`pm-model-dot ${status?.configured ? "is-ready" : ""}`} /><span>内置驱动模型</span><strong>{status?.modelId || "DeepSeek Flash"}</strong><small>{status?.configured ? "真实模型已配置 · 用量逐任务记录" : "等待服务端模型配置"}</small></div>
-    </div>
+    <Card className="pm-stats" aria-label="任务概况">
+      <div><strong>{loading ? "待加载" : clientValueText(status?.employees.length ?? 0)}</strong><span>已就绪员工</span><small>按岗位与技能分别装配</small></div>
+      <div><strong>{loading ? "待加载" : active}</strong><span>正在交付</span><small>后台运行，过程可回读</small></div>
+      <div><strong>{loading ? "待加载" : completed}</strong><span>产物已交齐</span><small>文件与回执摘要已核验</small></div>
+      <div className="pm-model-stat"><span>内置驱动模型</span><strong>{modelName(status?.modelId)}</strong><small>{status?.configured ? "真实模型已配置 · 用量逐任务记录" : "等待服务端模型配置"}</small></div>
+    </Card>
 
-    {error && <div className="pm-message pm-error" role="alert"><span>{error}</span><button type="button" disabled={busy} onClick={() => void load()}>重新加载</button><Link to="/login">前往登录</Link></div>}
-    {!loading && status && !status.configured && <div className="pm-message" role="status">配置真实模型后即可开始交付。密钥由本机服务安全读取。<Link to="/onboarding">配置模型 →</Link></div>}
-    {notice && <p className="pm-notice" role="status">{notice.replace(/ · \d{12,}$/, "")}</p>}
+    {error && <BannerAlert level="alert" className="pm-message" action={<><Button variant="quiet" disabled={busy} onClick={() => void load()}>重新加载</Button><Link to="/login">前往登录</Link></>}>{error}</BannerAlert>}
+    {!loading && status && !status.configured && <BannerAlert level="info" className="pm-message" action={<Link to="/onboarding">配置模型</Link>}>配置真实模型后即可开始交付。密钥由本机服务安全读取。</BannerAlert>}
+    {notice && <BannerAlert level="info" className="pm-message">{notice}</BannerAlert>}
 
     <div className="pm-workspace">
-      <section className="pm-compose pm-panel" aria-labelledby="pm-goal-title">
+      <Card className="pm-compose" aria-labelledby="pm-goal-title">
         <div className="pm-section-title"><span className="pm-step-number">01</span><div><h2 id="pm-goal-title">这次，要交付什么？</h2><p>说明问题、范围与验收标准，团队会保存完整目标。</p></div></div>
         <form onSubmit={(event) => void createRun(event)}>
-          <label className="pm-label" htmlFor="pm-goal">项目目标</label>
-          <textarea id="pm-goal" ref={inputRef} value={goal} maxLength={32000} onChange={(event) => { setGoal(event.target.value); setFormError(""); }}
+          <Textarea id="pm-goal" label="项目目标" ref={inputRef} value={goal} maxLength={32000} onChange={(event) => { setGoal(event.target.value); setFormError(""); }}
             placeholder="例如：实现一个支持中文的待办清单，交付需求说明、零依赖代码和正常/边界/异常测试……" required minLength={4} aria-describedby="pm-goal-help" disabled={busy} />
           <div className="pm-input-meta"><span id="pm-goal-help">写清“怎样算做完”，更容易交出对的结果。</span><span>{goal.length.toLocaleString()} / 32,000</span></div>
-          <label className="pm-label" htmlFor="pm-employee">执行方式</label>
-          <select id="pm-employee" value={employee} onChange={(event) => setEmployee(event.target.value)} disabled={busy || loading}>
+          <Select id="pm-employee" label="执行方式" optionalLabel="" value={employee} onChange={(event) => setEmployee(event.target.value)} disabled={busy || loading}
+            description={employee ? clientChineseText(status?.employees.find((item) => item.presetKey === employee)?.description, "员工职责待确认，请查看岗位说明。") : "适合需求定义、研发、测试和交付说明需要多人衔接的任务。"}>
             <option value="">由 AI 产品经理拆解并组队</option>
-            {status?.employees.map((item) => <option value={item.presetKey} key={item.presetKey}>单员工 · {item.name}</option>)}
-          </select>
-          <p className="pm-select-help">{employee ? status?.employees.find((item) => item.presetKey === employee)?.description : "适合需求定义、研发、测试和交付说明需要多人衔接的任务。"}</p>
-          <details className="pm-checks"><summary>指定必须交付的文件（可选）</summary><label htmlFor="pm-checks">每行一个相对路径，系统会验证文件是否实际存在。</label>
-            <textarea id="pm-checks" value={fileChecks} onChange={(event) => setFileChecks(event.target.value)} rows={3} placeholder={"docs/requirements.md\nsrc/todo.mjs\ntests/todo.test.mjs"} disabled={busy} /></details>
-          {formError && <p className="pm-form-error" role="alert">{formError}</p>}
-          <button type="submit" className="pm-primary" disabled={busy || loading || !status?.configured} aria-busy={busy}>{busy ? "正在提交目标…" : "交给团队执行"}<span aria-hidden="true">→</span></button>
+            {status?.employees.map((item) => <option value={item.presetKey} key={item.presetKey}>单员工 · {clientChineseText(item.name, "待确认员工")}</option>)}
+          </Select>
+          <details className="pm-checks"><summary>指定必须交付的文件（可选）</summary>
+            <Textarea id="pm-checks" label="必须交付的文件" hideLabel optionalLabel="" description="每行一个相对路径，系统会验证文件是否实际存在。" value={fileChecks} onChange={(event) => setFileChecks(event.target.value)} rows={3} placeholder={"文档/需求说明.md\n说明/验收记录.txt"} disabled={busy} /></details>
+          {formError && <BannerAlert level="alert" className="pm-message">{formError}</BannerAlert>}
+          <Button type="submit" variant="primary" className="pm-submit" disabled={busy || loading || !status?.configured} busy={busy} busyLabel="正在提交目标…">交给团队执行<Icon name="send" /></Button>
           <p className="pm-boundary">本轮产物保存在隔离目录。外部发布和生产变更使用独立审批流程。</p>
         </form>
-        <div className="pm-example-list"><p className="pm-small-label">从一个具体场景开始</p>{EXAMPLES.map((example) => <button type="button" disabled={busy} key={example.tag} onClick={() => { setGoal(example.goal); setEmployee(""); setFileChecks(""); setFormError(""); inputRef.current?.focus(); }}>
-          <span>{example.tag}</span><strong>{example.title}</strong><span aria-hidden="true">↗</span></button>)}</div>
-      </section>
+        <div className="pm-example-list"><p className="pm-small-label">从一个具体场景开始</p>{EXAMPLES.map((example) => <Button variant="quiet" disabled={busy} key={example.tag} onClick={() => { setGoal(example.goal); setEmployee(""); setFileChecks(""); setFormError(""); inputRef.current?.focus(); }}>
+          <span>{example.tag}</span><strong>{example.title}</strong><Icon name="chevron" /></Button>)}</div>
+      </Card>
 
-      <section className="pm-progress pm-panel" aria-labelledby="pm-progress-title">
+      <Card className="pm-progress" aria-labelledby="pm-progress-title">
         <div className="pm-section-title"><span className="pm-step-number">02</span><div><h2 id="pm-progress-title">交付过程，看得见</h2><p>从员工分工到实际文件，每一步都有记录。</p></div></div>
-        {!selected && <div className="pm-empty"><div className="pm-orbit" aria-hidden="true"><span>PM</span><i /><i /><i /></div><h3>团队已就位，等待你的目标。</h3><p>提交后，任务拆解、员工进展与交付文件会出现在这里。</p><div><span>理解目标</span><b>→</b><span>员工协作</span><b>→</b><span>验证产物</span></div></div>}
-        {selected && !detail && <div className="pm-loading" role="status">正在读取任务与回执…</div>}
+        {!selected && <AsyncState status="empty" className="pm-empty" title="团队已就位，等待你的目标。" description="提交后，任务拆解、员工进展与交付文件会出现在这里。" visual={<Icon name="team" size={48} />} action={<ol className="pm-flow"><li>理解目标</li><li><Icon name="chevron" />员工协作</li><li><Icon name="chevron" />验证产物</li></ol>} />}
+        {selected && !detail && <AsyncState status="loading" title="正在读取任务与回执…" />}
         {detail && <>
-          <div className="pm-run-heading"><span className={`pm-status pm-state-${detail.run.status}`}>{LABEL[detail.run.status]}</span><span className="pm-time">{timeOf(detail.run.createdAt)}</span></div>
+          <div className="pm-run-heading"><Badge tone={statusTone(detail.run.status)}>{clientChineseText(LABEL[detail.run.status], clientStatusLabel(detail.run.status))}</Badge><span className="pm-time">{timeOf(detail.run.createdAt)}</span></div>
           <h3 className="pm-run-goal">{detail.run.goal}</h3>
           <div className="pm-run-actions">
-            {detail.run.status === "created" && <button type="button" className="pm-primary pm-compact" onClick={() => void act("start")} disabled={busy}>开始执行</button>}
-            {["paused", "blocked", "failed"].includes(detail.run.status) && <button type="button" className="pm-secondary" onClick={() => void act("resume")} disabled={busy}>校验并恢复</button>}
-            {["created", "planning", "running", "paused", "blocked"].includes(detail.run.status) && <button type="button" className="pm-text-button" onClick={() => void act("cancel")} disabled={busy}>取消任务</button>}
-            <span>{(detail.run.usage.promptTokens + detail.run.usage.completionTokens).toLocaleString()} tokens · {detail.run.modelId}</span>
+            {detail.run.status === "created" && <Button variant="primary" onClick={() => void act("start")} disabled={busy}>开始执行</Button>}
+            {["paused", "blocked", "failed"].includes(detail.run.status) && <Button onClick={() => void act("resume")} disabled={busy}>校验并恢复</Button>}
+            {["created", "planning", "running", "paused", "blocked"].includes(detail.run.status) && <Button variant="quiet" onClick={() => void act("cancel")} disabled={busy}>取消任务</Button>}
+            <span>模型用量 {(detail.run.usage.promptTokens + detail.run.usage.completionTokens).toLocaleString()} 词元 · {modelName(detail.run.modelId)}</span>
           </div>
-          {detail.run.error && <div className="pm-message pm-error" role="alert">{detail.run.error}<small>{detail.run.errorCode}</small></div>}
-          {detail.tasks.length === 0 && <div className="pm-planning" role="status">{detail.run.status === "planning" ? "产品经理正在安排员工、依赖与验收标准。" : "开始执行后，将保存团队任务计划。"}</div>}
-          <ol className="pm-task-list">{detail.tasks.map((task, index) => <li key={task.id} className={`pm-task pm-task-${task.status}`}>
-            <div className="pm-task-top"><span className="pm-task-index">{String(index + 1).padStart(2, "0")}</span><strong>{employeeName(task.presetKey)}</strong><span className="pm-task-state">{LABEL[task.status] || task.status}</span></div>
-            <p>{task.goal}</p>
-            {task.dependsOn.length > 0 && <div className="pm-dependencies">读取上游：{task.dependsOn.map((id) => <span key={id}>{employeeName(detail.tasks.find((item) => item.id === id)?.presetKey ?? id)}</span>)}</div>}
-            {task.summary && <p className="pm-task-summary">{task.summary}</p>}
-            {task.error && <p className="pm-form-error" role="alert">{task.error}</p>}
-            <div className="pm-task-meta"><span>{task.executionBackend === "deepseek-harness" ? "DeepSeek Harness 工具循环" : task.executionBackend === "deepseek-completion" ? "DeepSeek 技能产物" : "等待执行"}</span><span>{task.outputRefs.length} 个计划文件</span></div>
+          {detail.run.error && <BannerAlert level="alert" className="pm-message">{clientChineseText(detail.run.error, "本次交付遇到异常，请核对产物后重试；详细原因已记录，可由管理员查看。")}</BannerAlert>}
+          {detail.tasks.length === 0 && <AsyncState status={detail.run.status === "planning" ? "loading" : "empty"} title={detail.run.status === "planning" ? "产品经理正在安排员工、依赖与验收标准。" : "本次尚未生成任务计划。"} description={detail.run.status === "created" ? "开始执行后，员工分工与依赖将保存在这里。" : "请结合任务状态与提示，决定重试、恢复或核对产物。"} />}
+          <ol className="pm-task-list">{detail.tasks.map((task, index) => <li key={task.id}>
+            <Card className="pm-task">
+              <div className="pm-task-top"><span className="pm-task-index">{String(index + 1).padStart(2, "0")}</span><strong>{clientChineseText(employeeName(task.presetKey), "待确认员工")}</strong><Badge tone={statusTone(task.status)}>{clientChineseText(LABEL[task.status], clientStatusLabel(task.status))}</Badge></div>
+              <p>{clientChineseText(task.goal, "请在项目目标与交付文件中核对本项任务。")}</p>
+              {task.dependsOn.length > 0 && <div className="pm-dependencies">读取上游：{task.dependsOn.map((id) => <Badge key={id}>{clientChineseText(employeeName(detail.tasks.find((item) => item.id === id)?.presetKey ?? ""), "待确认员工")}</Badge>)}</div>}
+              {task.summary && <p className="pm-task-summary">{clientChineseText(task.summary, "执行摘要含文件或代码信息，请打开交付文件核对原文。")}</p>}
+              {task.error && <BannerAlert level="alert">{clientChineseText(task.error, "本项任务遇到异常，请核对交付记录后重试。")}</BannerAlert>}
+              <div className="pm-task-meta"><span>{task.executionBackend === "deepseek-harness" ? "受限工具执行" : task.executionBackend === "deepseek-completion" ? "技能产物生成" : "等待执行"}</span><span>{task.outputRefs.length} 个计划文件</span></div>
+            </Card>
           </li>)}</ol>
-          {detail.artifacts.length > 0 && <div className="pm-artifacts"><h3>交付文件 <span>{detail.artifacts.length}</span></h3>{detail.artifacts.map((artifact) => <div key={artifact.id} className="pm-file-row">
-            <button type="button" className="pm-file-open" onClick={() => void readArtifact(artifact)} disabled={Boolean(fileBusy)}><span aria-hidden="true">▤</span><span><strong>{artifact.path}</strong><small>{byteText(artifact.sizeBytes)} · SHA-256 {artifact.sha256.slice(0, 12)}…</small></span></button>
-            <button type="button" className="pm-text-button" onClick={() => void readArtifact(artifact, true)} disabled={Boolean(fileBusy)} aria-label={`下载 ${artifact.path}`}>{fileBusy === artifact.path ? "读取中…" : "下载"}</button>
+          {detail.artifacts.length > 0 && <div className="pm-artifacts"><h3>交付文件 <Badge tone="success">{detail.artifacts.length}</Badge></h3>{detail.artifacts.map((artifact) => <div key={artifact.id} className="pm-file-row">
+            <Button variant="quiet" className="pm-file-open" onClick={() => void readArtifact(artifact)} disabled={Boolean(fileBusy)}><Icon name="document" /><span><strong>{artifact.path}</strong><small>{byteText(artifact.sizeBytes)} · 文件摘要已核验</small></span></Button>
+            <Button variant="quiet" onClick={() => void readArtifact(artifact, true)} disabled={Boolean(fileBusy)} aria-label={`下载 ${artifact.path}`}>{fileBusy === artifact.path ? "读取中…" : "下载"}</Button>
           </div>)}</div>}
         </>}
-      </section>
+      </Card>
     </div>
 
-    {file && <section className="pm-file-view pm-panel" aria-label={`产物预览：${file.path}`}><div><h2>{file.path}</h2><button type="button" className="pm-secondary" onClick={() => setFile(null)}>关闭预览</button></div><p>SHA-256 {file.sha256}</p><pre tabIndex={0}>{file.content}</pre></section>}
-    <section className="pm-history pm-panel" aria-labelledby="pm-history-title"><div className="pm-history-heading"><div><p className="pm-eyebrow">团队交付记录</p><h2 id="pm-history-title">每个目标，都有来路与结果。</h2></div><button type="button" className="pm-secondary" disabled={loading || busy} onClick={() => void load()}>刷新记录</button></div>
-      {loading ? <p className="pm-loading" role="status">正在读取任务记录…</p> : runs.length === 0 ? <p className="pm-history-empty">还没有任务。可以从上方场景开始，也可以直接输入你的目标。</p> : <div className="pm-history-list">{runs.map((run) => <button type="button" key={run.id} className={selected === run.id ? "is-selected" : ""} onClick={() => { setSelected(run.id); setError(""); }} aria-pressed={selected === run.id}>
-        <span className={`pm-status pm-state-${run.status}`}>{LABEL[run.status]}</span><strong>{run.goal}</strong><time dateTime={run.createdAt}>{timeOf(run.createdAt)}</time><span aria-hidden="true">↗</span></button>)}</div>}
-    </section>
+    {file && <Card className="pm-file-view" aria-label={`产物预览：${file.path}`}><div><h2>{file.path}</h2><Button onClick={() => setFile(null)}>关闭预览</Button></div><p>以下为交付文件原文，代码与文件名保留原样，便于核对和使用。</p><details><summary>核对文件摘要</summary><p className="pm-file-digest">{file.sha256}</p></details><pre tabIndex={0}>{file.content}</pre></Card>}
+    <Card className="pm-history" aria-labelledby="pm-history-title"><div className="pm-history-heading"><div><p className="pm-eyebrow">团队交付记录</p><h2 id="pm-history-title">每个目标，都有来路与结果。</h2></div><Button disabled={loading || busy} onClick={() => void load()}>刷新记录</Button></div>
+      {loading ? <AsyncState status="loading" title="正在读取任务记录…" /> : runs.length === 0 ? <AsyncState status="empty" title="还没有任务" description="可以从上方场景开始，也可以直接输入你的目标。" /> : <div className="pm-history-list">{runs.map((run) => <Button key={run.id} className={selected === run.id ? "is-selected" : ""} onClick={() => { setSelected(run.id); setError(""); }} aria-pressed={selected === run.id}>
+        <Badge tone={statusTone(run.status)}>{clientChineseText(LABEL[run.status], clientStatusLabel(run.status))}</Badge><strong>{run.goal}</strong><time dateTime={run.createdAt}>{timeOf(run.createdAt)}</time><Icon name="chevron" /></Button>)}</div>}
+    </Card>
   </main>;
 }
