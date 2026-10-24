@@ -220,7 +220,19 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
     await current.start(scopeA, detail.run.id);
     const finished = await current.waitForRun(scopeA, detail.run.id);
     expect(calls).toBe(5);
-    expect(finished.tasks[0]!.status).toBe("completed");
+    const task = finished.tasks[0]!;
+    // This state contains only fixture IDs, fixed error messages and metering.
+    // A worker-level rejection must be diagnosed before the later OS verifier
+    // branch; completed tasks cannot be rewritten by the final failRun call.
+    const executionState = JSON.stringify({ platform: process.platform, nodeMajor: Number(process.versions.node.split(".")[0]),
+      run: { status: finished.run.status, errorCode: finished.run.errorCode, error: finished.run.error, usage: finished.run.usage },
+      task: { status: task.status, errorCode: task.errorCode, error: task.error, usage: task.usage,
+        receipt: { adapter: task.adapterReceipt?.adapter, modelCalls: task.adapterReceipt?.modelCalls,
+          usageComplete: task.adapterReceipt?.usageComplete, final: task.adapterReceipt?.final,
+          secretRejected: task.adapterReceipt?.secretRejected, receiptTooLarge: task.adapterReceipt?.receiptTooLarge },
+        attempts: task.attemptReceipts.map((attempt) => ({ final: attempt.final, usage: attempt.usage })) },
+      artifacts: finished.artifacts.map((artifact) => ({ path: artifact.path, sha256: artifact.sha256 })) });
+    expect(task.status, executionState).toBe("completed");
     expect(finished.tasks[0]!.adapterReceipt).toMatchObject({ adapter: "deepseek-harness-headless", modelCalls: 5, exitCode: 0, usageComplete: true,
       assetBinding: fixtureBinding("dev-orchestrator", "a"), assetBindingSource: "verified-catalog" });
     expect(finished.run.usage).toEqual({ promptTokens: 115, completionTokens: 55 });
