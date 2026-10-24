@@ -1,5 +1,18 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
+
+const productManifest = JSON.parse(readFileSync(new URL("../../product.manifest.json", import.meta.url), "utf8")) as {
+  productId?: unknown;
+};
+const productId = productManifest.productId;
+if (typeof productId !== "string" || !/^[a-z0-9][a-z0-9-]{1,63}$/.test(productId)) {
+  throw new Error("三端 UI 验收必须使用受保护产品清单中的有效 productId");
+}
+const accessTokenKeys = {
+  pc: `workloom:${productId}:b-pc:access-token`,
+  bMobile: `workloom:${productId}:b-mobile:access-token`,
+};
 
 const clients = [
   { name: "B 端 PC", url: "http://127.0.0.1:3100/login", width: 1024, height: 640 },
@@ -37,12 +50,12 @@ async function enterOwnerDemo(page: Page, next = "/") {
 
 async function enterBMobileOwner(page: Page, next = "/") {
   await enterOwnerDemo(page);
-  const token = await page.evaluate(() => localStorage.getItem("workloom:workloom-im:b-pc:access-token"));
+  const token = await page.evaluate((key) => localStorage.getItem(key), accessTokenKeys.pc);
   expect(token, "PC 开发身份应返回可供同源 B 端验证的短期访问令牌").toBeTruthy();
   await page.goto(`http://127.0.0.1:3101${next}`);
-  await page.evaluate((value) => {
-    sessionStorage.setItem("workloom:workloom-im:b-mobile:access-token", value ?? "");
-  }, token);
+  await page.evaluate(({ key, value }) => {
+    sessionStorage.setItem(key, value ?? "");
+  }, { key: accessTokenKeys.bMobile, value: token });
   await page.reload();
   await waitForStableUi(page);
   await expect(page.getByRole("button", { name: "打开主导航" })).toBeVisible({ timeout: 15_000 });
