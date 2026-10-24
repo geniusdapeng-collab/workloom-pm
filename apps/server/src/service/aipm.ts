@@ -9,7 +9,7 @@ import { createHash } from "node:crypto";
 import { svcQuery, serviceTx } from "./events.js";
 import { llmCall } from "./llm.js";
 
-const UA = { "User-Agent": "WorkLoom-AIPM/1.0 (+https://github.com/workloom-ai/workloom-im)" };
+const UA = { "User-Agent": "WorkLoom-PM/1.0 (+https://github.com/geniusdapeng-collab/workloom-pm)" };
 
 /* ---------------- 凭据读取（仅服务端；secret 不出进程） ---------------- */
 async function readCredential(workspaceId: string, provider: string): Promise<string | null> {
@@ -21,19 +21,25 @@ async function readCredential(workspaceId: string, provider: string): Promise<st
 
 /* ---------------- github-pulse：仓库脉搏（真实 GitHub API） ---------------- */
 /**
- * API base 回退链：直连 api.github.com 优先；不可达时走公共镜像（gh-proxy.com）。
- * 可用 GITHUB_API_BASE 环境变量覆盖整条链（逗号分隔多个 base 按序尝试）。
- * 纪律：无论走哪个 base 都是真实 GitHub 数据；全部失败才落 mock（D4 绝不假装真实）。
+ * 缺省只访问官方 API。匿名开发探针可显式配置 GITHUB_API_BASE；带凭据时，
+ * 每一次请求均重新校验官方 origin 且禁止重定向，凭据不会沿镜像回退链外发。
  */
 const GITHUB_API_BASES = (process.env.GITHUB_API_BASE ??
-  "https://api.github.com,https://gh-proxy.com/https://api.github.com"
+  "https://api.github.com"
 ).split(",").map((s) => s.trim().replace(/\/$/, "")).filter(Boolean);
 
 async function ghFetch(path: string, headers: Record<string, string>): Promise<unknown> {
   let lastErr: unknown = null;
+  const authenticated = Object.entries(headers).some(([key, value]) => key.toLowerCase() === "authorization" && Boolean(value));
   for (const base of GITHUB_API_BASES) {
     try {
-      const res = await fetch(`${base}${path}`, { headers, signal: AbortSignal.timeout(12_000) });
+      const endpoint = new URL(`${base}${path}`);
+      if (endpoint.username || endpoint.password || !["https:", "http:"].includes(endpoint.protocol)
+        || (authenticated && endpoint.origin !== "https://api.github.com")) {
+        lastErr = new Error("GitHub 凭据目的地不在官方授权范围，已跳过该端点");
+        continue;
+      }
+      const res = await fetch(endpoint.href, { headers, signal: AbortSignal.timeout(12_000), redirect: "error" });
       if (res.ok) return await res.json();
       lastErr = new Error(`${base} -> HTTP ${res.status}`);
     } catch (e) { lastErr = e; }
@@ -112,15 +118,25 @@ export interface IntelItem {
   summary?: string;
 }
 
-export async function industryRadar(workspaceId: string, feeds?: string[]): Promise<{ items: IntelItem[]; mock: boolean }> {
+export async function industryRadar(workspaceId: string, feeds?: string[]): Promise<{
+  items: IntelItem[]; mock: boolean; sourcesFetched: number; sourcesFailed: number;
+  summaryState: "generated" | "not-configured" | "no-items" | "failed";
+  persistedCount: number; deduplicatedCount: number; persistenceErrors: number;
+}> {
   const sources = feeds ?? DEFAULT_FEEDS;
   const items: IntelItem[] = [];
+  let sourcesFetched = 0;
+  let sourcesFailed = 0;
   for (const url of sources) {
     try {
       const res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) continue;
+      if (!res.ok) { sourcesFailed += 1; continue; }
       const xml = await res.text();
+      // 错误页也可能返回200；只接收有完整 RSS/Atom 外层的来源，合法空 feed 仍算取源成功。
+      const feedEnvelope = /^(?:<\?xml\b[\s\S]*?\?>\s*)?(?:<!--[\s\S]*?-->\s*)*<(?<root>rss|feed)\b[^>]*(?:\/>|>[\s\S]*<\/\k<root>\s*>)\s*$/iu;
+      if (!feedEnvelope.test(xml.trim())) { sourcesFailed += 1; continue; }
       const host = new URL(url).hostname;
+      sourcesFetched += 1;
       // RSS/Atom 轻解析（<item>/<entry> 标题+链接+日期）
       const entries = [...xml.matchAll(/<item[\s>]([\s\S]*?)<\/item>|<entry[\s>]([\s\S]*?)<\/entry>/g)].slice(0, 8);
       for (const e of entries) {
@@ -131,7 +147,7 @@ export async function industryRadar(workspaceId: string, feeds?: string[]): Prom
         const published = /<pubDate>([\s\S]*?)<\/pubDate>|<published[^>]*>([\s\S]*?)<\/published>|<updated[^>]*>([\s\S]*?)<\/updated>/.exec(body)?.slice(1).find(Boolean)?.trim() ?? "";
         if (title && link) items.push({ title, link, source: host, published });
       }
-    } catch { /* 单源失败不阻塞其他源 */ }
+    } catch { sourcesFailed += 1; }
   }
   // 去重（标题哈希）
   const seen = new Set<string>();
@@ -144,27 +160,45 @@ export async function industryRadar(workspaceId: string, feeds?: string[]): Prom
 
   // LLM 摘要 Top3（缺配置只附原始条目，标 mock）
   const llm = llmCall("aipm-industry-radar");
+  let summaryState: "generated" | "not-configured" | "no-items" | "failed" = !llm ? "not-configured" : "no-items";
   if (llm && deduped.length > 0) {
     try {
       const brief = await llm(
         `你是行业瞭望官。从以下 AI 行业新闻标题中精选最重要的 3 条，每条一句话说清"发生了什么+对产品人意味着什么"，附序号：\n${deduped.map((i, n) => `${n + 1}. ${i.title}（${i.source}）`).join("\n")}`);
       for (const it of deduped) it.summary = brief;
-    } catch { /* 摘要失败保留原条目 */ }
+      summaryState = "generated";
+    } catch { summaryState = "failed"; }
   }
   // 落库留痕（情报集）
-  await serviceTx(workspaceId, async (client) => {
+  let persistedCount = 0;
+  let deduplicatedCount = 0;
+  let persistenceErrors = 0;
+  await serviceTx(workspaceId, async (client, scope) => {
     for (const it of deduped) {
-      await client.query(
+      // 集合尚未配置时只该条失败；不能吞 SQL 错误后让整个事务处于 aborted 状态。
+      await client.query("SAVEPOINT aipm_intel_item");
+      try {
+        const inserted = await client.query(
         `INSERT INTO kb_documents (id, workspace_id, collection_id, title, source_kind, source_url, version, status, content_md, hash, created_at)
          VALUES ($1,$2,$3,$4,'official_site',$5,1,'active',$6,$7,now())
          ON CONFLICT (id) DO NOTHING`,
-        [`kd-intel-${createHash("sha1").update(it.link).digest("hex").slice(0, 12)}`, workspaceId,
-         `kc-${workspaceId}-行业情报`, it.title.slice(0, 120), it.link, it.summary ?? it.title,
+        [`kd-intel-${createHash("sha1").update(`${scope.workspaceId}\0${it.link}`).digest("hex").slice(0, 20)}`, scope.workspaceId,
+         `kc-${scope.workspaceId}-行业情报`, it.title.slice(0, 120), it.link, it.summary ?? it.title,
          createHash("sha1").update(it.link).digest("hex")],
-      ).catch(() => undefined);   // 集合不存在时静默（不影响返回）
+        );
+        if (inserted.rowCount !== 0 && inserted.rowCount !== 1) throw new Error("情报写入未返回可核实的行数");
+        await client.query("RELEASE SAVEPOINT aipm_intel_item");
+        if (inserted.rowCount === 1) persistedCount += 1;
+        else deduplicatedCount += 1;
+      } catch {
+        await client.query("ROLLBACK TO SAVEPOINT aipm_intel_item");
+        await client.query("RELEASE SAVEPOINT aipm_intel_item");
+        persistenceErrors += 1;
+      }
     }
   });
-  return { items: deduped, mock: !llm };
+  return { items: deduped, mock: !llm || sourcesFetched === 0, sourcesFetched, sourcesFailed,
+    summaryState, persistedCount, deduplicatedCount, persistenceErrors };
 }
 
 /* ---------------- competitor-scan：竞品页面抓取对比（真实 fetch） ---------------- */
@@ -173,21 +207,27 @@ export async function competitorScan(workspaceId: string, targets: Array<{ name:
   for (const t of targets.slice(0, 6)) {
     try {
       const res = await fetch(t.url, { headers: UA, signal: AbortSignal.timeout(12_000) });
-      const html = res.ok ? await res.text() : "";
+      if (!res.ok) throw new Error(`竞品来源不可用：HTTP ${res.status}`);
+      const html = await res.text();
       const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 4000);
+      if (!text.trim()) throw new Error("竞品来源没有可读取的正文");
       const hash = createHash("sha1").update(text).digest("hex");
       // 与上次快照比对（org_memory 存快照哈希）
       const prev = await svcQuery<{ content: string }>(workspaceId,
         `SELECT content FROM org_memory WHERE kind='competitor-snapshot' AND content LIKE $1 LIMIT 1`, [`%${t.url}%`]);
       const changed = prev.length > 0 && !prev[0]!.content.includes(hash);
-      await svcQuery(workspaceId,
-        `INSERT INTO org_memory (memory_id, tenant_id, workspace_id, scope, kind, content, source_events)
-         VALUES ($1, 'demo', current_setting('app.workspace_id', true), 'workspace', 'competitor-snapshot', $2, '{}')
-         ON CONFLICT (memory_id) DO UPDATE SET content=EXCLUDED.content`,
-        [`mem-comp-${createHash("sha1").update(t.url).digest("hex").slice(0, 10)}`, `${t.name}（${t.url}）页面快照哈希：${hash}`]).catch(() => undefined);
+      await serviceTx(workspaceId, async (client, scope) => {
+        await client.query(
+          `INSERT INTO org_memory (memory_id, tenant_id, workspace_id, scope, kind, content, source_events)
+           VALUES ($1,$2,$3,'workspace','competitor-snapshot',$4,'{}')
+           ON CONFLICT (memory_id) DO UPDATE SET content=EXCLUDED.content`,
+          [`mem-comp-${createHash("sha1").update(`${workspaceId}\0${t.url}`).digest("hex").slice(0, 20)}`,
+            scope.tenantId, scope.workspaceId, `${t.name}（${t.url}）页面快照哈希：${hash}`],
+        );
+      });
       reports.push({ name: t.name, url: t.url, changed, snippet: text.slice(0, 300), mock: false });
     } catch {
-      reports.push({ name: t.name, url: t.url, changed: false, snippet: "（抓取失败——网络或反爬）", mock: true });
+      reports.push({ name: t.name, url: t.url, changed: false, snippet: "（来源或快照未核实——检查网络、页面正文与存储状态）", mock: true });
     }
   }
   return { reports };

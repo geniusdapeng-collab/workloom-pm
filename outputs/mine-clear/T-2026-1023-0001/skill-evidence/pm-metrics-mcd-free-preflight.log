@@ -1,0 +1,10 @@
+{"schema":"workloom.pm-mcd-nested-summary/v1","group":"metrics_native","kind":"node","report":"/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/metrics_native-1792782273218-7ba2922a-be56-43bc-9e6f-e8918bd371fd.node.jsonl","sha256":"2f75a3d61d84b27648557a8f62534f23399f4090dae8dd6222b5ceff0e0e074e","actualPassed":10,"actualTotal":10,"pending":0,"files":1}
+✔ MCD metrics_native: actual assertions, no paid I/O (4924.2745ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6819.946

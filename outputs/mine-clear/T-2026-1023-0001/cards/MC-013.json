@@ -1,0 +1,59 @@
+{
+  "id": "MC-013",
+  "kind": "problem",
+  "title": "PRD技能骨架未要求功能分级与字段状态一致",
+  "severity": "P2",
+  "level": "L3",
+  "batch": 2,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "bundles/ai-pm/skills/prd-forge/SKILL.md:17@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "273e26b74b7db80aaae904155b70f69011c8853e3b7558ac9426388b924d7afc",
+      "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+    }
+  ],
+  "semantic_discovery": {
+    "path": "discovery/pm-semantic-review.json",
+    "sha256": "471d1d9503677993c9dd455a5408c9fc13f61567872a93ec563bd494edab417e",
+    "evidenceGrade": "B",
+    "sourceRevision": {
+      "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "workingTreeDirty": true,
+      "committedRepairSha": null
+    },
+    "note": "原真实付费产物的完整正文人工语义审查及UTF8摘要回读；不是审计提交的动态执行，也不是修复后的新真实模型验收。"
+  },
+  "root_cause": {
+    "file": "bundles/ai-pm/skills/prd-forge/SKILL.md",
+    "line": 17,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "prd-forge source execution discipline"
+  },
+  "trigger_path": "requirement-analyst真实产物中创建即100%有负责人与创建可空冲突，且以工单优先级替代功能P0/P1/P2；原技能只要求章节骨架。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+      "expect": "技能要求3场景、功能P0/P1/P2、字段空值/默认/状态权限一致及真实入库回执；放宽场景/一致性的合同拒装配。正文语义仍需人工或另行授权真实模型复验。",
+      "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/asset_evidence.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "修复中新增发现并补卡；保留原audit dirty_count1，正式repair/acceptance仍未建立。自动断言只验证来源合同、完整性、服务端可信指令/回执与失败关闭，不把合同标签当作模型正文语义通过证明。"
+}

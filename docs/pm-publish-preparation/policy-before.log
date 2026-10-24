@@ -1,0 +1,37 @@
+✔ only the two reviewed single-job product publishers may write GitHub Releases (48.010709ms)
+✔ release writer detector rejects common alternate and newly introduced bypasses (0.569125ms)
+✔ legacy packers and platform evidence keep read-only repository permissions (3.187459ms)
+✖ inherited safety checks run in product copies while mirror writes remain source-repository only (4.537084ms)
+✔ local PAT publisher fails before reading credentials or touching the network (1.078791ms)
+✔ UI release is assembled as non-latest draft and published only after byte verification (2.484291ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 174.963875
+
+✖ failing tests:
+
+test at scripts/release-publisher-policy.test.mjs:140:1
+✖ inherited safety checks run in product copies while mirror writes remain source-repository only (4.537084ms)
+  AssertionError [ERR_ASSERTION]: geniusdapeng-collab/workloom-pm:refs/heads/main:push
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/release-publisher-policy.test.mjs:155:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,12 @@
+{
+  "stagingRoot": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-ai-pm-seal-0umhzok0",
+  "command": [
+    "pnpm",
+    "bundle:seal"
+  ],
+  "releaseMode": false,
+  "bundleVersion": "3.0.1",
+  "status": "candidate",
+  "integrityDigest": "bc33c1836d36073f8db0322d4cd0386c5cfb0845e20cfdb48f78384229b915f3",
+  "signaturePresent": false
+}

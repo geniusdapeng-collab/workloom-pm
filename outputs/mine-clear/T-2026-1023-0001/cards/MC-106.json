@@ -1,0 +1,58 @@
+{
+  "id": "MC-106",
+  "kind": "fix",
+  "covers": [
+    "MC-005"
+  ],
+  "title": "GitHub凭据限定官方源且禁止redirect",
+  "batch": 0,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "apps/server/src/service/aipm.ts:36@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    },
+    {
+      "type": "code",
+      "ref": "apps/server/src/service/aipm.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+      "note": "A: token-bearing headers are shared with every fallback base"
+    }
+  ],
+  "fix_plan": "有token时固定api.github.com+redirect:error；第三方fallback仅匿名，测试只用假凭据。",
+  "blast_radius": "网络失败显式mock/未验证；不会以可达性为由转发客户GitHub凭据。",
+  "conflict_paths": [
+    "apps/server/src/service/aipm.ts"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+      "expect": "带凭据请求只能访问固定官方GitHub API并拒绝redirect；第三方端点从未收到Authorization；匿名开发夹具仍可用。",
+      "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/aipm.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root",
+  "eligible_acceptance_actors": [
+    "/root/intent_audit"
+  ],
+  "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+}

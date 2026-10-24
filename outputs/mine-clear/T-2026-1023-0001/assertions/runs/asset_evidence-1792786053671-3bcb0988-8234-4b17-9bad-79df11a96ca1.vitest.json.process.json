@@ -1,0 +1,21 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "asset_evidence",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/node_modules/vitest/vitest.mjs",
+    "run",
+    "src/industry/ai-pm/asset-evidence.test.ts",
+    "src/industry/ai-pm/team.pg.test.ts",
+    "--reporter=json",
+    "--outputFile=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/asset_evidence-1792786053671-3bcb0988-8234-4b17-9bad-79df11a96ca1.vitest.json"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server",
+  "startedAt": "2026-10-23T20:07:33.671Z",
+  "finishedAt": "2026-10-23T20:07:36.419Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "JSON report written to /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/asset_evidence-1792786053671-3bcb0988-8234-4b17-9bad-79df11a96ca1.vitest.json\n",
+  "stderr": ""
+}

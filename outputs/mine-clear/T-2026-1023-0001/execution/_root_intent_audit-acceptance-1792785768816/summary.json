@@ -1,0 +1,169 @@
+{
+  "schema": "workloom.pm-mcd-actor-batch/v1",
+  "actor": "/root/intent_audit",
+  "role": "acceptance",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "startedAt": "2026-10-23T20:02:48.817Z",
+  "finishedAt": "2026-10-23T20:03:08.731Z",
+  "declaredCards": [
+    "MC-003",
+    "MC-005",
+    "MC-009",
+    "MC-014",
+    "MC-104",
+    "MC-106",
+    "MC-107",
+    "MC-108",
+    "MC-110",
+    "MC-115",
+    "MC-118",
+    "MC-119",
+    "MC-120"
+  ],
+  "results": [
+    {
+      "id": "MC-003",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:02:48.848Z",
+      "finishedAt": "2026-10-23T20:02:49.907Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-005",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:02:49.967Z",
+      "finishedAt": "2026-10-23T20:02:50.950Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-009",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:02:50.977Z",
+      "finishedAt": "2026-10-23T20:02:53.139Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-014",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:02:53.169Z",
+      "finishedAt": "2026-10-23T20:02:53.978Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-104",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:02:54.005Z",
+      "finishedAt": "2026-10-23T20:02:54.754Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-106",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:02:54.780Z",
+      "finishedAt": "2026-10-23T20:02:55.615Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-107",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:02:55.644Z",
+      "finishedAt": "2026-10-23T20:02:57.207Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-108",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:02:57.234Z",
+      "finishedAt": "2026-10-23T20:02:58.742Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-110",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:02:58.769Z",
+      "finishedAt": "2026-10-23T20:03:00.888Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-115",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:03:00.918Z",
+      "finishedAt": "2026-10-23T20:03:01.824Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-118",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:03:01.851Z",
+      "finishedAt": "2026-10-23T20:03:03.428Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-119",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:03:03.455Z",
+      "finishedAt": "2026-10-23T20:03:06.360Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-120",
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:03:06.391Z",
+      "finishedAt": "2026-10-23T20:03:08.730Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "complete": true
+}

@@ -1,0 +1,26 @@
+{
+  "id": "MC-001",
+  "actor": "/root/sandbox_prepare",
+  "role": "acceptance",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-001-0-1792785993512.json",
+        "sha256": "e72d541cdbc81ac02a471646bb3f72ae94f0e8a7cbb5068ab3ec2a511fdc2f5e",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    },
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-001-1-1792785994413.json",
+        "sha256": "43c551f004479d3b727db033efcd91e9607ec91e57aac3aba268c14b2b64b3aa",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

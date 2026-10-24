@@ -1,0 +1,20 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "aipm",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/node_modules/vitest/vitest.mjs",
+    "run",
+    "src/industry/ai-pm/aipm-integrity.test.ts",
+    "--reporter=json",
+    "--outputFile=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/aipm-1792784815566-d7febe26-0f77-4052-a21f-27bfac59a1d0.vitest.json"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server",
+  "startedAt": "2026-10-23T19:46:55.566Z",
+  "finishedAt": "2026-10-23T19:46:55.969Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "JSON report written to /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/aipm-1792784815566-d7febe26-0f77-4052-a21f-27bfac59a1d0.vitest.json\n",
+  "stderr": ""
+}

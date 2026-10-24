@@ -1,0 +1,71 @@
+{
+  "id": "MC-112",
+  "kind": "fix",
+  "covers": [
+    "MC-002"
+  ],
+  "title": "生成代码必须真实OS隔离执行并防伪造TAP",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    },
+    {
+      "type": "code",
+      "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+      "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+    }
+  ],
+  "fix_plan": "OS沙箱+Node权限、清env、禁网/子进程、超时/输出限额；用可信TestsStream证据，不解析模型打印TAP；模型测试不能自称trusted。",
+  "blast_radius": "仅零依赖JS自动执行；其它语言明确未运行；实际生成测试不是需求全面覆盖证明。",
+  "conflict_paths": [
+    "apps/server/src/industry/ai-pm/code-verifier.ts",
+    "apps/server/src/industry/ai-pm/code-test-runner.mjs"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+      "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+      "command": "node --test assertions/code.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/code.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/code.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root",
+  "eligible_acceptance_actors": [
+    "/root/deepseek_research"
+  ],
+  "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。",
+  "introduced_regression_evidence": [
+    {
+      "path": "discovery/pm-code-independent-before.json",
+      "sha256": "1204afc759068c7b2ccd011b94a2bda93ab0f0b6f08d14dbaf111ae3fd24c980",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复过程中真实运行/回放的原始留痕；不是审计提交中存在的源码，也不是干净修复基线的正式MCD验收运行。"
+    }
+  ]
+}

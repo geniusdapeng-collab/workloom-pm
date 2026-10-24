@@ -1,0 +1,24 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "budget",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "--test-reporter=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/delivery/node-test-reporter.mjs",
+    "--test-reporter-destination=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/budget-1792785994589-1c65ab4b-b821-480e-a2dd-5fec3052f498.node.jsonl",
+    "--test-reporter=tap",
+    "--test-reporter-destination=stdout",
+    "--import",
+    "tsx",
+    "--test",
+    "--test-concurrency=1",
+    "scripts/pm-budget-proxy.test.mjs"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm",
+  "startedAt": "2026-10-23T20:06:34.589Z",
+  "finishedAt": "2026-10-23T20:06:34.963Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "TAP version 13\n# Subtest: no upstream I/O before a trusted tokenizer and separate credentials exist\nok 1 - no upstream I/O before a trusted tokenizer and separate credentials exist\n  ---\n  duration_ms: 1.455792\n  type: 'test'\n  ...\n# Subtest: one physical request is reserved first, then actual model/usage evidence is persisted without credentials\nok 2 - one physical request is reserved first, then actual model/usage evidence is persisted without credentials\n  ---\n  duration_ms: 37.327625\n  type: 'test'\n  ...\n# Subtest: concurrent requests cannot exceed physical request cap\nok 3 - concurrent requests cannot exceed physical request cap\n  ---\n  duration_ms: 39.752291\n  type: 'test'\n  ...\n# Subtest: token reservation can block the first request before external I/O\nok 4 - token reservation can block the first request before external I/O\n  ---\n  duration_ms: 12.703334\n  type: 'test'\n  ...\n# Subtest: missing usage freezes further paid requests; HTTP200 is not model success\nok 5 - missing usage freezes further paid requests; HTTP200 is not model success\n  ---\n  duration_ms: 25.869334\n  type: 'test'\n  ...\n# Subtest: upstream network uncertainty is never retried and freezes the run\nok 6 - upstream network uncertainty is never retried and freezes the run\n  ---\n  duration_ms: 19.905667\n  type: 'test'\n  ...\n# Subtest: provider usage exceeding reservation freezes the following request\nok 7 - provider usage exceeding reservation freezes the following request\n  ---\n  duration_ms: 23.758666\n  type: 'test'\n  ...\n# Subtest: unbounded, multimodal, server-side search and alternate-model requests fail before I/O\nok 8 - unbounded, multimodal, server-side search and alternate-model requests fail before I/O\n  ---\n  duration_ms: 17.571667\n  type: 'test'\n  ...\n# Subtest: authorization, endpoint and credential-in-prompt failures have no upstream effects\nok 9 - authorization, endpoint and credential-in-prompt failures have no upstream effects\n  ---\n  duration_ms: 10.095333\n  type: 'test'\n  ...\n# Subtest: tokenizer failure cannot fall back to an estimate or send a paid request\nok 10 - tokenizer failure cannot fall back to an estimate or send a paid request\n  ---\n  duration_ms: 6.1245\n  type: 'test'\n  ...\n# Subtest: Search/Fetch are individually counted and internal-address fetch is rejected\nok 11 - Search/Fetch are individually counted and internal-address fetch is rejected\n  ---\n  duration_ms: 16.4345\n  type: 'test'\n  ...\n# Subtest: upstream credential cannot be redirected to a different origin\nok 12 - upstream credential cannot be redirected to a different origin\n  ---\n  duration_ms: 0.542417\n  type: 'test'\n  ...\n# Subtest: restart keeps the same physical call cap, evidence and original wall clock\nok 13 - restart keeps the same physical call cap, evidence and original wall clock\n  ---\n  duration_ms: 20.327458\n  type: 'test'\n  ...\n# Subtest: restart with an unsettled request freezes paid I/O instead of silently clearing it\nok 14 - restart with an unsettled request freezes paid I/O instead of silently clearing it\n  ---\n  duration_ms: 19.721083\n  type: 'test'\n  ...\n1..14\n# tests 14\n# suites 0\n# pass 14\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 338.362375\n",
+  "stderr": ""
+}

@@ -1,9 +1,9 @@
 {
   "schemaVersion": "workloom.runtime-deps/v1",
   "product": {
-    "productId": "workloom-im",
-    "role": "base",
-    "repository": "workloom-ai/workloom-im",
+    "productId": "workloom-pm",
+    "role": "industry",
+    "repository": "geniusdapeng-collab/workloom-pm",
     "includePlatformOps": false
   },
   "npmVersion": "11.17.0",
@@ -24,7 +24,7 @@
   "inputs": [
     {
       "path": "apps/server/package.json",
-      "sha256": "1cdbc0ad2980975fd2efe3bf59c4028b5950ec4dbb6737c3aeee02a73785231e"
+      "sha256": "054528ec29add146c75b41eafbc94ce329349bb0e1d9db5ba5bf1ea45a205a16"
     },
     {
       "path": "apps/web/package.json",
@@ -32,7 +32,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "e5f28fd21ea535951e8f313a0ce57c8ae5dc23d326785632f89b93f44ecf2db8"
+      "sha256": "48ff3e658967984e8977283ae24ec933bcffd83551b417fdde9bbb302a12dc47"
     },
     {
       "path": "packages/base/package.json",
@@ -60,11 +60,11 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "0e918e517b8c7338cd254bfadc24251542b4bd800b2db5e989c1cd4da91e853a"
+      "sha256": "5f4ae5e974f35e099a0a12ff9b65181ccf94d198a8621c70f26e5a41d9c3f763"
     },
     {
       "path": "product.manifest.json",
-      "sha256": "cd79d5cb5627b55fb7fc2d0547e45fb5fc0c3e611adcc066b3432a20a1ea7e2d"
+      "sha256": "fe501855af419c530414d09c516679fb73b076832bada40059ad6c481c603400"
     },
     {
       "path": "scripts/pack-nm-merge.mjs",
@@ -76,13 +76,13 @@
     },
     {
       "path": "scripts/product-runtime.mjs",
-      "sha256": "bf8a446d4a600424b8d38189fa4cbe61a36126dc051124c71012a1ec46c439e3"
+      "sha256": "9fd2dd096193b12aaac50f8c329c66047a30814fde8a95b7e44f3d14a9449baa"
     },
     {
       "path": "scripts/runtime-deps-lock.mjs",
-      "sha256": "38d5eba21ae509aec4de97000bda055ca632f0216473e1d1000eeba6b5e0a475"
+      "sha256": "3695b53718e65d3a9646cfd9434af94be99c81ffa61b93e890372a6e43637934"
     }
   ],
-  "manifestSha256": "28a4eb3f27de3e7e5a70d9942355b46525aaa13e5f856fa7b3817240f0a3ce25",
-  "packageLockSha256": "1b47b98a84cbb9aa2211849d21bc8e6f65bf859d8dc87e138d0f8a221c42a9d3"
+  "manifestSha256": "bf5a5f97b9a971ec4034a2c8980e053d99156df1e45b9ac3bfd740fa912ff841",
+  "packageLockSha256": "7dd3fb75b4aae43b0c01339a40316de14ffb40044a750d62381b970e4932c7d7"
 }

@@ -1,0 +1,23 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "router_lazy",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/node_modules/vitest/vitest.mjs",
+    "run",
+    "src/industry/ai-pm/router.test.ts",
+    "test/demo-login.test.ts",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/router_lazy-1792784826275-b2d81102-2b0d-428e-b44a-c93f3f8040f4.vitest.json"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server",
+  "startedAt": "2026-10-23T19:47:06.275Z",
+  "finishedAt": "2026-10-23T19:47:08.961Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "JSON report written to /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/router_lazy-1792784826275-b2d81102-2b0d-428e-b44a-c93f3f8040f4.vitest.json\n",
+  "stderr": ""
+}

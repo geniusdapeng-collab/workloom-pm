@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "description": "正式桌面运行期精确依赖合成（受控 npm ci 使用，自动生成勿手改）",
   "dependencies": {
+    "@deepseek-ai/dsh": "0.2.0-rc.2",
     "@hono/node-server": "2.1.1",
     "@tailwindcss/vite": "4.3.3",
     "@trpc/server": "11.19.0",

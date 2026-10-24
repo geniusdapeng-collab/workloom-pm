@@ -1,0 +1,85 @@
+{
+  "id": "MC-117",
+  "kind": "fix",
+  "covers": [
+    "MC-002"
+  ],
+  "title": "冻结沙箱内可信断言与加载器出口防生成代码篡改独立验收",
+  "batch": 0,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    },
+    {
+      "type": "code",
+      "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+      "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+    }
+  ],
+  "fix_plan": "在真实隔离测试child启动前加载可信preload，冻结assert/test出口、加载器/cache/hook与内建intrinsics；兼容正常ESM/CJS；OS负向验证value0不能让独立assert42通过。",
+  "blast_radius": "这是本轮新增代码验证器的引入回归，不能伪指向e5中不存在的code-verifier源码。只强化当前零依赖JS验收，不能承诺其它语言/平台隔离。",
+  "conflict_paths": [
+    "apps/server/src/industry/ai-pm/code-verifier.ts",
+    "apps/server/src/industry/ai-pm/code-test-runner.mjs",
+    "apps/server/src/industry/ai-pm/code-test-preload.mjs",
+    "apps/server/src/industry/ai-pm/code-verifier-independent.test.ts",
+    "scripts/pack-electron-payload.sh"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+      "expect": "实际Seatbelt+Node24中direct assert/noop、ESM、CJS、反射、加载器、cache与hook攻击不能把独立错断言变绿；正常上下文/CJS仍运行。两套至少17真实passed，0skip，maxWorkers1。",
+      "command": "node --test assertions/code.test.mjs",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/code.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/code.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚正式含修复的提交并禁用不可信代码自动验收；保留旧产物、事件和红色证明，不把旧假绿当完成。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root/sandbox_prepare",
+  "eligible_acceptance_actors": [
+    "/root/deepseek_research"
+  ],
+  "introduced_during_repair": true,
+  "introduced_regression_evidence": [
+    {
+      "path": "discovery/pm-assert-probe-before.json",
+      "sha256": "10ca256ac5ee08db7981060b49856321c028a8dded8c41cf5e238f5e0c794f0a",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+    },
+    {
+      "path": "discovery/pm-assert-loader-baseline-receipts.json",
+      "sha256": "7b6d40385668832b2d32b13861002d5b4df276e33c5d24154bc3b3f5a752039f",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+    }
+  ],
+  "notes": "原MC002能力缺口催生本轮新验证器；本卡锚定MC002原始问题，但回归发现是修复过程中真实OS证据。/root写过原验证器，正式独立验收指定deepseek；不可伪造pre-repair commit。"
+}

@@ -1,0 +1,1499 @@
+{
+  "schema": "workloom.pm-semantic-review/v1",
+  "reviewer": "/root/intent_audit",
+  "reviewedAt": "2026-10-23T18:14:29.316539+00:00",
+  "session": "pm-live-2026-10-23T17-14-23-575Z",
+  "sourceEvaluation": {
+    "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/evaluation.json",
+    "sha256": "b97d23d56a40d45817bc6bf6ac46712f1958f7fb77169465cdc347767b774ab5"
+  },
+  "method": "对每员工按startedAt选择最新真实run；人工完整阅读13份正文，按每份原始goal逐项语义核对，再全量脚本回读UTF8文件SHA、字节、runId、目标与运行回执。没有仅靠关键词/自述打分，没有新模型请求或联网。",
+  "evidenceGrade": "B",
+  "coverage": {
+    "selectedEmployees": 14,
+    "artifactContainersFullyRead": 14,
+    "artifactDocumentsSemanticallyRead": 13,
+    "emptyArtifactContainers": 1,
+    "evaluationFilesMachineParsed": 1,
+    "runMetadataFilesMachineParsed": 14,
+    "sampledDocuments": 0,
+    "unreadSelectedDocuments": 0,
+    "sourceCodeSemanticReadForThisReview": 0,
+    "notCovered": [
+      "不是完整20技能真实业务handler执行验收。",
+      "本轮doc-writer为纪要；没有真正PRD交付任务。",
+      "没有重新联网核实给定官方来源包，也未执行13份文档建议的发布、攻击、迁移、KB更新或提示回退。"
+    ]
+  },
+  "mechanicalMetrics": {
+    "firstAttempt": {
+      "passed": 5,
+      "total": 14,
+      "percent": 35.714285714285715
+    },
+    "latestAfterHumanRepairs": {
+      "passed": 13,
+      "total": 14,
+      "percent": 92.85714285714286
+    },
+    "recoveredInitialFailures": 8,
+    "singleRunRecordsInEvaluation": 23,
+    "note": "5/14是首次机械通过；13/14包含人工修复代码/协议后显式重跑，不能称无人干预首次达成率或语义全对率。evaluation中的case记录不是完整物理请求台账；repair-2标签不代表所有中间失败记录都在该数组内。"
+  },
+  "semanticStatusCounts": {
+    "meets-with-caveats": 5,
+    "partial": 3,
+    "meets": 3,
+    "serious-content-issue": 2,
+    "no-deliverable": 1
+  },
+  "majorFindings": [
+    {
+      "id": "SEM-01",
+      "employee": "dev-orchestrator",
+      "severity": "serious",
+      "finding": "生成的门禁设计仍允许缺模型mock放行、exam非fail即过。",
+      "runtimeArtifactUntouched": true
+    },
+    {
+      "id": "SEM-02",
+      "employee": "prompt-curator",
+      "severity": "serious",
+      "finding": "把有已知注入缺陷的v1默认作为可回退的上一通过版本。",
+      "runtimeArtifactUntouched": true
+    },
+    {
+      "id": "SEM-03",
+      "employee": "data-insight",
+      "severity": "general",
+      "finding": "算术正确，但cohort/显著无影响推论越过汇总数据；可证伪实验缺统计判定。"
+    },
+    {
+      "id": "SEM-04",
+      "employee": "requirement-analyst",
+      "severity": "general",
+      "finding": "负责人必填时点自相矛盾；P0/P1/P2只有紧急程度定义，未列功能分级。"
+    },
+    {
+      "id": "SEM-05",
+      "employee": "model-scout",
+      "severity": "general",
+      "finding": "真实响应model不保证不可变解析版本；别名不变不能覆盖所有漂移。"
+    }
+  ],
+  "independentArithmetic": {
+    "current": {
+      "registerPerVisit": 0.1,
+      "activatePerRegister": 0.4,
+      "payPerActivate": 0.25,
+      "payPerVisit": 0.01
+    },
+    "previous": {
+      "registerPerVisit": 0.12,
+      "activatePerRegister": 0.5,
+      "payPerActivate": 0.25,
+      "payPerVisit": 0.015
+    },
+    "differencesPercentagePoints": [
+      -2.0,
+      -10.0,
+      0.0,
+      -0.5
+    ],
+    "relativeChangesPercent": [
+      -16.666666666666664,
+      -19.999999999999996,
+      0.0,
+      -33.33333333333333
+    ],
+    "experimentIllustration": {
+      "nPerGroup": 200,
+      "pControl": 0.4,
+      "pTreatment": 0.45,
+      "standardErrorDifferencePercentagePoints": 4.937104414532874,
+      "approx95HalfWidthPercentagePoints": 9.676724652484433,
+      "note": "This illustrative normal approximation is not a fitted significance test for real observed data; it explains why a point threshold alone does not falsify a 5pp effect."
+    }
+  },
+  "cases": [
+    {
+      "employee": "chief-pm",
+      "caseId": "single-chief-pm-repair-1",
+      "runId": "pm-ae849af3-1904-40bd-bbeb-747cd17fe5c3",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n将需求A（用户可导出CSV）、B（颜色主题）、C（修复统计错误）排优先级。A影响30名用户、B影响2人、C影响全部用户且会误报总数；本周仅2人日。输出优先级、理由、验收与不做清单。\n交付result.md，必须明确包含“优先级”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-chief-pm",
+      "firstAttemptPassed": false,
+      "manualRepairAttempts": 1,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-chief-pm-repair-1/artifacts.json",
+        "sha256": "c048ed787c28fab1867d98660725dba0f290fac158501d87649b99f0078b5537"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-chief-pm-repair-1/run.json",
+        "sha256": "534aa70264b4668f052fa5ff00a31a4c46f1396c3f29bd5dc81ad83fb7d4adad",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "665394d5058523dc9091809e46744af159eee678d5f0176954f1dc3ff5d93c04",
+          "sizeBytes": 3904,
+          "lines": 53,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "meets-with-caveats",
+        "checks": [
+          {
+            "requirement": "按影响与风险排序A/B/C",
+            "status": "met",
+            "assessment": "排序与全部用户受错误统计影响、30人需要导出、2人主题诉求的材料一致；没有把30/2人数改写。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 7,
+              "excerpt": "C（修复统计错误）> A（用户可导出 CSV）> B（颜色主题）"
+            }
+          },
+          {
+            "requirement": "在2人日约束下给出取舍",
+            "status": "met",
+            "assessment": "明确C优先、A可顺延、B不做；没有无条件承诺全部交付。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 47,
+              "excerpt": "若实际超出 2 人日，按 C 优先、A 顺延处理"
+            }
+          },
+          {
+            "requirement": "理由、验收与不做清单",
+            "status": "met",
+            "assessment": "C有口径/明细和前后对比，A有CSV/中文/字段口径验收，B与范围扩张均明确不做。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 27,
+              "excerpt": "总数与逐项明细求和一致"
+            }
+          },
+          {
+            "requirement": "材料外工期和事实不冒充已核实",
+            "status": "partial",
+            "assessment": "C=1/A=1人日不是材料事实，已明确标估算并需研发确认，可作方案假设；“A唯一有明确受益人群”不严谨，因为B也给出了2人。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 13,
+              "excerpt": "约 1 人日（估算，未核实）"
+            }
+          }
+        ],
+        "missing": [],
+        "serious": [],
+        "subjective": [
+          "C优先是合理判断，但没有损失金额、投入测量和真实用户优先级，不能机器证明商业价值最优。"
+        ]
+      }
+    },
+    {
+      "employee": "requirement-analyst",
+      "caseId": "single-requirement-analyst-repair-1",
+      "runId": "pm-826984c2-f847-49fa-b24c-e663bda2f12f",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n设计小团队需求收集功能：反馈需含标题、来源、状态、负责人。输出3个用户场景、P0/P1/P2、字段与正常/空输入/权限/重复提交验收。\n交付result.md，必须明确包含“P0”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-requirement-analyst",
+      "firstAttemptPassed": false,
+      "manualRepairAttempts": 1,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-requirement-analyst-repair-1/artifacts.json",
+        "sha256": "e5330f3af3bd893c395e83af1c440d02a7696decb470d6ed2c52aadcafdc8a15"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-requirement-analyst-repair-1/run.json",
+        "sha256": "e7ed18cee34885bace6e2dc58070f74beb622fcb25372793495a67b07a0b7081",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "61ecfb6a28f41ed239fd84919f3d4cdfcf6a8d8881f096d40bb76e965591d983",
+          "sizeBytes": 5348,
+          "lines": 80,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "partial",
+        "checks": [
+          {
+            "requirement": "3个具体用户场景",
+            "status": "met",
+            "assessment": "提交、分诊指派、跟进闭环3场景均有角色、触发与行为；不只是三个功能名。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 22,
+              "excerpt": "场景 3：负责人跟进与状态闭环"
+            }
+          },
+          {
+            "requirement": "字段含标题/来源/状态/负责人",
+            "status": "met",
+            "assessment": "字段名称、类型、必填阶段与状态枚举都列出，标题trim非空和来源其他补说明可判定。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 42,
+              "excerpt": "负责人 owner"
+            }
+          },
+          {
+            "requirement": "P0/P1/P2产出",
+            "status": "partial",
+            "assessment": "定义了需求条目紧急程度，却未给本功能P0/P1/P2实施清单；若任务期望的是功能分级，此项缺失，不能据关键词P0判满分。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 25,
+              "excerpt": "优先级定义（P0 / P1 / P2）"
+            }
+          },
+          {
+            "requirement": "正常/空输入/权限/重复提交验收",
+            "status": "met",
+            "assessment": "四维均给出动作和拒绝/成功结果；去重窗口与阈值如实列待确认，因此仍需实现前定稿。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 67,
+              "excerpt": "### 5.4 重复提交"
+            }
+          },
+          {
+            "requirement": "负责人约束内部一致",
+            "status": "partial",
+            "assessment": "前文目标声称100%反馈在创建时具备负责人，场景与字段又允许空至分诊后；应明确“字段存在可空”或“创建即指定”其中一种合同。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 17,
+              "excerpt": "负责人暂为空"
+            }
+          }
+        ],
+        "missing": [
+          "本功能按P0/P1/P2的具体实施清单。",
+          "创建时负责人能否为空的统一规则。"
+        ],
+        "serious": [],
+        "subjective": [
+          "去重时间窗口、来源枚举和状态回退没有用户/实现依据，需要产品决策；不能在此合成样本中替用户定事实。"
+        ]
+      }
+    },
+    {
+      "employee": "competitor-scout",
+      "caseId": "single-competitor-scout-repair-1",
+      "runId": "pm-8ff0c357-aacd-4a88-bd41-c4efa1f53f95",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n对比材料：产品甲每月99元、CSV导出、有操作日志；产品乙每月59元、无导出、有手机端。目标客户为5人团队，最需要审计追溯。只基于给定材料列对比、未知项、定位建议。\n交付result.md，必须明确包含“未知”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-competitor-scout",
+      "firstAttemptPassed": false,
+      "manualRepairAttempts": 1,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-competitor-scout-repair-1/artifacts.json",
+        "sha256": "34aac65dd8176a96c07996a87f6dc4f5916afdab474689cc99f25da7bae932c5"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-competitor-scout-repair-1/run.json",
+        "sha256": "f07b99c9a2f3b8bd6746b05d511de96312c1217b59e60d8e45da597593cbf7fd",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "f17083552d761a62a04d6ddfd2a45a28e46f458671ef4fad26d74d6c07ddbd9c",
+          "sizeBytes": 4056,
+          "lines": 57,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "meets-with-caveats",
+        "checks": [
+          {
+            "requirement": "准确转述甲乙价格/导出/日志/手机端",
+            "status": "met",
+            "assessment": "99-59=40；甲CSV/日志、乙无导出/有手机端均一致，未给乙臆造日志能力。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 19,
+              "excerpt": "甲比乙每月高 40 元"
+            }
+          },
+          {
+            "requirement": "未知项必须保留未知",
+            "status": "met",
+            "assessment": "明确乙日志、甲手机端、席位计费、日志导出范围等未知，未擅自按5席乘价格。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 24,
+              "excerpt": "是否有操作日志未知"
+            }
+          },
+          {
+            "requirement": "按5人团队审计追溯诉求建议",
+            "status": "met",
+            "assessment": "甲已知有日志，故在现有材料内更匹配；同时限制结论强度和必须补齐日志保留/防篡改/权限。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 48,
+              "excerpt": "产品甲是材料内更匹配的选项"
+            }
+          },
+          {
+            "requirement": "CSV不应暗示已证实日志可导出",
+            "status": "partial",
+            "assessment": "此句把日志/数据并列，略强于仅“支持CSV导出”；后文已把日志导出范围列未知，应统一为“业务数据可导出，日志能否导出未核实”。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 23,
+              "excerpt": "CSV 导出可用于把日志/数据带出"
+            }
+          },
+          {
+            "requirement": "来源与工具动作诚实",
+            "status": "met",
+            "assessment": "来源仅任务给定的合成对比表；明确未联网、未抓取/测试，没有伪造外部出处。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 55,
+              "excerpt": "无外部链接、无工具回执"
+            }
+          }
+        ],
+        "missing": [],
+        "serious": [],
+        "subjective": [
+          "产品定位和差异化建议属于基于有限材料的主观取舍，不能据此断言真实竞品优劣或合规。"
+        ]
+      }
+    },
+    {
+      "employee": "data-insight",
+      "caseId": "single-data-insight-repair-1",
+      "runId": "pm-30b786b4-f982-4662-8906-677177b9bef4",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n分析合成漏斗：访问1000、注册100、激活40、付费10；上周访问800、注册96、激活48、付费12。计算各阶段转化率与变化，区分相关与因果，提出一个可证伪实验。\n交付result.md，必须明确包含“40%”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-data-insight",
+      "firstAttemptPassed": false,
+      "manualRepairAttempts": 1,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-data-insight-repair-1/artifacts.json",
+        "sha256": "b299e4887639dce60831b4f182798a266385108543d7555f6bc3f1855a9e75c3"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-data-insight-repair-1/run.json",
+        "sha256": "004404d888181050e54837b1795e78710766bc54a8db617354ad9e6f9a3beb7a",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "d5f783496942d99c6827da5dfcd349376888fd93de7d8d8aca59dc2fcc20027c",
+          "sizeBytes": 4191,
+          "lines": 54,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "partial",
+        "checks": [
+          {
+            "requirement": "阶段及全链转化率正确",
+            "status": "met",
+            "assessment": "独立重算：注册10%/12%、激活40%/50%、付费25%/25%，全链1%/1.5%；全部正确。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 12,
+              "excerpt": "付费/激活 = 10/40 = **25.0%**"
+            }
+          },
+          {
+            "requirement": "百分点和相对变化正确",
+            "status": "met",
+            "assessment": "阶段百分点-2/-10/0，全链-0.5pp；访问+25%、注册数+4.1667%、激活/付费数-16.6667%，转化相对变化-16.6667%/-20%/0和全链-33.3333%，均正确到所用舍入位。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 14,
+              "excerpt": "相对降幅约 33.3%"
+            }
+          },
+          {
+            "requirement": "不把汇总相关当个体/因果事实",
+            "status": "partial",
+            "assessment": "跨周总量没有新/存量cohort、渠道或统计口径，不能推出新增流量相对存量效率；这句超出材料。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 19,
+              "excerpt": "说明新增访问的注册效率低于存量访问"
+            }
+          },
+          {
+            "requirement": "对无显著影响保持证据边界",
+            "status": "partial",
+            "assessment": "25%点估计相同不证明影响不显著，更不证明无影响；附小样本括号有所缓解但没有显著性检验。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 31,
+              "excerpt": "说明付费环节未受上游质量变化的显著影响"
+            }
+          },
+          {
+            "requirement": "给可证伪的随机实验",
+            "status": "partial",
+            "assessment": "随机对照、干预、主指标/护栏齐全；但点估计低于5pp不能在小样本下直接证伪。应预设效应/检验/区间及足够样本；每组200、40%与45%时两比例差SE约4.94pp、粗略95%半宽9.68pp，难区分5pp效应。2–4周按100总注册/周也仅每组100–200。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 46,
+              "excerpt": "提升不足 5pp"
+            }
+          },
+          {
+            "requirement": "数据与工具执行限制",
+            "status": "met",
+            "assessment": "全篇承认合成输入、未联网和未用外部工具，没有把计算写成线上查询。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 3,
+              "excerpt": "无工具回执"
+            }
+          }
+        ],
+        "missing": [
+          "可证伪实验的统计判定、功效/样本规划与未达阈值时的不确定区间。"
+        ],
+        "serious": [],
+        "subjective": [
+          "激活应否优先、哪些引导适合用户没有真实行为数据；不把实验建议质量纳入机械完成率。"
+        ]
+      }
+    },
+    {
+      "employee": "user-listener",
+      "caseId": "single-user-listener-repair-1",
+      "runId": "pm-6671098e-ae46-4673-bb8b-d5d90a9a4f7f",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n整理三条用户反馈：用户甲说导出按钮难找；用户乙说导出失败没有提示；用户丙说不能导出中文。按痛点归类，提取原文证据，写需求和验收，不杜撰用户。\n交付result.md，必须明确包含“中文”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-user-listener",
+      "firstAttemptPassed": false,
+      "manualRepairAttempts": 1,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-user-listener-repair-1/artifacts.json",
+        "sha256": "66b3946d90b01ef926f641f76a9ff201d49c0f34e09cad2eccc2a0479c6e6257"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-user-listener-repair-1/run.json",
+        "sha256": "753975df5d7b00aac01afe1e018d75265455d86b16491b4a9dac6c470d57ea15",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "54c3c862ef660a6c2efbe096013cb7ad0cc3d5ce72ef141efec1b404513ec379",
+          "sizeBytes": 2358,
+          "lines": 45,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "meets",
+        "checks": [
+          {
+            "requirement": "三名用户原文证据不改写",
+            "status": "met",
+            "assessment": "甲/乙/丙三句逐一引用，与任务原话逐字符一致，没有新增用户。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 11,
+              "excerpt": "「不能导出中文」"
+            }
+          },
+          {
+            "requirement": "痛点分类和需求可追溯",
+            "status": "met",
+            "assessment": "入口发现性、失败反馈、中文支持分别对应F1/F2/F3和R1/R2/R3，链路清楚。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 34,
+              "excerpt": "R3（对应痛点 C）"
+            }
+          },
+          {
+            "requirement": "验收和未知表现分开",
+            "status": "met",
+            "assessment": "没有把“不能导出中文”擅自定性为已证实乱码；为三需求给可观察验收。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 28,
+              "excerpt": "具体表现（乱码/丢失/被拦截）材料未说明"
+            }
+          },
+          {
+            "requirement": "不杜撰已执行工具",
+            "status": "met",
+            "assessment": "明确仅材料整理，未声称创建真实工单。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 45,
+              "excerpt": "未创建工单、未写入任何反馈库或生产系统"
+            }
+          }
+        ],
+        "missing": [],
+        "serious": [],
+        "subjective": [
+          "“一次找到入口”的可用性验收仍需受试者/环境和成功标准；情绪判断是单句语义解释，未当用户统计。"
+        ]
+      }
+    },
+    {
+      "employee": "doc-writer",
+      "caseId": "single-doc-writer",
+      "runId": "pm-c364b5a3-bf4a-409f-aaf7-e9ffdd92945d",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n将会议材料写成会议纪要：张三负责CSV导出，周五完成；李四负责错误提示，周三完成；是否支持Excel尚待决定。分开已定事项、待决事项、负责人、日期和验收。\n交付result.md，必须明确包含“待决”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-doc-writer",
+      "firstAttemptPassed": true,
+      "manualRepairAttempts": 0,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-doc-writer/artifacts.json",
+        "sha256": "4f7acd1a688ddb06f382f8b0c743e849fe5f376aed76191a156c3f70568e4b09"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-doc-writer/run.json",
+        "sha256": "f079eca74789199ac774ca3bab6ed08efa158a81b376c3c87c360aa3bb49f7df",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "53c66e15a8fe60ae06e84476c82f286efc288c69cdbb12b06214f1c30a8384ac",
+          "sizeBytes": 2026,
+          "lines": 32,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "meets-with-caveats",
+        "checks": [
+          {
+            "requirement": "已定事项/负责人/相对日期准确",
+            "status": "met",
+            "assessment": "张三CSV导出周五、李四错误提示周三均保留；未自行换成不明绝对日历日期。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 9,
+              "excerpt": "张三 | 周五"
+            }
+          },
+          {
+            "requirement": "Excel待决不冒充已定",
+            "status": "met",
+            "assessment": "Excel保持待决，负责人和时间未指定均明确；给形成书面决定的验收。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 22,
+              "excerpt": "负责人与日期均未确定"
+            }
+          },
+          {
+            "requirement": "不扩张会议事实",
+            "status": "partial",
+            "assessment": "原材料只有“是否支持Excel”；增加“导入/导出”是未经明确的范围解释，应作为待确认选项，而非会议事项原文。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 16,
+              "excerpt": "是否支持 Excel 导入/导出"
+            }
+          },
+          {
+            "requirement": "验收与限制可见",
+            "status": "met",
+            "assessment": "CSV字段和错误场景不编造；给待补证据，没有虚构执行。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 9,
+              "excerpt": "具体字段清单材料未给出"
+            }
+          }
+        ],
+        "missing": [],
+        "serious": [],
+        "subjective": [
+          "本例是会议纪要，不是PRD；它不能支持“中文PRD/完整PRD已深度验收”这一外推。"
+        ]
+      }
+    },
+    {
+      "employee": "industry-radar",
+      "caseId": "single-industry-radar-repair-1",
+      "runId": "pm-1e3a97be-0813-43a9-956d-9383fa921c53",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n给定已核实来源包：https://api-docs.deepseek.com/guides/search/（2026-10-23读取）：Flash的Responses web_search被忽略，需要函数工具调用Search/Fetch。写一页行业简报，说明产品影响、证据日期与未知事项；不得写成重新联网核实。\n交付result.md，必须明确包含“Search”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-industry-radar",
+      "firstAttemptPassed": false,
+      "manualRepairAttempts": 1,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-industry-radar-repair-1/artifacts.json",
+        "sha256": "c77711da5f14b65cf4590e31eedd986090d8bd68b4d7ae2a7b68e17efb30db7e"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-industry-radar-repair-1/run.json",
+        "sha256": "88f9fdb947e85585715c2b3bd1f3921720c27cddd144bc970c077d27d3409aed",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "345bde28b19f9b33bde847718f739229ac8c6229d21fb9f3c0c75d1ca34b65a9",
+          "sizeBytes": 2551,
+          "lines": 41,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "meets",
+        "checks": [
+          {
+            "requirement": "来源URL/证据日期与材料一致",
+            "status": "met",
+            "assessment": "精确写给定DeepSeek search文档URL与来源包日期，未宣称本轮重新读取。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 10,
+              "excerpt": "2026-10-23（来源包标注的读取时间）"
+            }
+          },
+          {
+            "requirement": "核心行为和产品影响对应来源包",
+            "status": "met",
+            "assessment": "准确复述Flash Responses忽略web_search、需要function Search/Fetch回传，映射到集成与可观测性风险。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 16,
+              "excerpt": "`web_search` 参数会被**忽略**"
+            }
+          },
+          {
+            "requirement": "未知事项不能伪造",
+            "status": "met",
+            "assessment": "版本/区域、告警、参数/超时/配额和后续变更均列未知，没有编造新事实。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 30,
+              "excerpt": "Search / Fetch 工具的参数 schema、超时与配额限制"
+            }
+          },
+          {
+            "requirement": "没有重新联网核实声明",
+            "status": "met",
+            "assessment": "明确仅据给定包；文中自己的“B级”标签不是本审查对外部事实的独立核实。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 3,
+              "excerpt": "未重新联网核实"
+            }
+          }
+        ],
+        "missing": [],
+        "serious": [],
+        "subjective": [
+          "30天复核周期是建议而非已有SLA；API真实当前行为未由本次语义审查联网再验。"
+        ]
+      }
+    },
+    {
+      "employee": "release-guardian",
+      "caseId": "single-release-guardian-repair-1",
+      "runId": "pm-4b20bae0-7ab4-49ec-ad53-2fdd3429081d",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n审阅合成发布包：单元测试10/10，权限测试未跑，数据库迁移无回滚，版本说明完整。给出发布Go/No-Go和阻断项，不执行发布，明确需要补的证据。\n交付result.md，必须明确包含“No-Go”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-release-guardian",
+      "firstAttemptPassed": false,
+      "manualRepairAttempts": 1,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-release-guardian-repair-1/artifacts.json",
+        "sha256": "41c9fdda273b0e00a3729973455d0c0215aeb40fa7978999d6617e3b5cbe9c34"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-release-guardian-repair-1/run.json",
+        "sha256": "f3e1ddaab54794f5f9afb5554fc4af83030fba334ff4757de24e2a7705d04717",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "a3b1906d2fad3ec61c3fa893d4ad23ba1637b2c4e5679868d02e8bca168e23a0",
+          "sizeBytes": 1897,
+          "lines": 42,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "meets-with-caveats",
+        "checks": [
+          {
+            "requirement": "Go/No-Go结论符合缺证材料",
+            "status": "met",
+            "assessment": "没有被单元10/10和完整版本说明诱导放行；权限未跑、迁移无回滚明确阻断。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 9,
+              "excerpt": "**No-Go（不发布）**"
+            }
+          },
+          {
+            "requirement": "补证据具体而非空泛",
+            "status": "met",
+            "assessment": "需要权限用例/结果/覆盖、回滚脚本/演练/一致性、单元原始回执及版本对应关系。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 29,
+              "excerpt": "权限测试执行回执"
+            }
+          },
+          {
+            "requirement": "汇总数字不伪装原始回执",
+            "status": "met",
+            "assessment": "清楚区分给定10/10描述与尚未看见的原始日志。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 31,
+              "excerpt": "当前仅有汇总数字"
+            }
+          },
+          {
+            "requirement": "不执行发布及恢复能力措辞",
+            "status": "partial",
+            "assessment": "明确“不执行发布”满足要求；“无回滚方案”不能证明所有备份/前滚恢复都不存在，应改为“恢复路径未获验证”。该过强句不改变正确No-Go。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 25,
+              "excerpt": "一旦迁移失败无法恢复"
+            }
+          }
+        ],
+        "missing": [],
+        "serious": [],
+        "subjective": [
+          "此合成发布包的No-Go可靠，但不能替真实部署环境完成权限测试或迁移演练。"
+        ]
+      }
+    },
+    {
+      "employee": "dev-orchestrator",
+      "caseId": "single-dev-orchestrator",
+      "runId": "pm-87fc4cb0-74a7-41c2-98f4-ab3719486d08",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n只输出result.md，设计一个研发任务的可执行分工与验收清单（不生成代码）：实现CSV导出，必须有中文/空列表/权限校验与失败提示。通过受限工具写入result.md并在摘要如实说明已写文件，没有运行外部发布。\n交付result.md，必须明确包含“中文”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-dev-orchestrator",
+      "firstAttemptPassed": true,
+      "manualRepairAttempts": 0,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-dev-orchestrator/artifacts.json",
+        "sha256": "6a8e0ef15bbec3798966f6c3073fdd5e59d258884a78193746c6776f16bd70f2"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-dev-orchestrator/run.json",
+        "sha256": "f3c704e42c777ee5961c28d9ff0281e3b4285349727c10f9af1e51ac667c02c7",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "2d4168d40cda52264ecd3bfe657b9890754d6a64e774b9b39b91cb527ca89fb3",
+          "sizeBytes": 8546,
+          "lines": 159,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "serious-content-issue",
+        "checks": [
+          {
+            "requirement": "不生成代码且有分工/依赖/验收",
+            "status": "met",
+            "assessment": "5任务有职责、依赖、中文/转义/空列表/401/403/错误提示/防重点击验收；明确只写result.md。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 69,
+              "excerpt": "T5 · 端到端验收与文档"
+            }
+          },
+          {
+            "requirement": "模型缺配置不得在质量门禁放行",
+            "status": "failed",
+            "assessment": "设计表把缺失真实模型评审当降级放行，与“没有真实验证不通过”的门禁要求冲突，会再现原IA07假绿。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 102,
+              "excerpt": "模型缺配置则降级放行并标 mock"
+            }
+          },
+          {
+            "requirement": "上线考必须真实完成而非非fail即过",
+            "status": "failed",
+            "assessment": "null、未知、未完成考试也都不等于fail，不能作为通过条件；应要求真实同scope/task/session/内容版本考试及完整通过证据。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 103,
+              "excerpt": "verdict ≠ fail"
+            }
+          },
+          {
+            "requirement": "空列表与阈值方案一致",
+            "status": "partial",
+            "assessment": "目标固定返回提示，T3又允许仅表头CSV二选一，后文承认待裁决；可作草案但尚非可直接执行的唯一合同。1万行/3秒为新增设计假设而非材料事实。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 17,
+              "excerpt": "空列表导出返回「无数据可导出」提示"
+            }
+          },
+          {
+            "requirement": "如实说明未测试/外发",
+            "status": "met",
+            "assessment": "文件及任务摘要都没有虚构已经实现/运行/发布；DSH文件写回执是真实内部动作，不等于外部研发工具都已运行。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 157,
+              "excerpt": "未运行 typecheck / lint / test"
+            }
+          }
+        ],
+        "missing": [
+          "安全且一致的三关通过合同；空列表唯一行为定稿。"
+        ],
+        "serious": [
+          {
+            "severity": "serious",
+            "observation": "门禁设计允许模型缺配置mock放行、考试仅verdict非fail。",
+            "reason": "可导致缺失验证被写成通过；本轮产物只是设计文档，未实际发布，也不证明修复后的服务端仍允许放行。"
+          }
+        ],
+        "subjective": [
+          "机床Codex优先、1万行/3秒与行数策略缺真实代码/性能测量，不能作为已核实系统事实。"
+        ]
+      }
+    },
+    {
+      "employee": "model-scout",
+      "caseId": "single-model-scout-repair-2",
+      "runId": "pm-ffff6493-89de-4e3a-9ff3-b01e8d25536a",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n依据给定来源包选择模型：DeepSeek官方/models于2026-10-23返回deepseek-flash，可用于文本与function tools；该别名可能漂移。需求是中文PRD与受限代码工具，要求记录真实响应model/id/usage。输出选择理由、迁移验证和未知项，不编其他模型价格或成绩。\n交付result.md，必须明确包含“usage”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-model-scout",
+      "firstAttemptPassed": false,
+      "manualRepairAttempts": 1,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-model-scout-repair-2/artifacts.json",
+        "sha256": "148f93e6e438f35a3fbf5cdcecf88706f0d0dfd2dab800c382e213cc33ef4af1"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-model-scout-repair-2/run.json",
+        "sha256": "21c36956e85ee9dcb37c3b01b35635449c3bb384e6eb3117ba654498a5208653",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "435f356562a9a63eb37051189e1a8861b7d43343b6041afb7cd0791e76054bb6",
+          "sizeBytes": 3320,
+          "lines": 39,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "partial",
+        "checks": [
+          {
+            "requirement": "基于唯一材料选择Flash并说明边界",
+            "status": "met",
+            "assessment": "以给定文本/function tools支持作为初步候选理由，同时承认不等于场景实测通过，不编竞品价格/成绩。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 15,
+              "excerpt": "基于材料的能力面匹配"
+            }
+          },
+          {
+            "requirement": "迁移验证包含真实model/id/usage",
+            "status": "met",
+            "assessment": "工具schema/越权、中文PRD结构、回滚、计量缺失与参数固定要求都有；没有把它们写成已跑。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 26,
+              "excerpt": "逐次记录响应 `usage` 字段"
+            }
+          },
+          {
+            "requirement": "别名漂移不能假定响应model就是不可变版本",
+            "status": "partial",
+            "assessment": "任务只保证要记录真实返回字段，并未保证model返回不可变构建版本。若请求和响应都为deepseek-flash，版本可能漂移而字段不变；应明确记录字段仍不足以检测全部漂移。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 25,
+              "excerpt": "`model`（真实解析版本）"
+            }
+          },
+          {
+            "requirement": "未知不应写成已证伪",
+            "status": "partial",
+            "assessment": "上下文/价格/评测没有材料，应写“证据不足，未触发迁移”，不能把未知等同不成立；谨慎不切生产的决策本身合理。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 22,
+              "excerpt": "三触发器均不成立"
+            }
+          },
+          {
+            "requirement": "不伪称工具/试跑",
+            "status": "met",
+            "assessment": "明确只有来源包和设计清单，元数据规则尚待执行。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 4,
+              "excerpt": "未运行真实试跑"
+            }
+          }
+        ],
+        "missing": [
+          "响应model仍可能是别名时的漂移不可检出边界与替代回归机制。"
+        ],
+        "serious": [],
+        "subjective": [
+          "文本能力不等于中文PRD质量；这个合成来源包没有候选对照，无法推导最优模型。"
+        ]
+      }
+    },
+    {
+      "employee": "eval-master",
+      "caseId": "single-eval-master-repair-2",
+      "runId": "pm-8c46011e-a898-4960-a86b-68c0026aa65e",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n为用户反馈分类器编写评测集：正常反馈、空输入、超长中文、提示注入、重复反馈、权限不足。每例需前置、输入、预期、判分标准；区分模式路由召回和交付达成。\n交付result.md，必须明确包含“召回”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "blocked",
+      "mechanicalPassed": false,
+      "firstAttemptCaseId": "single-eval-master",
+      "firstAttemptPassed": false,
+      "manualRepairAttempts": 1,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-eval-master-repair-2/artifacts.json",
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-eval-master-repair-2/run.json",
+        "sha256": "e495fdd2852d1b673f3ae72d9b4b56ceca60b1d9a062e34aaa28be00f2c153d5",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "no-deliverable",
+        "checks": [
+          {
+            "requirement": "6种场景各有前置/输入/预期/判分标准",
+            "status": "missing",
+            "assessment": "最新run被finish_reason=length阻断；artifacts.json为[]，不能用未发布的截断正文给任何一项算通过。",
+            "evidence": {
+              "type": "runtime-run-metadata",
+              "grade": "B",
+              "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-eval-master-repair-2/run.json",
+              "artifactCount": 0,
+              "status": "blocked",
+              "errorCode": "MODEL_RECEIPT_MISSING"
+            }
+          },
+          {
+            "requirement": "区分模式路由召回和交付达成",
+            "status": "missing",
+            "assessment": "没有可交付产物，未满足；也不能以错误回执包含某个关键词替代内容。",
+            "evidence": {
+              "type": "runtime-run-metadata",
+              "grade": "B",
+              "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-eval-master-repair-2/run.json",
+              "artifactCount": 0,
+              "status": "blocked",
+              "errorCode": "MODEL_RECEIPT_MISSING"
+            }
+          },
+          {
+            "requirement": "失败后不假完成",
+            "status": "met",
+            "assessment": "run.status=blocked/errorCode=MODEL_RECEIPT_MISSING，已知usage2325+3072保留；没有生成可下载的假完整文件。",
+            "evidence": {
+              "type": "runtime-run-metadata",
+              "grade": "B",
+              "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-eval-master-repair-2/run.json",
+              "artifactCount": 0,
+              "status": "blocked",
+              "errorCode": "MODEL_RECEIPT_MISSING"
+            }
+          }
+        ],
+        "missing": [
+          "完整6用例评测集和两类指标定义。"
+        ],
+        "serious": [],
+        "subjective": [
+          "本例无完整产物，无从评判评测集质量；后来8192代码修改尚未真实付费复跑，不能补写为通过。"
+        ]
+      }
+    },
+    {
+      "employee": "prompt-curator",
+      "caseId": "single-prompt-curator",
+      "runId": "pm-5142f7a1-f463-45fd-98b1-2982b358bf03",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n旧提示词是“随便总结用户反馈”，出现把原话当命令的问题。写改进提示词（用户材料与系统指令隔离）、版本差异、3条回归用例与回退条件，不声称实测效果。\n交付result.md，必须明确包含“回退”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-prompt-curator",
+      "firstAttemptPassed": true,
+      "manualRepairAttempts": 0,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-prompt-curator/artifacts.json",
+        "sha256": "1cea13f84261c114cacb12eaa07753512fc9496b5bf66e690a4641f553bac22d"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-prompt-curator/run.json",
+        "sha256": "fe9814cf7e121f6195b4186cb2aa1cdd1f0740365a06a8cd266bc49a04b6a3aa",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "14c57f6d76980070b455dfd3487cbc86ead7c09542178b26bba0d0431222f284",
+          "sizeBytes": 5253,
+          "lines": 90,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "serious-content-issue",
+        "checks": [
+          {
+            "requirement": "改进提示词隔离材料与指令",
+            "status": "met",
+            "assessment": "明确材料当数据、不能泄露/调用工具、固定摘要/风险提示、空输入不猜测；比旧“随便总结”有具体约束。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 17,
+              "excerpt": "<user_material>"
+            }
+          },
+          {
+            "requirement": "版本差异与3条回归用例",
+            "status": "met",
+            "assessment": "给正常、注入、空输入3例，输入/预期/判分都有，明确未运行eval。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 70,
+              "excerpt": "用例 R3：空/无效材料"
+            }
+          },
+          {
+            "requirement": "回退不得自动回到已知问题版本",
+            "status": "failed",
+            "assessment": "材料中的v1已知把反馈原话当命令，没有任何“独立通过同红线回归”的证据。把它称为上一通过版本并推荐回退，会恢复已知注入问题。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 79,
+              "excerpt": "回退到上一通过版本 v1"
+            }
+          },
+          {
+            "requirement": "分隔符完整性属于实现前待验证",
+            "status": "partial",
+            "assessment": "只有文本标签模板，未说明如何处理材料中嵌入闭合标签；未测试破坏分隔符用例，不能把提示声明当已实现安全边界。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 26,
+              "excerpt": "边界外内容一律忽略"
+            }
+          },
+          {
+            "requirement": "不声称实测效果",
+            "status": "met",
+            "assessment": "标题和限制明确未实测，没有编造通过率/效果提升。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 3,
+              "excerpt": "未执行 eval 回归"
+            }
+          }
+        ],
+        "missing": [
+          "没有已知安全版本时停用/转人工的回退条件；对历史问题版本的禁止默认认可。"
+        ],
+        "serious": [
+          {
+            "severity": "serious",
+            "observation": "把输入明确有注入缺陷的v1当“上一通过版本”推荐回滚。",
+            "reason": "缺少已知安全版本证明，方案可能重启历史缺陷；本轮没有实际回退操作。"
+          }
+        ],
+        "subjective": [
+          "提示词是否真的抗注入必须实际攻击/回归验证；仅人工读提示词不能算安全有效。"
+        ]
+      }
+    },
+    {
+      "employee": "red-teamer",
+      "caseId": "single-red-teamer",
+      "runId": "pm-2a144418-ca45-46dc-a44f-53b7f41b9f3d",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n仅对给定虚构反馈分类器设计防御性测试：恶意反馈要求忽略系统规则、输出密钥、访问内网。写输入、预期拒绝/降权结果和审计字段；不发动真实攻击、不提供凭据。\n交付result.md，必须明确包含“内网”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-red-teamer",
+      "firstAttemptPassed": true,
+      "manualRepairAttempts": 0,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-red-teamer/artifacts.json",
+        "sha256": "d69e53db09a94a9f38f933ded04ca4f04cd82b180c498561828dd3652278cf01"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-red-teamer/run.json",
+        "sha256": "6d0104bf3c3ea1ca519fb4cb46c8b9d5599b1ca9e0b121c06d624cada20d1ec0",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "93dba09ee040ef4eabd32d4b44d045251a9bb017f2f6af649ab757ffbf5306c7",
+          "sizeBytes": 5881,
+          "lines": 86,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "meets",
+        "checks": [
+          {
+            "requirement": "覆盖忽略规则/密钥/内网三类",
+            "status": "met",
+            "assessment": "A/B/C分别覆盖指定三类，D组合、E正常提及内网的误报边界；不是只堆攻击名词。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 32,
+              "excerpt": "### 用例 C（T3：访问内网）"
+            }
+          },
+          {
+            "requirement": "每类输入/预期拒绝降权",
+            "status": "met",
+            "assessment": "明确不执行注入、不泄露、不请求内网，以及保留正常分类/打标记/拒绝的区别。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 47,
+              "excerpt": "预期拒绝/降权规则汇总"
+            }
+          },
+          {
+            "requirement": "可追溯审计字段",
+            "status": "met",
+            "assessment": "版本、输入hash、脱敏片段、攻击类型、处置、规则ID、环境与人审字段具体；未要求记录真实秘密。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 64,
+              "excerpt": "`input_hash`"
+            }
+          },
+          {
+            "requirement": "不发动真实攻击不含凭据",
+            "status": "met",
+            "assessment": "示例地址为占位域，全文是防御设计，未声称扫描/拦截已发生。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 7,
+              "excerpt": "未执行真实对抗扫描"
+            }
+          }
+        ],
+        "missing": [],
+        "serious": [],
+        "subjective": [
+          "分类标签和置信度缺实际taxonomy；此稿验证设计完整性，不能算真实红队攻击通过或分类器安全已证。"
+        ]
+      }
+    },
+    {
+      "employee": "knowledge-curator",
+      "caseId": "single-knowledge-curator",
+      "runId": "pm-1fa0bb7b-370c-429f-abdb-71b0040b0bb6",
+      "precondition": "真实DeepSeek，合成需求，独立DB，固定40请求/30万token/120元估算/45分钟闸门",
+      "goal": "材料为本轮合成数据，不是生产数据；只能基于以下材料写结论，不访问外网，不声称已运行外部业务工具。\n整理知识：旧文档说导出只支持英文；2026-10-20新决策说CSV使用UTF-8且支持中文；未确定是否加BOM。输出更新提案、过期标识、证据链和待确认问题，不伪称已修改真实知识库。\n交付result.md，必须明确包含“UTF-8”。",
+      "requiredDeliverable": "result.md",
+      "stepsObserved": "HTTP创建→幂等读回→开始→轮询→摘要读取→独立断言",
+      "mechanicalStatus": "completed",
+      "mechanicalPassed": true,
+      "firstAttemptCaseId": "single-knowledge-curator",
+      "firstAttemptPassed": true,
+      "manualRepairAttempts": 0,
+      "artifactContainer": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-knowledge-curator/artifacts.json",
+        "sha256": "cc261231841ac6d71d16b3cd1ea72190a1512c2aa32d150d09114cfa9f52c694"
+      },
+      "runMetadata": {
+        "path": "outputs/pm-live-2026-10-23T17-14-23-575Z/single-knowledge-curator/run.json",
+        "sha256": "30424db94246173e1357a9223551808a1140f2a24a344daa77b1dbb510570361",
+        "goalMatchesEvaluation": true
+      },
+      "artifacts": [
+        {
+          "path": "result.md",
+          "sha256": "7e278560326de908017a0a983d5ec7650c597b9e420af416d9666cf35e054761",
+          "sizeBytes": 3305,
+          "lines": 53,
+          "matchesEvaluationAndRunReceipt": true
+        }
+      ],
+      "evidenceGrade": "B",
+      "review": {
+        "status": "meets-with-caveats",
+        "checks": [
+          {
+            "requirement": "新旧知识冲突准确",
+            "status": "met",
+            "assessment": "把“仅英文”与CSV UTF-8支持中文对齐，保留旧文历史，不臆造BOM结论。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 10,
+              "excerpt": "2026-10-20 新决策：CSV 使用 **UTF-8** 编码"
+            }
+          },
+          {
+            "requirement": "过期标识/提案/证据链",
+            "status": "met",
+            "assessment": "有过期原因、新表述、3条材料证据与更新/归档方案，且不删除旧证据。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 19,
+              "excerpt": "保留原文并加过期横幅"
+            }
+          },
+          {
+            "requirement": "BOM和范围待确认",
+            "status": "met",
+            "assessment": "明确不写有/无BOM；CSV之外格式是否扩展列待确认，没有静默覆盖所有导出能力。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 33,
+              "excerpt": "BOM：**待确认**"
+            }
+          },
+          {
+            "requirement": "决策日期不自动等同生效日期",
+            "status": "partial",
+            "assessment": "材料给的是新决策日期，未明确生产生效日期；可提议采用该日，但应标待确认，不能作为已证实上线时间。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 29,
+              "excerpt": "生效日期 2026-10-20"
+            }
+          },
+          {
+            "requirement": "不伪称修改真实KB",
+            "status": "met",
+            "assessment": "仅待批准提案，和没有工具回执一致。",
+            "evidence": {
+              "type": "runtime-artifact",
+              "grade": "B",
+              "path": "result.md",
+              "line": 3,
+              "excerpt": "**未修改真实知识库**"
+            }
+          }
+        ],
+        "missing": [],
+        "serious": [],
+        "subjective": [
+          "材料没有真实KB条目ID/版本/链接；提案可读性和条目保鲜效果不能代替真实更新验收。"
+        ]
+      }
+    }
+  ],
+  "fixBoundary": "主代理已授权随后修技能与资产验证；本报告记录原始运行产物，绝不重写历史产物/通过标记，后续修复与离线回归另报。"
+}

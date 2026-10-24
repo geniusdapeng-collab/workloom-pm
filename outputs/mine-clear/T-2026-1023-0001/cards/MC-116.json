@@ -1,0 +1,94 @@
+{
+  "id": "MC-116",
+  "kind": "fix",
+  "covers": [
+    "MC-010",
+    "MC-011",
+    "MC-012",
+    "MC-013"
+  ],
+  "title": "纠正五技能证据纪律并绑定每次员工实际装配来源",
+  "batch": 2,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "bundles/ai-pm/skills/changeset-harvest/SKILL.md:18@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "c9466906caee84a722756fa9072477d73a4f4e7b7c86afcf20e183d0d3cce7b2",
+      "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+    },
+    {
+      "type": "code",
+      "ref": "bundles/ai-pm/skills/prompt-regression/SKILL.md:20@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "7f94d384f624c534d903a6a520a970d3a76ef59bb754158101088bd8bfe6d13d",
+      "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+    },
+    {
+      "type": "code",
+      "ref": "bundles/ai-pm/skills/metric-digest/SKILL.md:18@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "6cda6d573f5a6e0561a4552edce1c7bebb645b707957322b59e02c7bbfa5554c",
+      "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+    },
+    {
+      "type": "code",
+      "ref": "bundles/ai-pm/skills/prd-forge/SKILL.md:17@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "273e26b74b7db80aaae904155b70f69011c8853e3b7558ac9426388b924d7afc",
+      "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+    }
+  ],
+  "semantic_discovery": {
+    "path": "discovery/pm-semantic-review.json",
+    "sha256": "471d1d9503677993c9dd455a5408c9fc13f61567872a93ec563bd494edab417e",
+    "evidenceGrade": "B",
+    "sourceRevision": {
+      "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "workingTreeDirty": true,
+      "committedRepairSha": null
+    },
+    "note": "原真实付费产物的完整正文人工语义审查及UTF8摘要回读；不是审计提交的动态执行，也不是修复后的新真实模型验收。"
+  },
+  "fix_plan": "全文纠正五技能并分别patch升版；仅正式seal ai-pm3.0.1candidate。新PM catalog校验结构化安全合同并从实际verified source生成bundle/manifest/preset/skillSHA；可信policy用于planner/one-shot/DSH，服务端覆盖worker自报binding并逐attempt保留；不activate/reseed/升级全局registry。",
+  "blast_radius": "仅AI-PM来源与隔离执行，source元数据可选兼容可信DI；不改DDL/已付费产物/事件/旧skill安装记录，不承诺全部模型语义已治愈。",
+  "conflict_paths": [
+    "bundles/ai-pm",
+    "apps/server/src/industry/ai-pm/asset-binding.ts",
+    "apps/server/src/industry/ai-pm/skill-contracts.ts",
+    "apps/server/src/industry/ai-pm/asset-evidence.test.ts",
+    "apps/server/src/industry/ai-pm/types.ts",
+    "apps/server/src/industry/ai-pm/employees.ts",
+    "apps/server/src/industry/ai-pm/service.ts",
+    "apps/server/src/industry/ai-pm/store.ts",
+    "apps/server/src/industry/ai-pm/dsh-adapter.ts",
+    "apps/server/src/industry/ai-pm/team.pg.test.ts"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+      "expect": "校验安全合同和实际14岗sourceSHA；合法重摘要的unsafe合同仍拒；真实PG保留成功/已知失败/恢复版本/规划/DSH回执且worker篡改不能自证；DI无binding仍能完成并移除伪造来源。",
+      "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/asset_evidence.test.mjs then assertions/metrics_native.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚正式含修复的真实提交，不回滚/删除原付费产物、DB事件、原全局注册或费用台账。已知不安全技能不得用于自动交付。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root/intent_audit",
+  "eligible_acceptance_actors": [
+    "/root",
+    "/root/deepseek_research"
+  ],
+  "notes": "本卡仍open/not-run等待root干净提交。原40物理窗口已耗尽；没有新的真实模型复验，不据免费夹具宣布语义通过。"
+}

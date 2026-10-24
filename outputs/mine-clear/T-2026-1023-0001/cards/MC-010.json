@@ -1,0 +1,59 @@
+{
+  "id": "MC-010",
+  "kind": "problem",
+  "title": "技能原文允许缺模型mock放行与非fail考试放行",
+  "severity": "P1",
+  "level": "L3",
+  "batch": 2,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "bundles/ai-pm/skills/changeset-harvest/SKILL.md:18@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "c9466906caee84a722756fa9072477d73a4f4e7b7c86afcf20e183d0d3cce7b2",
+      "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+    }
+  ],
+  "semantic_discovery": {
+    "path": "discovery/pm-semantic-review.json",
+    "sha256": "471d1d9503677993c9dd455a5408c9fc13f61567872a93ec563bd494edab417e",
+    "evidenceGrade": "B",
+    "sourceRevision": {
+      "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "workingTreeDirty": true,
+      "committedRepairSha": null
+    },
+    "note": "原真实付费产物的完整正文人工语义审查及UTF8摘要回读；不是审计提交的动态执行，也不是修复后的新真实模型验收。"
+  },
+  "root_cause": {
+    "file": "bundles/ai-pm/skills/changeset-harvest/SKILL.md",
+    "line": 18,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "changeset-harvest source execution discipline"
+  },
+  "trigger_path": "dev-orchestrator真实产物复述原技能的缺模型放行/verdict非fail；release-cut未要求发布前重验真实内容与考试。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+      "expect": "旧无合同技能及放宽mock/非fail/跳过Git前复核的重摘要合同均拒；新技能明示同scope/task/session/content的真实证据，服务端可信纪律覆盖入口。",
+      "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/asset_evidence.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "修复中新增发现并补卡；保留原audit dirty_count1，正式repair/acceptance仍未建立。自动断言只验证来源合同、完整性、服务端可信指令/回执与失败关闭，不把合同标签当作模型正文语义通过证明。"
+}

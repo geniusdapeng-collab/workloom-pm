@@ -1,7 +1,7 @@
 {
   "schemaVersion": "workloom.bundle/v1",
   "name": "@workloom/ai-pm",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "workloom": {
     "industry": "ai-pm",
     "displayName": "AI 产品经理版（示例方案：产品经理负责制）",
@@ -197,7 +197,7 @@
   },
   "integrity": {
     "algorithm": "sha256",
-    "digest": "f77098f77c668c5228db3fef4c5d8b2739c75eb4a560a4791150df78780ce44c",
+    "digest": "bc33c1836d36073f8db0322d4cd0386c5cfb0845e20cfdb48f78384229b915f3",
     "assets": {
       "eval/questions.json": "a204675c579639a33cece2b0a4a5ffa9e94686abcef26c86c1abe7d6c0bd08fb",
       "feedback-enums.yml": "fbba50157cda065db504eb48fbc95a2db8a7fdfb9719f910b82dd7945b5fe4f4",
@@ -236,7 +236,7 @@
       "service-front/client.json": "48ec6d249b12f02623caefed317b90e690968e4cb6f7c4cff696dd5818fa74e3",
       "service-front/faq.json": "36e443f5ece68d14369f8502bbf6e80599f234e7ade98a2c99f5e594db1bd7d2",
       "skills/badcase-harvest/SKILL.md": "1122b2d2b91fa83fa593e0e43750bff0d0bdffc44bbafaca6c7b9cae2a70c81d",
-      "skills/changeset-harvest/SKILL.md": "c9466906caee84a722756fa9072477d73a4f4e7b7c86afcf20e183d0d3cce7b2",
+      "skills/changeset-harvest/SKILL.md": "2e62a86d122a03bdfc50ba3e3abbd404ec5f644dc596aff0dc52dbb57968f2b0",
       "skills/competitor-scan/SKILL.md": "87b256d943aa0ed97b79826d7db78e0a7648a08e4ac9ea593e6ee335c9af328f",
       "skills/dev-dispatch/SKILL.md": "748b37c5c01b0790792b232b578270238685f00d65ef06ee0265bd4b90a48e9a",
       "skills/eval-forge/SKILL.md": "3a12625131a5144192aadf70dc0ec0b018b732f497898493d517d3b9c119ce28",
@@ -246,12 +246,12 @@
       "skills/kb-fresh/SKILL.md": "7911505ff221a51c3ced4406462d51bf6e55e0fd6f3f18441ceb537bb993f640",
       "skills/learning-digest/SKILL.md": "b72090da163445c4effafa4f2cd1897f8e82af5949cb491a298e1caec39a1e46",
       "skills/meeting-digest/SKILL.md": "46e45dec0d90f02721c424bbfec1dc912770702f3985d76ab4e0d3d672f2a370",
-      "skills/metric-digest/SKILL.md": "6cda6d573f5a6e0561a4552edce1c7bebb645b707957322b59e02c7bbfa5554c",
+      "skills/metric-digest/SKILL.md": "3fdce7ec1b0029b0c8f8d325060bee6a7f09a6de79ef9eec3a0e467812265fb3",
       "skills/model-scout/SKILL.md": "df9a79cc225b42ed81be0e2e3c5f62e1663ed3a4fdc04df4b03aa52f59b5137b",
-      "skills/prd-forge/SKILL.md": "273e26b74b7db80aaae904155b70f69011c8853e3b7558ac9426388b924d7afc",
-      "skills/prompt-regression/SKILL.md": "7f94d384f624c534d903a6a520a970d3a76ef59bb754158101088bd8bfe6d13d",
+      "skills/prd-forge/SKILL.md": "60cd0f34181ffd902834f05967d2f102d2f75e4714fd53bca2f7f8e2c8f8046f",
+      "skills/prompt-regression/SKILL.md": "660ad31238c4685faba193a15d50fc1a9ec0d847d83950bbaf136ee251da939c",
       "skills/redteam-scan/SKILL.md": "68ef625e26d314620e1056ed3711cd188da6b78a37fd0400420f56be9ee64d6a",
-      "skills/release-cut/SKILL.md": "b248b4d79e5fc59dd58f7e74e941f76daaf328f7bdf06cd67a2223002be7b939",
+      "skills/release-cut/SKILL.md": "e822a9629f230cc331b7706b2b05cf565bbf6242d7532e434ad50596d38b5e0b",
       "skills/release-notes/SKILL.md": "d85510937253f7a44ac0162ec311bda3e2a6279bf81b05a579f78a420df6d4f7",
       "skills/review-miner/SKILL.md": "bed5ad898866eb4eaf40ba77c324ab48a4a3e68457610f2c2ee9250edaa7f191",
       "skills/session-watch/SKILL.md": "4e239bb82b790a517ec353609e817481a9f0ee7f40c252ba5791eb27e8ca2534"

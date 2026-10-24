@@ -1,0 +1,47 @@
+{
+  "schema": "workloom.packaged-desktop-qa/v1",
+  "startedAt": "2026-10-23T18:38:56.069Z",
+  "kind": "actual local unsigned macOS arm64 app; isolated embedded runtime bootstrap and read-only first-launch UI; no paid model task",
+  "appDirectory": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-desktop-build/local-release/mac-arm64/WorkLoom PM.app",
+  "executable": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-desktop-build/local-release/mac-arm64/WorkLoom PM.app/Contents/MacOS/WorkLoom PM",
+  "support": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-packaged-bootstrap-user-data",
+  "ports": {
+    "server": 21887,
+    "web": 23573,
+    "pg": 25442,
+    "nats": 24222
+  },
+  "attemptedMutations": [],
+  "pageErrors": [],
+  "cases": [
+    {
+      "name": "actual fresh packaged bootstrap",
+      "expected": "Embedded payload, PostgreSQL SCRAM, migrations, seeds and services finish, then exit zero",
+      "actual": {
+        "exitCode": 1,
+        "signal": null,
+        "timedOut": false,
+        "stdoutSha256": "72838fcb61e334d54e6371234aafec495c66938be0ed93f937156793076b1a85",
+        "stderrSha256": "806738a44e43b21f9a67be6b827cae05df41d22821907f7f880b3aab6bd18993",
+        "stdoutBytes": 2286,
+        "stderrBytes": 379
+      },
+      "passed": false,
+      "evidence": "B"
+    }
+  ],
+  "smoke": {
+    "exitCode": 1,
+    "signal": null,
+    "timedOut": false,
+    "stdoutSha256": "72838fcb61e334d54e6371234aafec495c66938be0ed93f937156793076b1a85",
+    "stderrSha256": "806738a44e43b21f9a67be6b827cae05df41d22821907f7f880b3aab6bd18993",
+    "stdoutBytes": 2286,
+    "stderrBytes": 379
+  },
+  "fatal": {
+    "message": "Fresh packaged bootstrap did not complete; inspect protected work logs"
+  },
+  "passed": false,
+  "finishedAt": "2026-10-23T18:53:02.713Z"
+}

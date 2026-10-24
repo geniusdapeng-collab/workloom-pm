@@ -1,0 +1,133 @@
+{
+  "schema": "workloom.pm-mcd-actor-batch/v1",
+  "actor": "/root/sandbox_prepare",
+  "role": "repair",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "startedAt": "2026-10-23T19:59:07.955Z",
+  "finishedAt": "2026-10-23T19:59:55.565Z",
+  "declaredCards": [
+    "MC-003",
+    "MC-006",
+    "MC-007",
+    "MC-008",
+    "MC-103",
+    "MC-104",
+    "MC-107",
+    "MC-108",
+    "MC-109",
+    "MC-117"
+  ],
+  "results": [
+    {
+      "id": "MC-003",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:07.988Z",
+      "finishedAt": "2026-10-23T19:59:08.757Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-006",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:08.784Z",
+      "finishedAt": "2026-10-23T19:59:10.277Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-007",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:10.315Z",
+      "finishedAt": "2026-10-23T19:59:11.712Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-008",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:11.785Z",
+      "finishedAt": "2026-10-23T19:59:24.770Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-103",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:24.798Z",
+      "finishedAt": "2026-10-23T19:59:35.523Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-104",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:35.548Z",
+      "finishedAt": "2026-10-23T19:59:37.002Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-107",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:37.028Z",
+      "finishedAt": "2026-10-23T19:59:38.433Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-108",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:38.458Z",
+      "finishedAt": "2026-10-23T19:59:39.896Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-109",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:39.923Z",
+      "finishedAt": "2026-10-23T19:59:52.915Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-117",
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:59:52.943Z",
+      "finishedAt": "2026-10-23T19:59:55.565Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "complete": true
+}

@@ -1,0 +1,25 @@
+{
+  "schema": "workloom.pm-mcd-actor-batch/v1",
+  "actor": "/root/sandbox_prepare",
+  "role": "acceptance",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "startedAt": "2026-10-23T20:06:33.330Z",
+  "finishedAt": "2026-10-23T20:06:35.187Z",
+  "declaredCards": [
+    "MC-001"
+  ],
+  "results": [
+    {
+      "id": "MC-001",
+      "actor": "/root/sandbox_prepare",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:06:33.365Z",
+      "finishedAt": "2026-10-23T20:06:35.186Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "complete": true
+}

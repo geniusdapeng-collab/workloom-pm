@@ -1,0 +1,18 @@
+{
+  "id": "MC-004",
+  "actor": "/root/deepseek_research",
+  "role": "acceptance",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-004-0-1792785859384.json",
+        "sha256": "d303f96c2aef901b3108d76d7765b7f4a22554e6a849253ddf009ce3d5b6578c",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

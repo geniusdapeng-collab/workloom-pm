@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { ensureDemoLogin, trpc } from "../../lib/trpc";
+import { SECRETARY_AUTO_SCAN } from "../../lib/product";
 import { VoiceEngine } from "../../voice/VoiceEngine";
 import { MateLive2D, type MateMood, type MateGesture } from "./MateLive2D";
 import { LoomBall, emotionLabelOf, emotionOfSystem, loomBallEnabled, useStableEmotion, type SystemStatusSignal } from "../loomball";
@@ -278,11 +279,11 @@ export function LoomMate() {
   // clampPos 按当前左右栏/尺寸计算；这些值变化时重新校正一次即可。
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navW, railW, viewport.width, viewport.height, widgetW, widgetH]);
-  // 20s 心跳：先扫描事件源再拉收件箱
+  // 20s 心跳：按产品配置扫描事件源，已有收件箱始终保持只读刷新。
   useEffect(() => {
     const h = setInterval(async () => {
       await ensureDemoLogin();
-      await svc().secretary.scan.mutate().catch(() => ({ added: 0 }));
+      if (SECRETARY_AUTO_SCAN) await svc().secretary.scan.mutate().catch(() => ({ added: 0 }));
       await load();
     }, 20_000);
     return () => clearInterval(h);

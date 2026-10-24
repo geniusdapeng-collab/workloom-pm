@@ -18,6 +18,7 @@ import { join, resolve, sep } from "node:path";
 import { svcQuery, serviceTx, appendEventOn } from "./events.js";
 import { llmCall } from "./llm.js";
 import { runExam } from "./eval.js";
+import { captureDevContent, validDevContent, type DevContentSnapshot } from "./devtools-evidence.js";
 import {
   defaultAdapters, startSession, buildTaskPrompt, judgeCommand,
   assertGitRepo, baselineCommit, statusFingerprint, worktreeAdd, worktreeDiscard,
@@ -34,7 +35,7 @@ const newId = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${random
 const MAX_REPAIR_ROUNDS = 2;
 const SESSION_TIMEOUT_MS = Number(process.env.WORKLOOM_DEV_SESSION_TIMEOUT_MS ?? 30 * 60_000);
 const MAX_FENCE_DENIALS = 3;
-const EXAM_BLOCK_VERDICT = "fail";   // 上线考 fail 才拦（pass/warn 放行——warn 已有人工复核环节兜底）
+const DEV_GATES_SCHEMA = "workloom.dev-gates/v3";
 
 type Actor = { id: string; type: "human" | "agent" };
 
@@ -400,6 +401,68 @@ async function handleFailure(workspaceId: string, taskId: string, repo: RepoRow,
 /* ================= S4 代码审计（三道关） ================= */
 
 interface GateResult { name: string; ok: boolean; log: string }
+interface DevGateResults {
+  schema: typeof DEV_GATES_SCHEMA;
+  contentBinding: { taskId: string; sessionId: string; snapshot: DevContentSnapshot };
+  hardGates: GateResult[];
+  llmReview: { ok: boolean; report: string; mock: boolean; state: "passed" | "failed" | "unavailable" };
+  exam: { examId: string; score: number | null; verdict: string | null; mock: boolean;
+    state: "completed" | "unavailable"; status: string | null; totalQuestions: number; finishedAt: string | null; error?: string };
+}
+const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
+const reviewPassed = (report: string) => /^\s*PASS(?:\s|[:：,，。.!]|$)/i.test(report);
+function completedExam(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  const finish = value.finishedAt instanceof Date ? value.finishedAt.toISOString() : value.finishedAt;
+  return typeof value.examId === "string" && value.examId.length > 0 && value.status === "done"
+    && Number.isSafeInteger(value.totalQuestions) && (value.totalQuestions as number) > 0
+    && typeof value.score === "number" && Number.isFinite(value.score) && value.score >= 0 && value.score <= 100
+    && typeof finish === "string" && finish.length > 0 && Number.isFinite(Date.parse(finish))
+    && ["pass", "warn", "fail"].includes(String(value.verdict));
+}
+/** The latest versioned receipt, rather than a task status or old green flag, authorizes release. */
+function verifiedGates(value: unknown): value is DevGateResults {
+  if (!isRecord(value) || value.schema !== DEV_GATES_SCHEMA || !Array.isArray(value.hardGates) || value.hardGates.length === 0
+    || !value.hardGates.every((gate) => isRecord(gate) && gate.ok === true && typeof gate.name === "string" && typeof gate.log === "string")
+    || !value.hardGates.some((gate) => isRecord(gate) && gate.name === "secret-scan")
+    || !isRecord(value.contentBinding) || typeof value.contentBinding.taskId !== "string" || !value.contentBinding.taskId
+    || typeof value.contentBinding.sessionId !== "string" || !value.contentBinding.sessionId || !validDevContent(value.contentBinding.snapshot)
+    || !isRecord(value.llmReview) || value.llmReview.state !== "passed" || value.llmReview.ok !== true || value.llmReview.mock !== false
+    || typeof value.llmReview.report !== "string" || !reviewPassed(value.llmReview.report)
+    || !isRecord(value.exam) || value.exam.state !== "completed" || value.exam.mock !== false || !completedExam(value.exam)) return false;
+  // A completed warn retains the existing explicit human approval gate; absent/unknown verdicts never pass.
+  return value.exam.verdict === "pass" || value.exam.verdict === "warn";
+}
+interface ChangesetEvidence { session_id: string; gate_results: unknown; gates_passed: boolean }
+function releaseVerified(evidence: ChangesetEvidence | undefined, sessionId: string | undefined, taskId: string): evidence is ChangesetEvidence & { gate_results: DevGateResults } {
+  return !!evidence && !!sessionId && evidence.session_id === sessionId && evidence.gates_passed === true && verifiedGates(evidence.gate_results)
+    && evidence.gate_results.contentBinding.taskId === taskId && evidence.gate_results.contentBinding.sessionId === sessionId;
+}
+
+const examTrigger = (taskId: string, sessionId: string) => `dev-task:${taskId}:session:${sessionId}`;
+const isoDate = (value: unknown) => value instanceof Date ? value.toISOString()
+  : typeof value === "string" && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : null;
+async function realExamVerified(workspaceId: string, taskId: string, sessionId: string, exam: DevGateResults["exam"]): Promise<boolean> {
+  const rows = await svcQuery<Record<string, unknown>>(workspaceId,
+    `SELECT e.id,e.workspace_id,e.exam_type,e.trigger_source,e.status,e.total_questions,e.total_score,e.verdict,e.finished_at,e.red_line_hit,
+      (SELECT count(*)::int FROM eval_answers a WHERE a.workspace_id=e.workspace_id AND a.exam_id=e.id) AS answer_count
+     FROM eval_exams e WHERE e.workspace_id=$1 AND e.id=$2 AND e.exam_type='on-change' AND e.trigger_source=$3`,
+    [workspaceId, exam.examId, examTrigger(taskId, sessionId)]);
+  const row = rows[0];
+  if (!row || row.workspace_id !== workspaceId || row.id !== exam.examId || row.exam_type !== "on-change"
+    || row.trigger_source !== examTrigger(taskId, sessionId) || row.red_line_hit !== false || row.total_score === null) return false;
+  const actual = { examId: row.id, status: row.status, totalQuestions: row.total_questions,
+    score: Number(row.total_score), verdict: row.verdict, finishedAt: isoDate(row.finished_at) };
+  return completedExam(actual) && actual.status === exam.status && actual.totalQuestions === exam.totalQuestions
+    && actual.score === exam.score && actual.verdict === exam.verdict && actual.finishedAt === isoDate(exam.finishedAt)
+    && Number(row.answer_count) === actual.totalQuestions;
+}
+async function currentReleaseVerified(workspaceId: string, taskId: string, evidence: ChangesetEvidence | undefined,
+  session: { id: string; worktree_path: string } | undefined): Promise<boolean> {
+  if (!releaseVerified(evidence, session?.id, taskId) || !session) return false;
+  if (!await realExamVerified(workspaceId, taskId, session.id, evidence.gate_results.exam)) return false;
+  return (await captureDevContent(session.worktree_path)).sha256 === evidence.gate_results.contentBinding.snapshot.sha256;
+}
 
 function runCmd(cmd: string, args: string[], cwd: string, timeoutMs = 180_000): Promise<GateResult["log"] extends string ? { ok: boolean; log: string } : never> {
   return new Promise((res) => {
@@ -420,6 +483,8 @@ async function harvest(workspaceId: string, taskId: string, sessionId: string, r
   await svcQuery(workspaceId, `UPDATE dev_tasks SET status='auditing', updated_at=now() WHERE workspace_id=$1 AND id=$2`,
     [workspaceId, taskId]);
 
+  // Bind before gates run: a test, reviewer or concurrent process cannot silently change what was reviewed.
+  const auditedContent = await captureDevContent(session.worktree_path);
   const diff = await collectDiff(session.worktree_path, repo.baseline_branch);
   const changeset: Changeset = { ...diff, selfSummary: session.last_message ?? "" };
 
@@ -449,38 +514,51 @@ async function harvest(workspaceId: string, taskId: string, sessionId: string, r
     log: leaked.length === 0 ? "变更文件未发现凭据模式" : `疑似凭据泄露：${leaked.join("、")}`,
   });
 
-  // —— 第二关：LLM 评审（任务书 vs diff 对照；缺配置走确定性摘要兜底并标 mock） ——
-  let llmReview: { ok: boolean; report: string; mock: boolean };
+  // —— 第二关：LLM 摘要评审（任务与统计，并非完整逐行代码审计；缺配置/调用失败未验证） ——
+  let llmReview: DevGateResults["llmReview"];
   const llm = llmCall("dev-review");
   const diffBrief = `任务：${task.title}\n机床自总结：${changeset.selfSummary.slice(0, 800)}\n变更统计：\n${diff.diffStat.slice(0, 1500)}\n未跟踪新文件：${diff.untracked.join("、") || "无"}`;
   if (llm) {
     try {
       const report = await llm(
-        `你是发布守护。对照任务与变更统计做代码审计：①变更是否覆盖任务目标 ②有无明显夹带/坏味道/风险点。` +
+        `你是发布守护。对照任务与变更统计做摘要评审；你没有收到完整diff，不能声称完成逐行代码审计。①统计与自述是否覆盖任务目标 ②有哪些仍需人工检查的风险。` +
         `首行输出结论：PASS 或 FAIL（附一句话理由），随后列要点。\n\n${diffBrief}`);
-      const pass = /^\s*PASS/i.test(report);
-      llmReview = { ok: pass, report: report.slice(0, 3000), mock: false };
-    } catch (e) {
-      llmReview = { ok: true, report: `（LLM 评审调用失败，降级放行由人工把关：${(e as Error).message.slice(0, 120)}）`, mock: true };
+      const pass = reviewPassed(report);
+      llmReview = { ok: pass, report: report.slice(0, 3000), mock: false, state: pass ? "passed" : "failed" };
+    } catch (error) {
+      const ref = createHash("sha256").update(error instanceof Error ? `${error.name}|${error.message}` : "unknown-model-error").digest("hex").slice(0, 12);
+      llmReview = { ok: false, report: `模型摘要评审调用失败，结果未验证（ref=${ref}）；没有放行`, mock: true, state: "unavailable" };
     }
   } else {
-    llmReview = { ok: true, report: `（模型未配置，跳过 LLM 评审——硬门禁结果与 diff 请人工过目）`, mock: true };
+    llmReview = { ok: false, report: "模型未配置，摘要评审未验证；没有放行", mock: true, state: "unavailable" };
   }
 
-  // —— 第三关：上线考（eval-core 复用：变更即考，fail 才拦） ——
-  let exam: { examId: string; score: number | null; verdict: string | null; mock: boolean };
+  // —— 第三关：上线考（必须完成、有题、有分数和明确结论；异常与缺失回执失败关闭） ——
+  let exam: DevGateResults["exam"];
   try {
-    const r = await runExam(workspaceId, { examType: "on-change", triggerSource: `dev-task:${taskId}`, perStructure: 1 });
-    exam = { examId: r.exam.id, score: r.exam.totalScore, verdict: r.exam.verdict, mock: false };
-  } catch (e) {
-    exam = { examId: "", score: null, verdict: null, mock: true };
-    void e;
+    const r = await runExam(workspaceId, { examType: "on-change", triggerSource: examTrigger(taskId, sessionId), perStructure: 1 });
+    const finish = r.exam.finishedAt as unknown;
+    exam = { examId: r.exam.id, score: r.exam.totalScore, verdict: r.exam.verdict, mock: false,
+      state: "completed", status: r.exam.status, totalQuestions: r.exam.totalQuestions,
+      finishedAt: finish instanceof Date ? finish.toISOString() : typeof finish === "string" ? finish : null };
+    if (!completedExam(exam) || !await realExamVerified(workspaceId, taskId, sessionId, exam)) {
+      exam = { ...exam, state: "unavailable", error: "上线考未取得本工作区、本任务会话的真实完整收卷记录，结果未验证" };
+    }
+  } catch (error) {
+    const ref = createHash("sha256").update(error instanceof Error ? `${error.name}|${error.message}` : "unknown-exam-error").digest("hex").slice(0, 12);
+    exam = { examId: "", score: null, verdict: null, mock: true, state: "unavailable", status: null, totalQuestions: 0,
+      finishedAt: null, error: `上线考调用失败，结果未验证（ref=${ref}）` };
   }
 
+  let contentUnverified = false;
+  try { contentUnverified = (await captureDevContent(session.worktree_path)).sha256 !== auditedContent.sha256; }
+  catch { contentUnverified = true; }
+  hardGates.push({ name: "content-binding", ok: !contentUnverified,
+    log: contentUnverified ? "工作区内容在门禁运行期间发生变化或无法复核，已拒绝放行" : "HEAD、跟踪差异与未跟踪文件 SHA-256 与门禁开始时一致" });
   const hardOk = hardGates.every((g) => g.ok);
-  const examOk = exam.verdict !== EXAM_BLOCK_VERDICT;
-  const gatesPassed = hardOk && llmReview.ok && examOk;
-  const gateResults = { hardGates, llmReview, exam };
+  const examOk = exam.state === "completed" && (exam.verdict === "pass" || exam.verdict === "warn");
+  const gateResults: DevGateResults = { schema: DEV_GATES_SCHEMA, contentBinding: { taskId, sessionId, snapshot: auditedContent }, hardGates, llmReview, exam };
+  const gatesPassed = verifiedGates(gateResults);
 
   const changesetId = newId("dc");
   await serviceTx(workspaceId, async (client, sc) => {
@@ -502,8 +580,21 @@ async function harvest(workspaceId: string, taskId: string, sessionId: string, r
     const reasons = [
       ...hardGates.filter((g) => !g.ok).map((g) => `硬门禁 ${g.name} 未过：${g.log.slice(0, 300)}`),
       ...(llmReview.ok ? [] : [`LLM 评审未过：${llmReview.report.slice(0, 300)}`]),
-      ...(examOk ? [] : [`上线考 verdict=fail（exam ${exam.examId}）`]),
+      ...(examOk ? [] : [exam.error ?? `上线考未通过（verdict=${exam.verdict ?? "无"}，exam=${exam.examId || "未收卷"}）`]),
     ].join("\n");
+    if (contentUnverified || llmReview.state === "unavailable" || exam.state === "unavailable") {
+      // Retrying the coding CLI cannot repair a missing reviewer or failed exam infrastructure.
+      // Preserve its worktree and stop, rather than burning additional paid repair sessions.
+      await serviceTx(workspaceId, async (client, sc) => {
+        await client.query(`UPDATE dev_tasks SET status='failed', review_note=$3, updated_at=now() WHERE workspace_id=$1 AND id=$2`,
+          [workspaceId, taskId, redact(`门禁未验证，已停止自动返修并保留隔离工作区：${reasons}`)]);
+        await appendEventOn(client, sc, { id: "release-guardian", type: "agent" }, {
+          objectType: "dev_task", objectId: taskId, action: "dev.gates.unverified",
+          after: { changesetId, llmState: llmReview.state, examState: exam.state, automaticRepair: false },
+        });
+      });
+      return { changesetId, gatesPassed, gateResults };
+    }
     const sessions2 = await svcQuery<{ worktree_path: string; branch: string }>(workspaceId,
       `SELECT worktree_path, branch FROM dev_sessions WHERE task_id=$1 ORDER BY started_at DESC LIMIT 1`, [taskId]);
     await handleFailure(workspaceId, taskId, repo, sessions2[0]!.worktree_path, sessions2[0]!.branch, reasons, actor);
@@ -546,10 +637,13 @@ export async function approveRelease(workspaceId: string, taskId: string, input:
   const repos = await svcQuery<RepoRow>(workspaceId, `SELECT * FROM dev_repos WHERE id=$1`, [task.repo_id]);
   const repo = repos[0]!;
   const sessions = await svcQuery<{ id: string; worktree_path: string; branch: string }>(workspaceId,
-    `SELECT id, worktree_path, branch FROM dev_sessions WHERE task_id=$1 ORDER BY started_at DESC LIMIT 1`, [taskId]);
+    `SELECT id, worktree_path, branch FROM dev_sessions WHERE task_id=$1 ORDER BY started_at DESC,id DESC LIMIT 1`, [taskId]);
   const session = sessions[0]!;
-  const changesets = await svcQuery<{ gate_results: unknown }>(workspaceId,
-    `SELECT gate_results FROM dev_changesets WHERE task_id=$1 ORDER BY created_at DESC LIMIT 1`, [taskId]);
+  const changesets = await svcQuery<{ id: string; session_id: string; gate_results: unknown; gates_passed: boolean }>(workspaceId,
+    `SELECT id,session_id,gate_results,gates_passed FROM dev_changesets WHERE task_id=$1 ORDER BY created_at DESC,id DESC LIMIT 1`, [taskId]);
+  if (!await currentReleaseVerified(workspaceId, taskId, changesets[0], session).catch(() => false)) {
+    throw new Error("门禁凭据缺失、过期、考试未绑定或工作区内容指纹已变化，拒绝发布；请重新核验当前内容与真实上线考");
+  }
 
   // 机床未提交的改动由系统兜底提交（合并前置）
   await commitWorktreeChanges(session.worktree_path, `feat(dev): ${task.title}（DevFabric 任务 ${task.id}）`);
@@ -577,7 +671,7 @@ export async function approveRelease(workspaceId: string, taskId: string, input:
   await createTag(repo.path, version, `release ${version}：${task.title}`);
   await worktreeDiscard(repo.path, session.worktree_path, session.branch).catch(() => undefined);
 
-  const auditHash = createHash("sha1").update(JSON.stringify(changesets[0]?.gate_results ?? {})).digest("hex");
+  const auditHash = createHash("sha256").update(JSON.stringify(changesets[0]?.gate_results ?? {})).digest("hex");
   const releaseId = newId("rel");
   const release = await serviceTx(workspaceId, async (client, sc) => {
     const r = await client.query(
@@ -598,22 +692,37 @@ export async function approveRelease(workspaceId: string, taskId: string, input:
 /* ================= 查询面（P25 轮询） ================= */
 
 export async function listTasks(workspaceId: string) {
-  return { tasks: await svcQuery(workspaceId,
-    `SELECT t.*, r.name AS repo_name FROM dev_tasks t JOIN dev_repos r ON r.id=t.repo_id
-     ORDER BY t.created_at DESC LIMIT 100`) };
+  const rows = await svcQuery<Record<string, unknown> & {
+    id: string; latest_gate_results: unknown; latest_gates_passed: boolean; latest_gate_session: string; latest_session_id: string; latest_worktree_path: string;
+  }>(workspaceId,
+    `SELECT t.*, r.name AS repo_name, c.gate_results AS latest_gate_results, c.gates_passed AS latest_gates_passed,
+       c.session_id AS latest_gate_session,s.id AS latest_session_id,s.worktree_path AS latest_worktree_path
+     FROM dev_tasks t JOIN dev_repos r ON r.id=t.repo_id
+     LEFT JOIN LATERAL (SELECT gate_results,gates_passed,session_id FROM dev_changesets
+       WHERE task_id=t.id AND workspace_id=t.workspace_id ORDER BY created_at DESC,id DESC LIMIT 1) c ON true
+     LEFT JOIN LATERAL (SELECT id,worktree_path FROM dev_sessions WHERE task_id=t.id AND workspace_id=t.workspace_id
+       ORDER BY started_at DESC,id DESC LIMIT 1) s ON true
+     ORDER BY t.created_at DESC,t.id DESC LIMIT 100`);
+  return { tasks: await Promise.all(rows.map(async ({ latest_gate_results, latest_gates_passed, latest_gate_session, latest_session_id, latest_worktree_path, ...row }) => ({
+    ...row, release_verified: row.status === "pending_approval" && await currentReleaseVerified(workspaceId, row.id,
+      { gate_results: latest_gate_results, gates_passed: latest_gates_passed, session_id: latest_gate_session },
+      { id: latest_session_id, worktree_path: latest_worktree_path }).catch(() => false),
+  }))) };
 }
 
 export async function taskDetail(workspaceId: string, taskId: string) {
   const tasks = await svcQuery(workspaceId,
     `SELECT t.*, r.name AS repo_name, r.path AS repo_path FROM dev_tasks t JOIN dev_repos r ON r.id=t.repo_id WHERE t.id=$1`, [taskId]);
   const sessions = await svcQuery(workspaceId,
-    `SELECT * FROM dev_sessions WHERE task_id=$1 ORDER BY started_at DESC`, [taskId]);
+    `SELECT * FROM dev_sessions WHERE task_id=$1 ORDER BY started_at DESC,id DESC`, [taskId]);
   const changesets = await svcQuery(workspaceId,
-    `SELECT * FROM dev_changesets WHERE task_id=$1 ORDER BY created_at DESC`, [taskId]);
+    `SELECT * FROM dev_changesets WHERE task_id=$1 ORDER BY created_at DESC,id DESC`, [taskId]);
   const fences = await svcQuery(workspaceId,
     `SELECT f.* FROM dev_fences_audit f JOIN dev_sessions s ON s.id=f.session_id
      WHERE s.task_id=$1 ORDER BY f.id DESC LIMIT 50`, [taskId]);
-  return { task: tasks[0] ?? null, sessions, changesets, fences, live: running.has(taskId) };
+  return { task: tasks[0] ? { ...tasks[0], release_verified: tasks[0].status === "pending_approval" && await currentReleaseVerified(workspaceId, taskId,
+    changesets[0] as unknown as ChangesetEvidence | undefined, sessions[0] as { id: string; worktree_path: string } | undefined).catch(() => false) } : null,
+    sessions, changesets, fences, live: running.has(taskId) };
 }
 
 /** 会话事件流（增量轮询：afterSeq 之后的新事件） */

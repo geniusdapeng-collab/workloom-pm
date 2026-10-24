@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
+import { runInNewContext } from "node:vm";
 import YAML from "yaml";
 
 const workflowsUrl = new URL("../.github/workflows/", import.meta.url);
@@ -134,6 +135,31 @@ test("legacy packers and platform evidence keep read-only repository permissions
   assert.deepEqual(safetyWorkflow.permissions, { contents: "read" });
   assert.deepEqual(releaseWriteSignals(safetyWorkflow), []);
   assert.match(safety, /actions\/upload-artifact@[0-9a-f]{40}/u);
+});
+
+test("inherited safety checks run in product copies while mirror writes remain source-repository only", () => {
+  const workflow = YAML.parse(readFileSync(new URL("safety-gate.yml", workflowsUrl), "utf8"));
+  const mirror = workflow.jobs["mirror-backup"];
+  const cases = [
+    ["geniusdapeng-collab/workloom-im", "refs/heads/main", "push", true],
+    ["geniusdapeng-collab/workloom-pm", "refs/heads/main", "push", false],
+    ["other-owner/workloom-im", "refs/heads/main", "push", false],
+    ["geniusdapeng-collab/workloom-im", "refs/heads/task/test", "push", false],
+    ["geniusdapeng-collab/workloom-im", "refs/heads/main", "pull_request", false],
+    ["geniusdapeng-collab/workloom-im", "refs/heads/main", "workflow_dispatch", false],
+    ["geniusdapeng-collab/workloom-im", "refs/tags/v1.0.0", "push", false],
+    ["", "refs/heads/main", "push", false],
+  ];
+  for (const [repository, ref, event_name, expected] of cases) {
+    const actual = runInNewContext(mirror.if, { github: { repository, ref, event_name } }, { timeout: 100 });
+    assert.equal(actual, expected, `${repository}:${ref}:${event_name}`);
+  }
+  assert.equal(mirror.if, "github.repository == 'geniusdapeng-collab/workloom-im' && github.ref == 'refs/heads/main' && github.event_name == 'push'");
+  assert.equal(mirror.needs, "static-and-tests");
+  assert.equal(workflow.jobs["guard-and-classify"].if, undefined);
+  assert.equal(workflow.jobs["static-and-tests"].if, undefined);
+  assert.equal(workflow.jobs["static-and-tests"].needs, "guard-and-classify");
+  assert.deepEqual(workflow.on, { pull_request: { branches: ["main"] }, push: { branches: ["main"] } });
 });
 
 test("local PAT publisher fails before reading credentials or touching the network", () => {

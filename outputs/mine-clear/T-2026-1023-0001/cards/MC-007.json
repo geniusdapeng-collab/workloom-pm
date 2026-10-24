@@ -1,0 +1,48 @@
+{
+  "id": "MC-007",
+  "kind": "problem",
+  "title": "线程已认领后装配或规划异常可遗留running僵尸",
+  "severity": "P1",
+  "level": "L2",
+  "batch": 2,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "apps/server/src/runtime/thread-runner.ts:364@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    }
+  ],
+  "root_cause": {
+    "file": "apps/server/src/runtime/thread-runner.ts",
+    "line": 364,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "runQuestForThread"
+  },
+  "trigger_path": "CAS置running后resolvePreset、部署工具、词表或runQuest抛错，旧统一执行器无终态失败保护。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "CAS置running后resolvePreset、部署工具、词表或runQuest抛错，旧统一执行器无终态失败保护。",
+      "expect": "有权限且本worker认领的异常线程进入可见失败并同事务写WorkData；不覆盖其它worker或真实pending_review；哈希链有效。",
+      "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/legacy.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+}

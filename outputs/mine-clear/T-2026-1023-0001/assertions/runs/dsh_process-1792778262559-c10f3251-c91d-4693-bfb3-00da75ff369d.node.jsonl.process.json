@@ -1,0 +1,24 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "dsh_process",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "--test-reporter=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/delivery/node-test-reporter.mjs",
+    "--test-reporter-destination=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/dsh_process-1792778262559-c10f3251-c91d-4693-bfb3-00da75ff369d.node.jsonl",
+    "--test-reporter=tap",
+    "--test-reporter-destination=stdout",
+    "--import",
+    "tsx",
+    "--test",
+    "--test-concurrency=1",
+    "scripts/pm-dsh-integration.test.mts"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm",
+  "startedAt": "2026-10-23T17:57:42.559Z",
+  "finishedAt": "2026-10-23T17:57:42.591Z",
+  "exitCode": 1,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "Could not find 'scripts/pm-dsh-integration.test.mts'\n"
+}

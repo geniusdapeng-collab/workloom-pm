@@ -7,6 +7,9 @@ const path = require("node:path");
 const { describe, it } = require("node:test");
 const {
   bootstrap,
+  parseDesktopStartPath,
+  resolveDesktopStartPath,
+  desktopWebUrl,
   installPayloadAtomically,
   writeInstallCheckpoint,
   parseDesktopPort,
@@ -61,6 +64,28 @@ function transientDirectories(supportDir) {
 }
 
 describe("桌面载荷原子装配", () => {
+  it("源码与安装包启动路径只采用受控本地路由，保留旧产品根路由默认", async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "workloom-start-route-"));
+    const packageFile = path.join(root, "package.json");
+    try {
+      assert.equal(parseDesktopStartPath(), "/");
+      assert.equal(resolveDesktopStartPath({ packageFile }), "/");
+      fs.writeFileSync(packageFile, JSON.stringify({ workloomStartPath: "/development" }));
+      assert.equal(resolveDesktopStartPath({ packageFile }), "/development");
+      assert.equal(resolveDesktopStartPath({ packageFile, configured: "/settings" }), "/settings");
+      assert.equal(desktopWebUrl(5373, "/development"), "http://127.0.0.1:5373/development");
+      for (const configured of [null, "", "//evil.invalid", "https://evil.invalid", "/../settings", "/%2e%2e/settings",
+        "/development?x=1", "/development#hash", "/a\\b", "/a\nb"]) {
+        assert.throws(() => resolveDesktopStartPath({ packageFile, configured }), /START_PATH/);
+      }
+      fs.writeFileSync(packageFile, "{broken}");
+      assert.throws(() => resolveDesktopStartPath({ packageFile }), /无法读取或解析/);
+      const untouched = path.join(root, "must-not-create");
+      await assert.rejects(bootstrap({ resourcesDir: root, supportDir: untouched, startPath: "//evil.invalid" }), /START_PATH/);
+      assert.equal(fs.existsSync(untouched), false);
+    } finally { fs.rmSync(root, { recursive: true, force: true }); }
+  });
+
   it("解析物理路径后向 tar 传相对路径，并为 Windows 跨盘符暂存归档", () => {
     const destination = "D:\\a\\_temp\\wl-smoke\\.payload-cache";
     const sameDrive = tarExtractionPlan(

@@ -1,0 +1,2462 @@
+{
+  "task_id": "T-2026-1023-0001",
+  "batches": [
+    {
+      "batch": 0,
+      "name": "第 0 批 · 止血",
+      "cards": [
+        {
+          "id": "MC-005",
+          "kind": "problem",
+          "title": "GitHub凭据会随API回退发送给第三方端点",
+          "severity": "P0",
+          "level": "L3",
+          "batch": 0,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/aipm.ts:36@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/aipm.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+              "note": "A: token-bearing headers are shared with every fallback base"
+            }
+          ],
+          "root_cause": {
+            "file": "apps/server/src/service/aipm.ts",
+            "line": 36,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "ghFetch/githubPulse"
+          },
+          "trigger_path": "已读取GitHubBearer，官方端点失败或重定向后，旧默认fallback继续携带相同headers。只允许假token夹具复现。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "已读取GitHubBearer，官方端点失败或重定向后，旧默认fallback继续携带相同headers。只允许假token夹具复现。",
+              "expect": "带凭据请求只能访问固定官方GitHub API并拒绝redirect；第三方端点从未收到Authorization；匿名开发夹具仍可用。",
+              "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/aipm.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+        },
+        {
+          "id": "MC-008",
+          "kind": "problem",
+          "title": "开发质量门禁把缺失模型评审和考试当作通过",
+          "severity": "P1",
+          "level": "L3",
+          "batch": 0,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/devtools.ts:464@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "be80011bb797c58a1a05fc62745cbeeb044fc146069b3bbc2be23f681b78730f",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "root_cause": {
+            "file": "apps/server/src/service/devtools.ts",
+            "line": 464,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "collectAndAudit/approveRelease"
+          },
+          "trigger_path": "模型评审未配置/抛错或runExam异常时，原ok:true/null verdict仍使gatesPassed为true，旧bool可到发布。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "模型评审未配置/抛错或runExam异常时，原ok:true/null verdict仍使gatesPassed为true，旧bool可到发布。",
+              "expect": "缺失、模拟、失败、错scope/任务/会话/分数/答案的考试或变更后内容摘要均不能通过；真实同scope考试与worktree摘要一致才可到git边界。",
+              "command": "node --test assertions/devtools.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/devtools.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/devtools.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+        },
+        {
+          "id": "MC-106",
+          "kind": "fix",
+          "covers": [
+            "MC-005"
+          ],
+          "title": "GitHub凭据限定官方源且禁止redirect",
+          "batch": 0,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/aipm.ts:36@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/aipm.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+              "note": "A: token-bearing headers are shared with every fallback base"
+            }
+          ],
+          "fix_plan": "有token时固定api.github.com+redirect:error；第三方fallback仅匿名，测试只用假凭据。",
+          "blast_radius": "网络失败显式mock/未验证；不会以可达性为由转发客户GitHub凭据。",
+          "conflict_paths": [
+            "apps/server/src/service/aipm.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "带凭据请求只能访问固定官方GitHub API并拒绝redirect；第三方端点从未收到Authorization；匿名开发夹具仍可用。",
+              "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/aipm.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root",
+          "eligible_acceptance_actors": [
+            "/root/intent_audit"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+        },
+        {
+          "id": "MC-109",
+          "kind": "fix",
+          "covers": [
+            "MC-008"
+          ],
+          "title": "三关失败关闭并绑定真实考试和变更内容",
+          "batch": 0,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/devtools.ts:464@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "be80011bb797c58a1a05fc62745cbeeb044fc146069b3bbc2be23f681b78730f",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "fix_plan": "模型/考试基础设施缺失标未验证；发布前回读真实考试/答案/scope/task/session与受审worktree内容hash。",
+          "blast_radius": "旧bool收据不能放行；UI区分失败与未验证，人工批准不代替不存在考试。",
+          "conflict_paths": [
+            "apps/server/src/service/devtools.ts",
+            "apps/server/src/service/devtools-evidence.ts",
+            "apps/web/src/pages/P25.tsx"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "缺失、模拟、失败、错scope/任务/会话/分数/答案的考试或变更后内容摘要均不能通过；真实同scope考试与worktree摘要一致才可到git边界。",
+              "command": "node --test assertions/devtools.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/devtools.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/devtools.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/sandbox_prepare",
+          "eligible_acceptance_actors": [
+            "/root",
+            "/root/deepseek_research"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。首轮failclosed由/root/intent_audit实施，后续真实考试/hash绑定由/root/sandbox_prepare实施；两者均不能自验。"
+        },
+        {
+          "id": "MC-115",
+          "kind": "fix",
+          "covers": [
+            "MC-001"
+          ],
+          "title": "物理请求前预占和费用硬闸",
+          "batch": 0,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/base/model-router/providers.ts:97@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "8bbd358b29e2d4f6ba174be3530d0cd0b42a9547ec730ec44033d98c619a64a9",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "fix_plan": "loopback代理持真key、产品持哨兵；每物理模型和Search/Fetch请求先预占；未知结果冻结；不自动重试/重置预算。",
+          "blast_radius": "严格分开模型请求、工具请求、实际usage与保守预算；此断言全为免费fixture。",
+          "conflict_paths": [
+            "scripts/pm-budget-proxy.mjs",
+            "scripts/pm-token-count.py"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+              "command": "node --test assertions/budget.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/budget.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/budget.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root",
+          "eligible_acceptance_actors": [
+            "/root/intent_audit"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+        },
+        {
+          "id": "MC-117",
+          "kind": "fix",
+          "covers": [
+            "MC-002"
+          ],
+          "title": "冻结沙箱内可信断言与加载器出口防生成代码篡改独立验收",
+          "batch": 0,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+            }
+          ],
+          "fix_plan": "在真实隔离测试child启动前加载可信preload，冻结assert/test出口、加载器/cache/hook与内建intrinsics；兼容正常ESM/CJS；OS负向验证value0不能让独立assert42通过。",
+          "blast_radius": "这是本轮新增代码验证器的引入回归，不能伪指向e5中不存在的code-verifier源码。只强化当前零依赖JS验收，不能承诺其它语言/平台隔离。",
+          "conflict_paths": [
+            "apps/server/src/industry/ai-pm/code-verifier.ts",
+            "apps/server/src/industry/ai-pm/code-test-runner.mjs",
+            "apps/server/src/industry/ai-pm/code-test-preload.mjs",
+            "apps/server/src/industry/ai-pm/code-verifier-independent.test.ts",
+            "scripts/pack-electron-payload.sh"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+              "expect": "实际Seatbelt+Node24中direct assert/noop、ESM、CJS、反射、加载器、cache与hook攻击不能把独立错断言变绿；正常上下文/CJS仍运行。两套至少17真实passed，0skip，maxWorkers1。",
+              "command": "node --test assertions/code.test.mjs",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/code.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/code.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚正式含修复的提交并禁用不可信代码自动验收；保留旧产物、事件和红色证明，不把旧假绿当完成。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/sandbox_prepare",
+          "eligible_acceptance_actors": [
+            "/root/deepseek_research"
+          ],
+          "introduced_during_repair": true,
+          "introduced_regression_evidence": [
+            {
+              "path": "discovery/pm-assert-probe-before.json",
+              "sha256": "10ca256ac5ee08db7981060b49856321c028a8dded8c41cf5e238f5e0c794f0a",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+            },
+            {
+              "path": "discovery/pm-assert-loader-baseline-receipts.json",
+              "sha256": "7b6d40385668832b2d32b13861002d5b4df276e33c5d24154bc3b3f5a752039f",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+            }
+          ],
+          "notes": "原MC002能力缺口催生本轮新验证器；本卡锚定MC002原始问题，但回归发现是修复过程中真实OS证据。/root写过原验证器，正式独立验收指定deepseek；不可伪造pre-repair commit。"
+        }
+      ]
+    },
+    {
+      "batch": 1,
+      "name": "第 1 批 · 地基",
+      "cards": [
+        {
+          "id": "MC-001",
+          "kind": "problem",
+          "title": "原模型提供方缺少DeepSeek工具与完整计量协议",
+          "severity": "P1",
+          "level": "L3",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/base/model-router/providers.ts:97@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "8bbd358b29e2d4f6ba174be3530d0cd0b42a9547ec730ec44033d98c619a64a9",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "root_cause": {
+            "file": "packages/base/model-router/providers.ts",
+            "line": 97,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "OpenAiCompatibleProvider.chat"
+          },
+          "trigger_path": "需要function tools/search/fetch或thinking工具循环时，原接口只发送文本并只读content，usage缺失记0。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "需要function tools/search/fetch或thinking工具循环时，原接口只发送文本并只读content，usage缺失记0。",
+              "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+              "command": "node --test assertions/providers.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/providers.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "需要function tools/search/fetch或thinking工具循环时，原接口只发送文本并只读content，usage缺失记0。",
+              "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+              "command": "node --test assertions/budget.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/budget.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/providers.test.mjs then node --test assertions/budget.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+        },
+        {
+          "id": "MC-002",
+          "kind": "problem",
+          "title": "原Quest缺少AI产品经理驱动的员工DAG与真实依赖交付",
+          "severity": "P1",
+          "level": "L3",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+            }
+          ],
+          "root_cause": {
+            "file": "packages/runtime/src/loop.ts",
+            "line": 56,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "QuestStep/runQuest"
+          },
+          "trigger_path": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/team.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/team.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/dsh_process.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/dsh_process.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/code.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/code.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/oneshot.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/oneshot.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "用户提出需求→PRD→实现→测试→交付时，旧Quest只按单preset顺序执行预计划工具参数，无员工依赖产物与主链DSH。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/closure.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/closure.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/team.test.mjs then node --test assertions/dsh_process.test.mjs then node --test assertions/code.test.mjs then node --test assertions/oneshot.test.mjs then node --test assertions/closure.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+        },
+        {
+          "id": "MC-003",
+          "kind": "problem",
+          "title": "客户端载荷清理会删除第三方必需的nested依赖",
+          "severity": "P1",
+          "level": "L3",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "scripts/pack-electron-payload.sh:117@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "755bf17f0e36f0c441df01ed2af10ad803a1c88c2f02167af8287e41d1047a1e",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "root_cause": {
+            "file": "scripts/pack-electron-payload.sh",
+            "line": 117,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "runtime node_modules pruning"
+          },
+          "trigger_path": "运行期npm闭包具有第三方内部node_modules时，旧find按目录名批量删除，使已安装DSH等依赖无法加载。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "运行期npm闭包具有第三方内部node_modules时，旧find按目录名批量删除，使已安装DSH等依赖无法加载。",
+              "expect": "只删除复制的一方工作区node_modules；第三方nested依赖可真实import；锁文件与运行期清单一致。",
+              "command": "node --test assertions/payload.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/payload.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+        },
+        {
+          "id": "MC-009",
+          "kind": "problem",
+          "title": "完整复制后沿用源产品身份会碰撞客户端资料与端口",
+          "severity": "P1",
+          "level": "L3",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "product.manifest.json:3@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "cd79d5cb5627b55fb7fc2d0547e45fb5fc0c3e611adcc066b3432a20a1ea7e2d",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "root_cause": {
+            "file": "product.manifest.json",
+            "line": 3,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "product identity"
+          },
+          "trigger_path": "把源完整复制成workloom-pm而不派生manifest时，仍为workloom-im/base/com.workloom.im/offset0，不能成为独立PM产品。原仓身份本身并非错误。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "把源完整复制成workloom-pm而不派生manifest时，仍为workloom-im/base/com.workloom.im/offset0，不能成为独立PM产品。原仓身份本身并非错误。",
+              "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+              "command": "node --test assertions/identity.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/identity.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "把源完整复制成workloom-pm而不派生manifest时，仍为workloom-im/base/com.workloom.im/offset0，不能成为独立PM产品。原仓身份本身并非错误。",
+              "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+              "command": "node --test assertions/desktop.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/desktop.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/identity.test.mjs then node --test assertions/desktop.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+        },
+        {
+          "id": "MC-014",
+          "kind": "problem",
+          "title": "生产Vite配置运行时导入dev-only Vitest导致真实载荷启动失败",
+          "severity": "P1",
+          "level": "L3",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/web/vite.config.ts:4@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "df78fa7098772cb1e10d344a14461290c8005676e545491962a93f0e87e98307",
+              "note": "A: 已全文读原始Vite配置；value import在真实无Vitest生产stage无法解析。"
+            }
+          ],
+          "root_cause": {
+            "file": "apps/web/vite.config.ts",
+            "line": 4,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "Vite defineConfig runtime import"
+          },
+          "trigger_path": "源码环境装有Vitest时preview正常；真正仅生产依赖的.app首启在web健康阶段失败，ERR_MODULE_NOT_FOUND。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+              "expect": "当前锁定真实native npm stage不可解析Vitest，三个客户端实际启动preview并HTTP200，返回正文SHA等于当前dist首页。异宿主config-only不计native通过。",
+              "command": "node --test assertions/runtime_preview.test.mjs",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runtime_preview.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/runtime_preview.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "dynamic_discovery": [
+            {
+              "path": "discovery/pm-vite-runtime-before.json",
+              "sha256": "2b2a472d363715a7faf13815d2fcb305b8df0a6869775458a370a8be89227cf1",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+            },
+            {
+              "path": "discovery/pm-vite-runtime-before.log",
+              "sha256": "179c3e35660b00c12195d93e7d60a894f77a418ac2a3b5f6020a7266625ea692",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+            },
+            {
+              "path": "discovery/pm-packaged-desktop-first-failure.json",
+              "sha256": "6aae3f6e4df68dd4368214f1d277037b14cb3dcc6df1881f0d45a230a05ef889",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+            }
+          ],
+          "notes": "原始e5问题，真实.app失败在修复阶段补录。仅HTTP preview不能替代最终安装包/首启登录/数据库验收；正式MCD仍待clean commit。"
+        },
+        {
+          "id": "MC-101",
+          "kind": "fix",
+          "covers": [
+            "MC-001"
+          ],
+          "title": "DeepSeek完整completion/function tools协议",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/base/model-router/providers.ts:97@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "8bbd358b29e2d4f6ba174be3530d0cd0b42a9547ec730ec44033d98c619a64a9",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "fix_plan": "保留兼容chat；新增完整消息、工具多轮、thinking、结束状态与必需usage验证。",
+          "blast_radius": "旧模型路由兼容面与新PM真实provider共享底层，缺usage不得静默计0。",
+          "conflict_paths": [
+            "packages/base/model-router/providers.ts",
+            "packages/base/model-router/deepseek-tools.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+              "command": "node --test assertions/providers.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/providers.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/providers.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/deepseek_research",
+          "eligible_acceptance_actors": [
+            "/root"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+        },
+        {
+          "id": "MC-102",
+          "kind": "fix",
+          "covers": [
+            "MC-002"
+          ],
+          "title": "行业团队DAG与租户状态持久化",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+            }
+          ],
+          "fix_plan": "新增独立PM HTTP/service/store/artifacts/employees/policy层，真实14岗资产与双RLS，完整目标、hash依赖、取消恢复及计量。",
+          "blast_radius": "原Quest保留；新行业层单独建表/真实文件，HTTP权限实时查询。",
+          "conflict_paths": [
+            "apps/server/src/industry/ai-pm",
+            "packages/db/migrations/0043_pm_team.sql"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/team.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/team.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/team.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/intent_audit",
+          "eligible_acceptance_actors": [
+            "/root/deepseek_research"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+        },
+        {
+          "id": "MC-103",
+          "kind": "fix",
+          "covers": [
+            "MC-002"
+          ],
+          "title": "真实DSH受限员工执行器与预算错误归类",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+            }
+          ],
+          "fix_plan": "直接声明锁定DSH依赖；真实子进程仅有三文件工具；要求会话/final/turn_end/退出码与文件hash；HTTP429保留typed budget。",
+          "blast_radius": "禁止宿主shell/任意网络/未声明路径；DSH输出不能凭文本声称成功。",
+          "conflict_paths": [
+            "apps/server/src/industry/ai-pm/dsh-adapter.ts",
+            "apps/server/src/industry/ai-pm/dsh-workspace.plugin.mjs",
+            "apps/server/src/industry/ai-pm/acceptance/dsh-integration.mts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/dsh_unit.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/dsh_unit.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/dsh_process.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/dsh_process.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/dsh_unit.test.mjs then node --test assertions/dsh_process.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/sandbox_prepare",
+          "eligible_acceptance_actors": [
+            "/root/deepseek_research"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。后续HTTP429 typed分类由/root追加，验收者仍须独立于二者。"
+        },
+        {
+          "id": "MC-104",
+          "kind": "fix",
+          "covers": [
+            "MC-003"
+          ],
+          "title": "运行期第三方nested与peer闭包保留",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "scripts/pack-electron-payload.sh:117@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "755bf17f0e36f0c441df01ed2af10ad803a1c88c2f02167af8287e41d1047a1e",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "fix_plan": "按workspace manifest逐包清理一方node_modules，保留第三方nested；刷新运行期锁与peer闭包并实装验证。",
+          "blast_radius": "影响Electron npm平铺载荷；断言不等于全平台安装包验收，实际npm stage另有主任务取证。",
+          "conflict_paths": [
+            "scripts/prune-workspace-deps.mjs",
+            "scripts/pack-electron-payload.sh",
+            ".workloom-runtime-deps"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "只删除复制的一方工作区node_modules；第三方nested依赖可真实import；锁文件与运行期清单一致。",
+              "command": "node --test assertions/payload.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/payload.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/sandbox_prepare",
+          "eligible_acceptance_actors": [
+            "/root/intent_audit"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+        },
+        {
+          "id": "MC-110",
+          "kind": "fix",
+          "covers": [
+            "MC-009"
+          ],
+          "title": "派生独立PM身份和源码默认端口资料目录",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "product.manifest.json:3@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "cd79d5cb5627b55fb7fc2d0547e45fb5fc0c3e611adcc066b3432a20a1ea7e2d",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "fix_plan": "保持完整内容和原README归档；由manifest派生产品身份、端口偏移和userData/support目录，更新PM产品说明。",
+          "blast_radius": "不改变源仓；原二进制/源端口继续独立，避免新产品污染旧资料。",
+          "conflict_paths": [
+            "product.manifest.json",
+            "package.json",
+            "electron-builder.yml",
+            "scripts/desktop-app.mts",
+            "README.md",
+            "README.en.md",
+            "AGENTS.override.md"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+              "command": "node --test assertions/identity.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/identity.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "新产品身份为workloom-pm/industry/com.workloom.pm/offset200；源码端口与用户资料目录按产品派生；原README归档保留。",
+              "command": "node --test assertions/desktop.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/desktop.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/identity.test.mjs then node --test assertions/desktop.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/deepseek_research",
+          "eligible_acceptance_actors": [
+            "/root/intent_audit"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。 本地AGENTS.override.md声明独立PM产品和隔离边界，上游AGENTS.repo/产品上下文逐字保留；此文件由/root追加，故/root不得独立验整卡，/root/intent_audit仍独立。"
+        },
+        {
+          "id": "MC-112",
+          "kind": "fix",
+          "covers": [
+            "MC-002"
+          ],
+          "title": "生成代码必须真实OS隔离执行并防伪造TAP",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+            }
+          ],
+          "fix_plan": "OS沙箱+Node权限、清env、禁网/子进程、超时/输出限额；用可信TestsStream证据，不解析模型打印TAP；模型测试不能自称trusted。",
+          "blast_radius": "仅零依赖JS自动执行；其它语言明确未运行；实际生成测试不是需求全面覆盖证明。",
+          "conflict_paths": [
+            "apps/server/src/industry/ai-pm/code-verifier.ts",
+            "apps/server/src/industry/ai-pm/code-test-runner.mjs"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/code.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/code.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/code.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root",
+          "eligible_acceptance_actors": [
+            "/root/deepseek_research"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。",
+          "introduced_regression_evidence": [
+            {
+              "path": "discovery/pm-code-independent-before.json",
+              "sha256": "1204afc759068c7b2ccd011b94a2bda93ab0f0b6f08d14dbaf111ae3fd24c980",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复过程中真实运行/回放的原始留痕；不是审计提交中存在的源码，也不是干净修复基线的正式MCD验收运行。"
+            }
+          ]
+        },
+        {
+          "id": "MC-113",
+          "kind": "fix",
+          "covers": [
+            "MC-002"
+          ],
+          "title": "产品HTTP挂载移回排除的行业组合根",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+            }
+          ],
+          "fix_plan": "行业组合根导出productHttpRoutes；公共index只消费可选通用Hono数组，不引用PM路径/行业模块；不改sync白名单。",
+          "blast_radius": "保留/api/pm HTTP行为与原tRPC类型；Hono<any>仅用于可信挂载内部擦除局部env类型。",
+          "conflict_paths": [
+            "apps/server/src/trpc/router.ts",
+            "apps/server/src/index.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/closure.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/closure.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/closure.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/intent_audit",
+          "eligible_acceptance_actors": [
+            "/root/deepseek_research"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。公共index对接由/root实施，故/root也不能独立验此组合缝。"
+        },
+        {
+          "id": "MC-118",
+          "kind": "fix",
+          "covers": [
+            "MC-003",
+            "MC-014"
+          ],
+          "title": "三条发行线统一保留nested依赖并用无Vitest的生产preview验真",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "scripts/pack-electron-payload.sh:117@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "755bf17f0e36f0c441df01ed2af10ad803a1c88c2f02167af8287e41d1047a1e",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/web/vite.config.ts:4@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "df78fa7098772cb1e10d344a14461290c8005676e545491962a93f0e87e98307",
+              "note": "A: 已全文读原始Vite配置；value import在真实无Vitest生产stage无法解析。"
+            },
+            {
+              "type": "code",
+              "ref": "scripts/pack-macos.sh:107@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "47f81f9b178bf9cd49161bf86980411d75ab4d68f914e6b0d99ac51e794dff3e",
+              "note": "A: 已全文读原应急macOS线，全第三方node_modules目录按名删除。"
+            },
+            {
+              "type": "code",
+              "ref": "scripts/pack-windows.sh:122@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "92a284c72fb5581f460f0e05474b099a6cbed0616bc1ed5e04037ddd9e9fbb4d",
+              "note": "A: 已全文读原应急Windows线，同一nested删除错误。"
+            }
+          ],
+          "fix_plan": "Vite运行态从vite导入defineConfig，Vitest仅类型引用；三发行线都只清理复制的workspace node_modules，并在真实locked stage验证preview配置及native HTTP。",
+          "blast_radius": "正式Electron和两条应急载荷；异宿主仅config验证必须明确not-run HTTP；本卡不执行下载/完整打包/新库seed，不声称最终.app通过。",
+          "conflict_paths": [
+            "apps/web/vite.config.ts",
+            "scripts/verify-runtime-preview.mjs",
+            "scripts/prune-workspace-deps.test.mjs",
+            "scripts/pack-electron-payload.sh",
+            "scripts/pack-macos.sh",
+            "scripts/pack-windows.sh"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+              "expect": "三发行线均调用workspace-only prune与preview gate；真正required nested模块清理后仍可import，required peer/runtime lock合同至少13通过。",
+              "command": "node --test assertions/payload.test.mjs",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+              "expect": "当前锁定真实native npm stage不可解析Vitest，三个客户端实际启动preview并HTTP200，返回正文SHA等于当前dist首页。异宿主config-only不计native通过。",
+              "command": "node --test assertions/runtime_preview.test.mjs",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runtime_preview.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/payload.test.mjs then assertions/runtime_preview.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚正式含本修复的提交，不能删除或改变原bundle/source历史；未验证载荷不可当正式发行。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/deepseek_research",
+          "eligible_acceptance_actors": [
+            "/root",
+            "/root/intent_audit"
+          ],
+          "dynamic_discovery": [
+            {
+              "path": "discovery/pm-vite-runtime-before.json",
+              "sha256": "2b2a472d363715a7faf13815d2fcb305b8df0a6869775458a370a8be89227cf1",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+            },
+            {
+              "path": "discovery/pm-vite-runtime-http.json",
+              "sha256": "7107cc7f8fe25bb41a38ba7862e6110eb7a49a81fba3a5a9529d5668a5299875",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+            },
+            {
+              "path": "discovery/pm-packaged-desktop-first-failure.json",
+              "sha256": "6aae3f6e4df68dd4368214f1d277037b14cb3dcc6df1881f0d45a230a05ef889",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+            }
+          ],
+          "notes": "e5已存在的两个生产依赖问题，真实.app发现后修复。不把HTTP预检等同完整新包首启验收。"
+        },
+        {
+          "id": "MC-119",
+          "kind": "fix",
+          "covers": [
+            "MC-002"
+          ],
+          "title": "PM HTTP路由按鉴权后的实际请求惰性创建数据库worker",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+            }
+          ],
+          "fix_plan": "createPmTeamRouter装配时只创建Hono/auth结构；有效请求通过成员中间件后调用getService，服务按路由实例缓存；注入service兼容，所有endpoint均保持scope/权限/输入合同。",
+          "blast_radius": "本轮新增PM路由急切构造服务导致旧认证only测试在模块导入时要求DATABASE_APP_URL；新文件不存在于e5。该修复不移除已鉴权实际请求的数据库要求。",
+          "conflict_paths": [
+            "apps/server/src/industry/ai-pm/router.ts",
+            "apps/server/src/industry/ai-pm/router.test.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "清空模型环境，仅任务PG55437；新负向用例自己把DATABASE_APP_URL置空并恢复，原demo登录门禁不写数据库。",
+              "expect": "导入/装配通用路由不创建PM DB服务；无DB配置匿名/status仍401；已注入service与实时权限scope等原4用例不变；生产/非loopback演示登录仍拒，2文件8实际passed0skip。",
+              "command": "node --test assertions/router_lazy.test.mjs",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/router_lazy.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/router_lazy.test.mjs then assertions/team.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚含惰性修复的真实提交，保留原付费回执；不能通过注入假DB配置或移除认证测试让急切加载故障消失。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root",
+          "eligible_acceptance_actors": [
+            "/root/intent_audit",
+            "/root/deepseek_research"
+          ],
+          "introduced_during_repair": true,
+          "introduced_regression_evidence": [
+            {
+              "path": "discovery/pm-router-lazy-red.json",
+              "sha256": "0370891354572d24d564a6387518b8c0190d4eb5857ff6d20e719be77ac9cb2c",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "新PM路由在修复期间引入的急切DB初始化；红5例4过1失败，绿含原demo-login3例共8/8。不是e5存在该PM代码的证据。"
+            },
+            {
+              "path": "discovery/pm-router-lazy-green.json",
+              "sha256": "1c3b15bd14d71b5903502df70f7d86ff33f71f0701b6223373cd1855edea80f8",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "新PM路由在修复期间引入的急切DB初始化；红5例4过1失败，绿含原demo-login3例共8/8。不是e5存在该PM代码的证据。"
+            }
+          ],
+          "independent_source_review": {
+            "actor": "/root/intent_audit",
+            "evidenceGrade": "A",
+            "files": [
+              "apps/server/src/industry/ai-pm/router.ts",
+              "apps/server/src/industry/ai-pm/router.test.ts"
+            ],
+            "notes": "两文件完整阅读，所有handler仅在auth中间件后调用getService；const service??=首次构造失败可由onError返回500，未放宽实际数据库/权限要求。源码未由该独立审查者修改。"
+          },
+          "notes": "仍open/not-run等待干净提交与真实修复/独立角色运行；旧文档/原history保留。"
+        },
+        {
+          "id": "MC-120",
+          "kind": "fix",
+          "covers": [
+            "MC-009"
+          ],
+          "title": "正式首装游客在受限产品入口获得正式登录路径",
+          "batch": 1,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/web/src/shell/NavigationAccess.tsx:245@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "b77125a40da6af752f1da8e60112ce2752c7e19058f2271c954c5776d25d2757",
+              "note": "A: 完整读取原审计提交NavigationAccess；原禁止页只给fallback，原产品本身权限拒绝不是错误。派生PM默认首屏变为/development后暴露首次使用登录路径不清的交付缺口。"
+            }
+          ],
+          "fix_plan": "复用NavigationAccessDenied按服务端subject.kind仅对guest展示正式/login并携带encodeURIComponent后的当前path/search/hash；通用导航、能力边界、行业边界共用。禁止页不创建token、不调用loginAs、不授予任何permission。",
+          "blast_radius": "三个客户端文件中的PC公共受限呈现与新7例DOM回归；服务端权限、角色、Bundle安装/路径校验、错误失败关闭均不改。正式guest包装首装是否通过另取真实.app回执，本断言只证明代码与DOM授权合同。",
+          "conflict_paths": [
+            "apps/web/src/shell/NavigationAccess.tsx",
+            "apps/web/src/shell/IndustryRoutes.tsx",
+            "apps/web/src/shell/NavigationAccess.guest.test.tsx"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "清env、mock服务端access响应；真实guest/member/授权成员与权限查询错误在React DOM中分别渲染；不请求模型或正式登录后门。",
+              "expect": "游客在通用/行业受限入口只见正式/login?next=%2Fdevelopment链接、没有私有内容；成员无权仍管理员提示；只有服务端授予行业权限才渲染；身份事件重新查询权限、失败关闭；三文件22实际通过0skip，既有路由注册表与导航权限合同不变。",
+              "command": "node --test assertions/guest_access.test.mjs",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/guest_access.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/guest_access.test.mjs then assertions/desktop.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚含该修复的真实提交；保持服务端只读游客限制和正式登录流程，不使用开发登录或伪造owner token替代。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/deepseek_research",
+          "eligible_acceptance_actors": [
+            "/root/intent_audit"
+          ],
+          "introduced_during_repair": true,
+          "introduced_regression_evidence": [
+            {
+              "path": "discovery/pm-packaged-guest-before.json",
+              "sha256": "afe3115d5c86dfc4d49f30c4368d1dc51410254d836ff97ef4309c2dd7f5f661",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "真实派生PM产品fresh production guest首装/development禁止页观察；发生在修复期间，不是e5原产品首装失败的动态证明。"
+            },
+            {
+              "path": "discovery/packaged-guest-access-before.png",
+              "sha256": "6e2311309bd9324dc563e21f4d122fae327218cee45f0ec63feec61fe47ebb1b",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "真实派生PM产品fresh production guest首装/development禁止页观察；发生在修复期间，不是e5原产品首装失败的动态证明。"
+            },
+            {
+              "path": "discovery/pm-guest-entry-author-green.json",
+              "sha256": "b4275fe1f47d08a9c3558cfe508f7029c92db9798e6506fdb6f37f3e910cbecc",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "实际三个文件22/22通过、0skip。作者修复工作树回归与独立最终clean SHA回归分别保留；均非正式MCD角色运行记录。"
+            },
+            {
+              "path": "discovery/pm-guest-entry-independent-green.json",
+              "sha256": "d43a16d720171386c4ab9a4c520bf802e88f7044360199f623216e1681e5a7bb",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": false,
+                "committedRepairSha": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+              },
+              "provenance": "实际三个文件22/22通过、0skip。作者修复工作树回归与独立最终clean SHA回归分别保留；均非正式MCD角色运行记录。"
+            }
+          ],
+          "independent_source_review": {
+            "actor": "/root/intent_audit",
+            "evidenceGrade": "A",
+            "sourceCommit": "cc86cf9dee7101131912cd0e427b78a90d3494aa",
+            "files": [
+              "apps/web/src/shell/NavigationAccess.tsx",
+              "apps/web/src/shell/IndustryRoutes.tsx",
+              "apps/web/src/shell/NavigationAccess.guest.test.tsx"
+            ],
+            "notes": "三文件完整阅读并复核原before receipt/截图。guest CTA只由服务端subject.kind选择；member、未安装、误配置、查询错误仍走原失败路径。独立clean SHA实际22/22通过0skip；此审查者没有修改三个源文件。"
+          },
+          "notes": "MC-009派生产品交付面的子修复，补卡于实际修复后且公开来源。仍open/not-run，后续只能由真实修复者及未参与源码修复的独立会话以最终clean SHA分别运行正式MCD；截图/免费DOM回归不等于签名发行或生产实测。"
+        }
+      ]
+    },
+    {
+      "batch": 2,
+      "name": "第 2 批 · 正确性",
+      "cards": [
+        {
+          "id": "MC-004",
+          "kind": "problem",
+          "title": "AI-PM来源抓取失败被标为真实成功",
+          "severity": "P1",
+          "level": "L2",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/aipm.ts:176@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/aipm.ts:167@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+              "note": "A: RSS source outcome was inferred solely from the presence of llm"
+            }
+          ],
+          "root_cause": {
+            "file": "apps/server/src/service/aipm.ts",
+            "line": 176,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "competitorScan/industryRadar"
+          },
+          "trigger_path": "竞品URL返回404/500/空正文，或所有RSS失败但LLM配置存在，仍可能mock:false且空事实。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "竞品URL返回404/500/空正文，或所有RSS失败但LLM配置存在，仍可能mock:false且空事实。",
+              "expect": "失败/空来源标未核实且错误可见；有效来源与持久化真实结果分别统计，不把模型配置当来源成功。",
+              "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/aipm.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+        },
+        {
+          "id": "MC-006",
+          "kind": "problem",
+          "title": "长目标引用在调度与普通续跑首次规划时丢失",
+          "severity": "P1",
+          "level": "L2",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:374@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "root_cause": {
+            "file": "apps/server/src/runtime/thread-runner.ts",
+            "line": 374,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "runQuestForThread"
+          },
+          "trigger_path": "dispatch保存goal_ref/版本但排队或恢复入口只传短title；统一执行器直接使用input.goal，不回读绑定全文。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "dispatch保存goal_ref/版本但排队或恢复入口只传短title；统一执行器直接使用input.goal，不回读绑定全文。",
+              "expect": "queued/paused恢复将精确长目标送真实规划入口；缺失、无版本或版本漂移先拒绝并留回执，不用短标题冒充原目标。",
+              "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/legacy.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+        },
+        {
+          "id": "MC-007",
+          "kind": "problem",
+          "title": "线程已认领后装配或规划异常可遗留running僵尸",
+          "severity": "P1",
+          "level": "L2",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:364@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "root_cause": {
+            "file": "apps/server/src/runtime/thread-runner.ts",
+            "line": 364,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "runQuestForThread"
+          },
+          "trigger_path": "CAS置running后resolvePreset、部署工具、词表或runQuest抛错，旧统一执行器无终态失败保护。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "CAS置running后resolvePreset、部署工具、词表或runQuest抛错，旧统一执行器无终态失败保护。",
+              "expect": "有权限且本worker认领的异常线程进入可见失败并同事务写WorkData；不覆盖其它worker或真实pending_review；哈希链有效。",
+              "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/legacy.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+        },
+        {
+          "id": "MC-010",
+          "kind": "problem",
+          "title": "技能原文允许缺模型mock放行与非fail考试放行",
+          "severity": "P1",
+          "level": "L3",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "bundles/ai-pm/skills/changeset-harvest/SKILL.md:18@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "c9466906caee84a722756fa9072477d73a4f4e7b7c86afcf20e183d0d3cce7b2",
+              "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+            }
+          ],
+          "semantic_discovery": {
+            "path": "discovery/pm-semantic-review.json",
+            "sha256": "471d1d9503677993c9dd455a5408c9fc13f61567872a93ec563bd494edab417e",
+            "evidenceGrade": "B",
+            "sourceRevision": {
+              "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "workingTreeDirty": true,
+              "committedRepairSha": null
+            },
+            "note": "原真实付费产物的完整正文人工语义审查及UTF8摘要回读；不是审计提交的动态执行，也不是修复后的新真实模型验收。"
+          },
+          "root_cause": {
+            "file": "bundles/ai-pm/skills/changeset-harvest/SKILL.md",
+            "line": 18,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "changeset-harvest source execution discipline"
+          },
+          "trigger_path": "dev-orchestrator真实产物复述原技能的缺模型放行/verdict非fail；release-cut未要求发布前重验真实内容与考试。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+              "expect": "旧无合同技能及放宽mock/非fail/跳过Git前复核的重摘要合同均拒；新技能明示同scope/task/session/content的真实证据，服务端可信纪律覆盖入口。",
+              "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/asset_evidence.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "修复中新增发现并补卡；保留原audit dirty_count1，正式repair/acceptance仍未建立。自动断言只验证来源合同、完整性、服务端可信指令/回执与失败关闭，不把合同标签当作模型正文语义通过证明。"
+        },
+        {
+          "id": "MC-011",
+          "kind": "problem",
+          "title": "prompt回退技能未要求回退版本独立通过安全红线",
+          "severity": "P1",
+          "level": "L3",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "bundles/ai-pm/skills/prompt-regression/SKILL.md:20@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "7f94d384f624c534d903a6a520a970d3a76ef59bb754158101088bd8bfe6d13d",
+              "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+            }
+          ],
+          "semantic_discovery": {
+            "path": "discovery/pm-semantic-review.json",
+            "sha256": "471d1d9503677993c9dd455a5408c9fc13f61567872a93ec563bd494edab417e",
+            "evidenceGrade": "B",
+            "sourceRevision": {
+              "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "workingTreeDirty": true,
+              "committedRepairSha": null
+            },
+            "note": "原真实付费产物的完整正文人工语义审查及UTF8摘要回读；不是审计提交的动态执行，也不是修复后的新真实模型验收。"
+          },
+          "root_cause": {
+            "file": "bundles/ai-pm/skills/prompt-regression/SKILL.md",
+            "line": 20,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "prompt-regression source execution discipline"
+          },
+          "trigger_path": "prompt-curator真实产物建议回退材料中已知存在漏洞的v1，并无证称为上一通过版本；旧技能只说旧版保留可回滚。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+              "expect": "技能要求独立同红线/历史坏例合格版本，无安全版本停用转人工；放宽knownBadVersionEligible或rollbackEvidence的合同拒装配。",
+              "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/asset_evidence.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "修复中新增发现并补卡；保留原audit dirty_count1，正式repair/acceptance仍未建立。自动断言只验证来源合同、完整性、服务端可信指令/回执与失败关闭，不把合同标签当作模型正文语义通过证明。"
+        },
+        {
+          "id": "MC-012",
+          "kind": "problem",
+          "title": "统计技能缺少汇总归因和可证伪实验的证据合同",
+          "severity": "P2",
+          "level": "L3",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "bundles/ai-pm/skills/metric-digest/SKILL.md:18@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "6cda6d573f5a6e0561a4552edce1c7bebb645b707957322b59e02c7bbfa5554c",
+              "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+            }
+          ],
+          "semantic_discovery": {
+            "path": "discovery/pm-semantic-review.json",
+            "sha256": "471d1d9503677993c9dd455a5408c9fc13f61567872a93ec563bd494edab417e",
+            "evidenceGrade": "B",
+            "sourceRevision": {
+              "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "workingTreeDirty": true,
+              "committedRepairSha": null
+            },
+            "note": "原真实付费产物的完整正文人工语义审查及UTF8摘要回读；不是审计提交的动态执行，也不是修复后的新真实模型验收。"
+          },
+          "root_cause": {
+            "file": "bundles/ai-pm/skills/metric-digest/SKILL.md",
+            "line": 18,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "metric-digest source execution discipline"
+          },
+          "trigger_path": "data-insight真实产物算术正确但把跨周汇总推到cohort，并把相同点估计称无显著影响；给n200与5pp阈值却无功效/统计判定依据。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+              "expect": "技能区分计算/观察/假设，要求分母窗口与统计不确定性；零分母或点阈值可直接证伪的重摘要合同拒装配。新模型正文质量仍待另行授权真实复验。",
+              "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/asset_evidence.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "修复中新增发现并补卡；保留原audit dirty_count1，正式repair/acceptance仍未建立。自动断言只验证来源合同、完整性、服务端可信指令/回执与失败关闭，不把合同标签当作模型正文语义通过证明。"
+        },
+        {
+          "id": "MC-013",
+          "kind": "problem",
+          "title": "PRD技能骨架未要求功能分级与字段状态一致",
+          "severity": "P2",
+          "level": "L3",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "bundles/ai-pm/skills/prd-forge/SKILL.md:17@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "273e26b74b7db80aaae904155b70f69011c8853e3b7558ac9426388b924d7afc",
+              "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+            }
+          ],
+          "semantic_discovery": {
+            "path": "discovery/pm-semantic-review.json",
+            "sha256": "471d1d9503677993c9dd455a5408c9fc13f61567872a93ec563bd494edab417e",
+            "evidenceGrade": "B",
+            "sourceRevision": {
+              "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "workingTreeDirty": true,
+              "committedRepairSha": null
+            },
+            "note": "原真实付费产物的完整正文人工语义审查及UTF8摘要回读；不是审计提交的动态执行，也不是修复后的新真实模型验收。"
+          },
+          "root_cause": {
+            "file": "bundles/ai-pm/skills/prd-forge/SKILL.md",
+            "line": 17,
+            "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+            "symbol": "prd-forge source execution discipline"
+          },
+          "trigger_path": "requirement-analyst真实产物中创建即100%有负责人与创建可空冲突，且以工单优先级替代功能P0/P1/P2；原技能只要求章节骨架。",
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+              "expect": "技能要求3场景、功能P0/P1/P2、字段空值/默认/状态权限一致及真实入库回执；放宽场景/一致性的合同拒装配。正文语义仍需人工或另行授权真实模型复验。",
+              "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/asset_evidence.test.mjs",
+            "evidence": null
+          },
+          "fixed_by": null,
+          "verified_by": null,
+          "notes": "修复中新增发现并补卡；保留原audit dirty_count1，正式repair/acceptance仍未建立。自动断言只验证来源合同、完整性、服务端可信指令/回执与失败关闭，不把合同标签当作模型正文语义通过证明。"
+        },
+        {
+          "id": "MC-105",
+          "kind": "fix",
+          "covers": [
+            "MC-004"
+          ],
+          "title": "来源与快照持久化结果分别诚实回执",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/aipm.ts:176@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/service/aipm.ts:167@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+              "note": "A: RSS source outcome was inferred solely from the presence of llm"
+            }
+          ],
+          "fix_plan": "非2xx/空网页/无效RSS明确未验证；报告单源与逐条入库结果，失败savepoint回滚；租户/工作区来源服务端解析。",
+          "blast_radius": "原返回字段保留，追加失败与来源信息；不把模型调用成功视为数据源成功。",
+          "conflict_paths": [
+            "apps/server/src/service/aipm.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "失败/空来源标未核实且错误可见；有效来源与持久化真实结果分别统计，不把模型配置当来源成功。",
+              "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/aipm.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root",
+          "eligible_acceptance_actors": [
+            "/root/deepseek_research"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+        },
+        {
+          "id": "MC-107",
+          "kind": "fix",
+          "covers": [
+            "MC-006"
+          ],
+          "title": "统一执行入口恢复绑定的完整目标与版本",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:374@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "fix_plan": "从原dispatch事件恢复goal_ref/version并核验档案，所有旧调度/恢复入口共用。",
+          "blast_radius": "无绑定旧线程继续原goal；绑定丢失/漂移拒绝，不隐式改规划。",
+          "conflict_paths": [
+            "apps/server/src/runtime/thread-runner.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "queued/paused恢复将精确长目标送真实规划入口；缺失、无版本或版本漂移先拒绝并留回执，不用短标题冒充原目标。",
+              "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/legacy.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/sandbox_prepare",
+          "eligible_acceptance_actors": [
+            "/root/intent_audit"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+        },
+        {
+          "id": "MC-108",
+          "kind": "fix",
+          "covers": [
+            "MC-007"
+          ],
+          "title": "认领后失败同事务写线程终态与WorkData",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:364@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            }
+          ],
+          "fix_plan": "统一执行器捕获准备/规划异常并仅更新本次认领running线程，保持pending审批/并发保护。",
+          "blast_radius": "scheduler不再仅日志留running；原审批和hash链保持，错误本身不触发付费重试。",
+          "conflict_paths": [
+            "apps/server/src/runtime/thread-runner.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "有权限且本worker认领的异常线程进入可见失败并同事务写WorkData；不覆盖其它worker或真实pending_review；哈希链有效。",
+              "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/legacy.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/sandbox_prepare",
+          "eligible_acceptance_actors": [
+            "/root/intent_audit"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+        },
+        {
+          "id": "MC-111",
+          "kind": "fix",
+          "covers": [
+            "MC-002"
+          ],
+          "title": "单文件正文与多文件无歧义协议恢复",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+            }
+          ],
+          "fix_plan": "单文件路径服务端绑定并返回正文；多文件仅转义原始字符串控制码和折叠同path同UTF8重复，冲突/截断失败关闭。",
+          "blast_radius": "共享严格合同与planner不放宽；raw/normalized/payload hash和已知usage保留，不收费重试。",
+          "conflict_paths": [
+            "apps/server/src/industry/ai-pm/service.ts",
+            "apps/server/src/industry/ai-pm/one-shot-response.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/oneshot.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/oneshot.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/oneshot.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/intent_audit",
+          "eligible_acceptance_actors": [
+            "/root"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。",
+          "introduced_regression_evidence": [
+            {
+              "path": "discovery/pm-oneshot-live-replay.json",
+              "sha256": "be7d1e70c9bdb9eaa75d6ed0038ddac7f63bcd65993f3f3a95042b1a66afbef0",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复过程中真实运行/回放的原始留痕；不是审计提交中存在的源码，也不是干净修复基线的正式MCD验收运行。"
+            }
+          ]
+        },
+        {
+          "id": "MC-114",
+          "kind": "fix",
+          "covers": [
+            "MC-002"
+          ],
+          "title": "默认DSH8轮与评测官单文件8192限额",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "packages/runtime/src/loop.ts:56@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "10aaac0dd70f02d1f1e717d8a54e5ac85545b3cf1b8783915eae2b120d3a1dc4",
+              "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+            },
+            {
+              "type": "code",
+              "ref": "apps/server/src/runtime/thread-runner.ts:372@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+              "note": "A: the original entry passes one presetKey to the self-authored Quest loop; vendor/gate is not a production DSH receipt"
+            }
+          ],
+          "fix_plan": "默认coding executor从4至8轮，允许读上下文/依赖+双文件+final；仅eval-master单文件8192，其余正文3072/多文件4096；父预算仍总闸。",
+          "blast_radius": "只提供可review代码与免费夹具；不得越过原40物理请求/预算授权，真实付费复验须主会话另获授权。",
+          "conflict_paths": [
+            "apps/server/src/industry/ai-pm/service.ts",
+            "apps/server/src/industry/ai-pm/team.pg.test.ts",
+            "apps/server/src/industry/ai-pm/one-shot-text.test.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/oneshot.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/oneshot.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            },
+            {
+              "kind": "property",
+              "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+              "expect": "真实员工按DAG执行，完整目标与上游hash保留；权限/RLS/CAS/计量失败关闭；实际DSH及OS测试有回执；正文协议边界与公共依赖闭包通过。",
+              "command": "node --test assertions/team.test.mjs (outer TestsStream + nested actual test-count validation)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/team.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/oneshot.test.mjs then node --test assertions/team.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/intent_audit",
+          "eligible_acceptance_actors": [
+            "/root/deepseek_research"
+          ],
+          "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。",
+          "introduced_regression_evidence": [
+            {
+              "path": "discovery/pm-service-limits-before.json",
+              "sha256": "3199990f3b0c31217d05b527ad3cfec2afa0d61853273869686c8147c873d92e",
+              "sourceRevision": {
+                "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+                "workingTreeDirty": true,
+                "committedRepairSha": null
+              },
+              "provenance": "修复过程中真实运行/回放的原始留痕；不是审计提交中存在的源码，也不是干净修复基线的正式MCD验收运行。"
+            }
+          ]
+        },
+        {
+          "id": "MC-116",
+          "kind": "fix",
+          "covers": [
+            "MC-010",
+            "MC-011",
+            "MC-012",
+            "MC-013"
+          ],
+          "title": "纠正五技能证据纪律并绑定每次员工实际装配来源",
+          "batch": 2,
+          "state": "open",
+          "evidence": [
+            {
+              "type": "code",
+              "ref": "bundles/ai-pm/skills/changeset-harvest/SKILL.md:18@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "c9466906caee84a722756fa9072477d73a4f4e7b7c86afcf20e183d0d3cce7b2",
+              "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+            },
+            {
+              "type": "code",
+              "ref": "bundles/ai-pm/skills/prompt-regression/SKILL.md:20@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "7f94d384f624c534d903a6a520a970d3a76ef59bb754158101088bd8bfe6d13d",
+              "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+            },
+            {
+              "type": "code",
+              "ref": "bundles/ai-pm/skills/metric-digest/SKILL.md:18@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "6cda6d573f5a6e0561a4552edce1c7bebb645b707957322b59e02c7bbfa5554c",
+              "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+            },
+            {
+              "type": "code",
+              "ref": "bundles/ai-pm/skills/prd-forge/SKILL.md:17@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "sha256": "273e26b74b7db80aaae904155b70f69011c8853e3b7558ac9426388b924d7afc",
+              "note": "A: 原始提交技能正文。语义失败另录dirty discovery；未声称e5做过真实模型运行。"
+            }
+          ],
+          "semantic_discovery": {
+            "path": "discovery/pm-semantic-review.json",
+            "sha256": "471d1d9503677993c9dd455a5408c9fc13f61567872a93ec563bd494edab417e",
+            "evidenceGrade": "B",
+            "sourceRevision": {
+              "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+              "workingTreeDirty": true,
+              "committedRepairSha": null
+            },
+            "note": "原真实付费产物的完整正文人工语义审查及UTF8摘要回读；不是审计提交的动态执行，也不是修复后的新真实模型验收。"
+          },
+          "fix_plan": "全文纠正五技能并分别patch升版；仅正式seal ai-pm3.0.1candidate。新PM catalog校验结构化安全合同并从实际verified source生成bundle/manifest/preset/skillSHA；可信policy用于planner/one-shot/DSH，服务端覆盖worker自报binding并逐attempt保留；不activate/reseed/升级全局registry。",
+          "blast_radius": "仅AI-PM来源与隔离执行，source元数据可选兼容可信DI；不改DDL/已付费产物/事件/旧skill安装记录，不承诺全部模型语义已治愈。",
+          "conflict_paths": [
+            "bundles/ai-pm",
+            "apps/server/src/industry/ai-pm/asset-binding.ts",
+            "apps/server/src/industry/ai-pm/skill-contracts.ts",
+            "apps/server/src/industry/ai-pm/asset-evidence.test.ts",
+            "apps/server/src/industry/ai-pm/types.ts",
+            "apps/server/src/industry/ai-pm/employees.ts",
+            "apps/server/src/industry/ai-pm/service.ts",
+            "apps/server/src/industry/ai-pm/store.ts",
+            "apps/server/src/industry/ai-pm/dsh-adapter.ts",
+            "apps/server/src/industry/ai-pm/team.pg.test.ts"
+          ],
+          "assertions": [
+            {
+              "kind": "property",
+              "given": "只使用任务隔离PG55437、临时文件与真实DSH离线模型夹具；不带真实Key、不发付费请求。",
+              "expect": "校验安全合同和实际14岗sourceSHA；合法重摘要的unsafe合同仍拒；真实PG保留成功/已知失败/恢复版本/规划/DSH回执且worker篡改不能自证；DI无binding仍能完成并移除伪造来源。",
+              "command": "node --test assertions/asset_evidence.test.mjs (controlled TestsStream + exact nested Vitest files/counts)",
+              "exec": {
+                "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                "args": [
+                  "--test",
+                  "--test-concurrency=1",
+                  "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/asset_evidence.test.mjs"
+                ]
+              },
+              "last_result": "not-run"
+            }
+          ],
+          "regression": {
+            "command": "node --test assertions/asset_evidence.test.mjs then assertions/metrics_native.test.mjs",
+            "evidence": null
+          },
+          "rollback": "回滚正式含修复的真实提交，不回滚/删除原付费产物、DB事件、原全局注册或费用台账。已知不安全技能不得用于自动交付。",
+          "fixed_by": null,
+          "verified_by": null,
+          "proposed_repair_actor": "/root/intent_audit",
+          "eligible_acceptance_actors": [
+            "/root",
+            "/root/deepseek_research"
+          ],
+          "notes": "本卡仍open/not-run等待root干净提交。原40物理窗口已耗尽；没有新的真实模型复验，不据免费夹具宣布语义通过。"
+        }
+      ]
+    },
+    {
+      "batch": 3,
+      "name": "第 3 批 · 体验",
+      "cards": []
+    }
+  ],
+  "conflicts": [
+    {
+      "path": "packages/base/model-router/providers.ts",
+      "cards": [
+        "MC-001",
+        "MC-101",
+        "MC-115"
+      ]
+    },
+    {
+      "path": "packages/runtime/src/loop.ts",
+      "cards": [
+        "MC-002",
+        "MC-102",
+        "MC-103",
+        "MC-111",
+        "MC-112",
+        "MC-113",
+        "MC-114",
+        "MC-117",
+        "MC-119"
+      ]
+    },
+    {
+      "path": "apps/server/src/runtime/thread-runner.ts",
+      "cards": [
+        "MC-002",
+        "MC-006",
+        "MC-007",
+        "MC-102",
+        "MC-103",
+        "MC-107",
+        "MC-108",
+        "MC-111",
+        "MC-112",
+        "MC-113",
+        "MC-114",
+        "MC-117",
+        "MC-119"
+      ]
+    },
+    {
+      "path": "scripts/pack-electron-payload.sh",
+      "cards": [
+        "MC-003",
+        "MC-104",
+        "MC-117",
+        "MC-118"
+      ]
+    },
+    {
+      "path": "apps/server/src/service/aipm.ts",
+      "cards": [
+        "MC-004",
+        "MC-005",
+        "MC-105",
+        "MC-106"
+      ]
+    },
+    {
+      "path": "apps/server/src/service/devtools.ts",
+      "cards": [
+        "MC-008",
+        "MC-109"
+      ]
+    },
+    {
+      "path": "product.manifest.json",
+      "cards": [
+        "MC-009",
+        "MC-110"
+      ]
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/dsh-adapter.ts",
+      "cards": [
+        "MC-103",
+        "MC-116"
+      ]
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/service.ts",
+      "cards": [
+        "MC-111",
+        "MC-114",
+        "MC-116"
+      ]
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/code-verifier.ts",
+      "cards": [
+        "MC-112",
+        "MC-117"
+      ]
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/code-test-runner.mjs",
+      "cards": [
+        "MC-112",
+        "MC-117"
+      ]
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/team.pg.test.ts",
+      "cards": [
+        "MC-114",
+        "MC-116"
+      ]
+    },
+    {
+      "path": "bundles/ai-pm/skills/changeset-harvest/SKILL.md",
+      "cards": [
+        "MC-010",
+        "MC-116"
+      ]
+    },
+    {
+      "path": "bundles/ai-pm/skills/prompt-regression/SKILL.md",
+      "cards": [
+        "MC-011",
+        "MC-116"
+      ]
+    },
+    {
+      "path": "bundles/ai-pm/skills/metric-digest/SKILL.md",
+      "cards": [
+        "MC-012",
+        "MC-116"
+      ]
+    },
+    {
+      "path": "bundles/ai-pm/skills/prd-forge/SKILL.md",
+      "cards": [
+        "MC-013",
+        "MC-116"
+      ]
+    },
+    {
+      "path": "apps/web/vite.config.ts",
+      "cards": [
+        "MC-014",
+        "MC-118"
+      ]
+    }
+  ]
+}

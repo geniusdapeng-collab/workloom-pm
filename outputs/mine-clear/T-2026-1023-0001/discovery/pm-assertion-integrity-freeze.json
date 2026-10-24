@@ -1,0 +1,31 @@
+{
+  "schema": "workloom-pm.assertion-integrity-freeze/v1",
+  "testLog": "work/pm-assert-mutation-final-serial.log",
+  "tests": {
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0
+  },
+  "files": [
+    {
+      "path": "apps/server/src/industry/ai-pm/code-verifier.ts",
+      "sha256": "d3e22aba74f10ed3cf25658046439156bcb307ea5d3a7b0829fec2ea1854bd3b"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/code-test-runner.mjs",
+      "sha256": "780112c1974c13875189809d434ed24377f84e0ddc5f9c792cfe8681e3556aea"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/code-test-preload.mjs",
+      "sha256": "c1b9cd6c6692364fa0fcddfd742926cef8dc7a32f50fcbf945f96ba85cbb79d2"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/code-verifier-independent.test.ts",
+      "sha256": "a5361d476647c93ad5419332c15400c307dcfa04934def548b1dfa2df47ea094"
+    },
+    {
+      "path": "scripts/pack-electron-payload.sh",
+      "sha256": "9a211e2cf3eaa8899859dcb41562991849a5654251e240bba98ac3367f93ce58"
+    }
+  ]
+}

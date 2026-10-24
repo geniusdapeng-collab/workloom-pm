@@ -1,0 +1,55 @@
+{
+  "id": "MC-109",
+  "kind": "fix",
+  "covers": [
+    "MC-008"
+  ],
+  "title": "三关失败关闭并绑定真实考试和变更内容",
+  "batch": 0,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "apps/server/src/service/devtools.ts:464@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "be80011bb797c58a1a05fc62745cbeeb044fc146069b3bbc2be23f681b78730f",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    }
+  ],
+  "fix_plan": "模型/考试基础设施缺失标未验证；发布前回读真实考试/答案/scope/task/session与受审worktree内容hash。",
+  "blast_radius": "旧bool收据不能放行；UI区分失败与未验证，人工批准不代替不存在考试。",
+  "conflict_paths": [
+    "apps/server/src/service/devtools.ts",
+    "apps/server/src/service/devtools-evidence.ts",
+    "apps/web/src/pages/P25.tsx"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+      "expect": "缺失、模拟、失败、错scope/任务/会话/分数/答案的考试或变更后内容摘要均不能通过；真实同scope考试与worktree摘要一致才可到git边界。",
+      "command": "node --test assertions/devtools.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/devtools.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/devtools.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root/sandbox_prepare",
+  "eligible_acceptance_actors": [
+    "/root",
+    "/root/deepseek_research"
+  ],
+  "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。首轮failclosed由/root/intent_audit实施，后续真实考试/hash绑定由/root/sandbox_prepare实施；两者均不能自验。"
+}

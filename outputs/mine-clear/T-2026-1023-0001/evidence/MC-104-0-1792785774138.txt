@@ -1,0 +1,21 @@
+TAP version 13
+# {"schema":"workloom.pm-mcd-nested-summary/v1","group":"payload","kind":"node","report":"/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/payload-1792785774299-8077bdb7-8247-4aaa-b5ea-ffe493440e75.node.jsonl","sha256":"c4cf916c89f1cbda9a5bfc14181b333cd35abc68127cb38ba2def8448e736bb7","actualPassed":13,"actualTotal":13,"pending":0,"files":2}
+# Subtest: MCD payload: actual assertions, no paid I/O
+ok 1 - MCD payload: actual assertions, no paid I/O
+  ---
+  duration_ms: 257.999667
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 300.729958
+
+
+exit_code=0 signal=none error=none
+assertion_validation={"ok":true,"errors":[],"testSummary":{"total":1,"passed":1,"failed":0,"cancelled":0,"skipped":0,"todo":0}}

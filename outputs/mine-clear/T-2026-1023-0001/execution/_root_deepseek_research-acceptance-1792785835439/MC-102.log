@@ -1,0 +1,18 @@
+{
+  "id": "MC-102",
+  "actor": "/root/deepseek_research",
+  "role": "acceptance",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-102-0-1792785860225.json",
+        "sha256": "a597b1e6857acf45b3fc05c057aacbce793678ce1b80df58aa92f6f56d9af20f",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

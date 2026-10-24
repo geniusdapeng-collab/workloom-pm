@@ -1,0 +1,48 @@
+{
+  "id": "MC-008",
+  "kind": "problem",
+  "title": "开发质量门禁把缺失模型评审和考试当作通过",
+  "severity": "P1",
+  "level": "L3",
+  "batch": 0,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "apps/server/src/service/devtools.ts:464@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "be80011bb797c58a1a05fc62745cbeeb044fc146069b3bbc2be23f681b78730f",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    }
+  ],
+  "root_cause": {
+    "file": "apps/server/src/service/devtools.ts",
+    "line": 464,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "collectAndAudit/approveRelease"
+  },
+  "trigger_path": "模型评审未配置/抛错或runExam异常时，原ok:true/null verdict仍使gatesPassed为true，旧bool可到发布。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "模型评审未配置/抛错或runExam异常时，原ok:true/null verdict仍使gatesPassed为true，旧bool可到发布。",
+      "expect": "缺失、模拟、失败、错scope/任务/会话/分数/答案的考试或变更后内容摘要均不能通过；真实同scope考试与worktree摘要一致才可到git边界。",
+      "command": "node --test assertions/devtools.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/devtools.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/devtools.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+}

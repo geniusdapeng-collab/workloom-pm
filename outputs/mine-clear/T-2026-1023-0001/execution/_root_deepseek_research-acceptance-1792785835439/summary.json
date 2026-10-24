@@ -1,0 +1,121 @@
+{
+  "schema": "workloom.pm-mcd-actor-batch/v1",
+  "actor": "/root/deepseek_research",
+  "role": "acceptance",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "startedAt": "2026-10-23T20:03:55.439Z",
+  "finishedAt": "2026-10-23T20:04:49.811Z",
+  "declaredCards": [
+    "MC-002",
+    "MC-004",
+    "MC-102",
+    "MC-103",
+    "MC-105",
+    "MC-112",
+    "MC-113",
+    "MC-114",
+    "MC-117"
+  ],
+  "results": [
+    {
+      "id": "MC-002",
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:03:55.469Z",
+      "finishedAt": "2026-10-23T20:04:19.220Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-004",
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:04:19.247Z",
+      "finishedAt": "2026-10-23T20:04:20.073Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-102",
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:04:20.098Z",
+      "finishedAt": "2026-10-23T20:04:26.895Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-103",
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:04:26.920Z",
+      "finishedAt": "2026-10-23T20:04:37.904Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-105",
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:04:37.938Z",
+      "finishedAt": "2026-10-23T20:04:38.871Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-112",
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:04:38.896Z",
+      "finishedAt": "2026-10-23T20:04:41.481Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-113",
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:04:41.507Z",
+      "finishedAt": "2026-10-23T20:04:42.206Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-114",
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:04:42.233Z",
+      "finishedAt": "2026-10-23T20:04:47.242Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-117",
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:04:47.267Z",
+      "finishedAt": "2026-10-23T20:04:49.811Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "complete": true
+}

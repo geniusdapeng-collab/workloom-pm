@@ -1,0 +1,54 @@
+{
+  "id": "MC-104",
+  "kind": "fix",
+  "covers": [
+    "MC-003"
+  ],
+  "title": "运行期第三方nested与peer闭包保留",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "scripts/pack-electron-payload.sh:117@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "755bf17f0e36f0c441df01ed2af10ad803a1c88c2f02167af8287e41d1047a1e",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    }
+  ],
+  "fix_plan": "按workspace manifest逐包清理一方node_modules，保留第三方nested；刷新运行期锁与peer闭包并实装验证。",
+  "blast_radius": "影响Electron npm平铺载荷；断言不等于全平台安装包验收，实际npm stage另有主任务取证。",
+  "conflict_paths": [
+    "scripts/prune-workspace-deps.mjs",
+    "scripts/pack-electron-payload.sh",
+    ".workloom-runtime-deps"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+      "expect": "只删除复制的一方工作区node_modules；第三方nested依赖可真实import；锁文件与运行期清单一致。",
+      "command": "node --test assertions/payload.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/payload.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root/sandbox_prepare",
+  "eligible_acceptance_actors": [
+    "/root/intent_audit"
+  ],
+  "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+}

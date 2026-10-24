@@ -1,0 +1,31 @@
+{
+  "schema": "workloom.pm-mcd-actor-batch/v1",
+  "actor": "/root",
+  "role": "repair",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "startedAt": "2026-10-23T19:52:20.895Z",
+  "finishedAt": "2026-10-23T19:52:22.301Z",
+  "declaredCards": [
+    "MC-004",
+    "MC-005",
+    "MC-105",
+    "MC-106",
+    "MC-112",
+    "MC-115",
+    "MC-119"
+  ],
+  "results": [
+    {
+      "id": "MC-004",
+      "actor": "/root",
+      "role": "repair",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T19:52:20.930Z",
+      "finishedAt": "2026-10-23T19:52:22.300Z",
+      "exitCode": 2,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "complete": false
+}

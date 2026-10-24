@@ -1,0 +1,125 @@
+{
+  "schema": "workloom.pm-mcd-actual-actor-plan/v1",
+  "auditCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+  "sourceCommit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "mustSerializeLedgerWrites": true,
+  "phaseOrder": [
+    "all-repair",
+    "all-acceptance",
+    "gate",
+    "handoff"
+  ],
+  "actors": {
+    "/root": {
+      "repair": [
+        "MC-004",
+        "MC-005",
+        "MC-105",
+        "MC-106",
+        "MC-112",
+        "MC-115",
+        "MC-119"
+      ],
+      "acceptance": [
+        "MC-006",
+        "MC-007",
+        "MC-008",
+        "MC-010",
+        "MC-011",
+        "MC-012",
+        "MC-013",
+        "MC-101",
+        "MC-109",
+        "MC-111",
+        "MC-116"
+      ]
+    },
+    "/root/intent_audit": {
+      "repair": [
+        "MC-002",
+        "MC-010",
+        "MC-011",
+        "MC-012",
+        "MC-013",
+        "MC-102",
+        "MC-111",
+        "MC-113",
+        "MC-114",
+        "MC-116"
+      ],
+      "acceptance": [
+        "MC-003",
+        "MC-005",
+        "MC-009",
+        "MC-014",
+        "MC-104",
+        "MC-106",
+        "MC-107",
+        "MC-108",
+        "MC-110",
+        "MC-115",
+        "MC-118",
+        "MC-119",
+        "MC-120"
+      ]
+    },
+    "/root/sandbox_prepare": {
+      "repair": [
+        "MC-003",
+        "MC-006",
+        "MC-007",
+        "MC-008",
+        "MC-103",
+        "MC-104",
+        "MC-107",
+        "MC-108",
+        "MC-109",
+        "MC-117"
+      ],
+      "acceptance": [
+        "MC-001"
+      ]
+    },
+    "/root/deepseek_research": {
+      "repair": [
+        "MC-001",
+        "MC-009",
+        "MC-014",
+        "MC-101",
+        "MC-110",
+        "MC-118",
+        "MC-120"
+      ],
+      "acceptance": [
+        "MC-002",
+        "MC-004",
+        "MC-102",
+        "MC-103",
+        "MC-105",
+        "MC-112",
+        "MC-113",
+        "MC-114",
+        "MC-117"
+      ]
+    }
+  },
+  "rules": [
+    "Each agent runs only its own actual canonical actor; root does not impersonate another session.",
+    "Root grants one turn-wide ledger execution slot to one actor at a time; all repair runs must finish before any acceptance runs.",
+    "Bind actual clean source commit; preserve original audit dirty_count1 and supplement-at-repair disclosure.",
+    "Failure stops that actor batch and preserves unfixed evidence; new source commit requires reassessment, not a waiver.",
+    "Group child environment is allowlisted with only approved sandbox DB55437 and no real model/GitHub keys.",
+    "Runtime preview is actual native loopback HTTP without Vitest, not an app install or production acceptance."
+  ],
+  "roleNotes": {
+    "MC-103": "Sandbox and root both changed adapter code; only deepseek accepts.",
+    "MC-109": "Intent first pass and sandbox final genuine-exam/content binding; root accepts.",
+    "MC-110": "Deepseek identity and root override; intent accepts.",
+    "MC-112": "Root original verifier; deepseek accepts.",
+    "MC-113": "Intent industry composition + root generic index; deepseek accepts.",
+    "MC-117": "Sandbox assertion-integrity fix after root original verifier; deepseek accepts.",
+    "MC-119": "Root lazy-construction patch; intent independently read both files and existing auth tests.",
+    "MC-120": "Deepseek authored guest login CTA; intent completely reviewed three files and independently ran 22/22 on final clean source, then accepts through actual MCD slot."
+  },
+  "documentationOnlyDescendantOf": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+}

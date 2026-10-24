@@ -1,0 +1,124 @@
+{
+  "id": "MC-118",
+  "kind": "fix",
+  "covers": [
+    "MC-003",
+    "MC-014"
+  ],
+  "title": "三条发行线统一保留nested依赖并用无Vitest的生产preview验真",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "scripts/pack-electron-payload.sh:117@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "755bf17f0e36f0c441df01ed2af10ad803a1c88c2f02167af8287e41d1047a1e",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    },
+    {
+      "type": "code",
+      "ref": "apps/web/vite.config.ts:4@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "df78fa7098772cb1e10d344a14461290c8005676e545491962a93f0e87e98307",
+      "note": "A: 已全文读原始Vite配置；value import在真实无Vitest生产stage无法解析。"
+    },
+    {
+      "type": "code",
+      "ref": "scripts/pack-macos.sh:107@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "47f81f9b178bf9cd49161bf86980411d75ab4d68f914e6b0d99ac51e794dff3e",
+      "note": "A: 已全文读原应急macOS线，全第三方node_modules目录按名删除。"
+    },
+    {
+      "type": "code",
+      "ref": "scripts/pack-windows.sh:122@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "92a284c72fb5581f460f0e05474b099a6cbed0616bc1ed5e04037ddd9e9fbb4d",
+      "note": "A: 已全文读原应急Windows线，同一nested删除错误。"
+    }
+  ],
+  "fix_plan": "Vite运行态从vite导入defineConfig，Vitest仅类型引用；三发行线都只清理复制的workspace node_modules，并在真实locked stage验证preview配置及native HTTP。",
+  "blast_radius": "正式Electron和两条应急载荷；异宿主仅config验证必须明确not-run HTTP；本卡不执行下载/完整打包/新库seed，不声称最终.app通过。",
+  "conflict_paths": [
+    "apps/web/vite.config.ts",
+    "scripts/verify-runtime-preview.mjs",
+    "scripts/prune-workspace-deps.test.mjs",
+    "scripts/pack-electron-payload.sh",
+    "scripts/pack-macos.sh",
+    "scripts/pack-windows.sh"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+      "expect": "三发行线均调用workspace-only prune与preview gate；真正required nested模块清理后仍可import，required peer/runtime lock合同至少13通过。",
+      "command": "node --test assertions/payload.test.mjs",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    },
+    {
+      "kind": "property",
+      "given": "清env的免费本机文件/OS/loopback HTTP断言；仅任务隔离PG55437。",
+      "expect": "当前锁定真实native npm stage不可解析Vitest，三个客户端实际启动preview并HTTP200，返回正文SHA等于当前dist首页。异宿主config-only不计native通过。",
+      "command": "node --test assertions/runtime_preview.test.mjs",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runtime_preview.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/payload.test.mjs then assertions/runtime_preview.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚正式含本修复的提交，不能删除或改变原bundle/source历史；未验证载荷不可当正式发行。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root/deepseek_research",
+  "eligible_acceptance_actors": [
+    "/root",
+    "/root/intent_audit"
+  ],
+  "dynamic_discovery": [
+    {
+      "path": "discovery/pm-vite-runtime-before.json",
+      "sha256": "2b2a472d363715a7faf13815d2fcb305b8df0a6869775458a370a8be89227cf1",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+    },
+    {
+      "path": "discovery/pm-vite-runtime-http.json",
+      "sha256": "7107cc7f8fe25bb41a38ba7862e6110eb7a49a81fba3a5a9529d5668a5299875",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+    },
+    {
+      "path": "discovery/pm-packaged-desktop-first-failure.json",
+      "sha256": "6aae3f6e4df68dd4368214f1d277037b14cb3dcc6df1881f0d45a230a05ef889",
+      "sourceRevision": {
+        "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+        "workingTreeDirty": true,
+        "committedRepairSha": null
+      },
+      "provenance": "修复期间实际本机发现；不是审计提交中存在的新源码，也不是干净提交正式MCD验收。"
+    }
+  ],
+  "notes": "e5已存在的两个生产依赖问题，真实.app发现后修复。不把HTTP预检等同完整新包首启验收。"
+}

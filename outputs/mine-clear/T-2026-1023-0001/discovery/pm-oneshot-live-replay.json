@@ -1,0 +1,241 @@
+{
+  "kind": "offline-exact-live-response-replay",
+  "paidRequestsAdded": 0,
+  "source": "outputs/pm-live-2026-10-23T17-14-23-575Z/live/requests.jsonl",
+  "sourceSha256": "e714a9aeb47fb3fb620039b66afe3933e5d80ee688743d6c5da03c122c0f15a3",
+  "passed": 8,
+  "total": 8,
+  "cases": [
+    {
+      "responseId": "0b3456e3-505c-45e3-b4b6-2268b9e8ed15",
+      "baselineCode": "INVALID_MODEL_JSON",
+      "after": "passed",
+      "receipt": {
+        "rawResponseSha256": "7c3aef0933ea601e3719c19cee0fbeda0976b6169afe6fceadf06775a016ffa4",
+        "normalization": {
+          "policy": "pm-oneshot-transport/v1",
+          "attempted": true,
+          "escapedStringControlCharacters": 56,
+          "identicalFileDuplicatesCollapsed": 0,
+          "actions": [
+            {
+              "kind": "escape-unescaped-string-control",
+              "count": 56
+            }
+          ]
+        },
+        "normalizedResponseSha256": "06e9d408a26de35c1e6c512126e118db19107ca261a26abd86781efc219ad3ee",
+        "payloadSha256": "5ef5ed0a318a5f60b20c4c04f455eb9c04e6c67b6edea9a587f5fef0acd0fa8b"
+      },
+      "files": [
+        {
+          "path": "result.md",
+          "sha256": "6dd97f96d0b860176404e4508418e08688ed01d4ac45b66974a71d3c0788e0d6",
+          "bytes": 3392
+        }
+      ]
+    },
+    {
+      "responseId": "cf4dd6d8-4055-471f-a0a5-b9ebd78312d1",
+      "baselineCode": "DUPLICATE_ARTIFACT",
+      "after": "passed",
+      "receipt": {
+        "rawResponseSha256": "482e55f80dcd2cf88408e46b34942e84c83cbc59f411e5911908124d5c60ed1a",
+        "normalization": {
+          "policy": "pm-oneshot-transport/v1",
+          "attempted": true,
+          "escapedStringControlCharacters": 0,
+          "identicalFileDuplicatesCollapsed": 1,
+          "actions": [
+            {
+              "kind": "collapse-identical-file",
+              "count": 1
+            }
+          ]
+        },
+        "normalizedResponseSha256": "482e55f80dcd2cf88408e46b34942e84c83cbc59f411e5911908124d5c60ed1a",
+        "payloadSha256": "450a8e0fb40b3c6564588878b8b558be7eb9c17c8240496c6c8b92800fe36173"
+      },
+      "files": [
+        {
+          "path": "result.md",
+          "sha256": "2334ec0d059a1bbf094aa32090446f469f0aec1ecac7ada5ce53bab3faf3bf86",
+          "bytes": 6049
+        }
+      ]
+    },
+    {
+      "responseId": "a2fe4c99-8e2b-4027-8da7-1aa72f7c4a5d",
+      "baselineCode": "DUPLICATE_ARTIFACT",
+      "after": "passed",
+      "receipt": {
+        "rawResponseSha256": "31b3dcdf903303ae5899ae33de1936dbf671d15ee150f45eb8b1adba6e591ee1",
+        "normalization": {
+          "policy": "pm-oneshot-transport/v1",
+          "attempted": true,
+          "escapedStringControlCharacters": 0,
+          "identicalFileDuplicatesCollapsed": 1,
+          "actions": [
+            {
+              "kind": "collapse-identical-file",
+              "count": 1
+            }
+          ]
+        },
+        "normalizedResponseSha256": "31b3dcdf903303ae5899ae33de1936dbf671d15ee150f45eb8b1adba6e591ee1",
+        "payloadSha256": "8b77e2f9bdf7954e826cebb4148344875370d7df06b981b877c69ea11a00352b"
+      },
+      "files": [
+        {
+          "path": "result.md",
+          "sha256": "1c42e6ffc869cd25087c0dda1ff862bfc0746d64d0d6a762ee87a9f0dbd5b65f",
+          "bytes": 4204
+        }
+      ]
+    },
+    {
+      "responseId": "622b7e1e-7e76-4d59-90cc-2b017fe5a71a",
+      "baselineCode": "DUPLICATE_ARTIFACT",
+      "after": "passed",
+      "receipt": {
+        "rawResponseSha256": "c281a6f13a8a802bf3fd41db73c9ac325ce8afbefc4a242527fd383fbbbf996b",
+        "normalization": {
+          "policy": "pm-oneshot-transport/v1",
+          "attempted": true,
+          "escapedStringControlCharacters": 0,
+          "identicalFileDuplicatesCollapsed": 1,
+          "actions": [
+            {
+              "kind": "collapse-identical-file",
+              "count": 1
+            }
+          ]
+        },
+        "normalizedResponseSha256": "c281a6f13a8a802bf3fd41db73c9ac325ce8afbefc4a242527fd383fbbbf996b",
+        "payloadSha256": "87a1e827bc3b963b26b4825e4c1d57fb3c9469be087f829583a2c192284f0830"
+      },
+      "files": [
+        {
+          "path": "result.md",
+          "sha256": "38fc0e791b645523e60dec03e51227cd1396ce9c13f6d890367107c8b38f9ebd",
+          "bytes": 5080
+        }
+      ]
+    },
+    {
+      "responseId": "a1623504-cf33-4ce0-ae35-153db4bf85be",
+      "baselineCode": "INVALID_MODEL_JSON",
+      "after": "passed",
+      "receipt": {
+        "rawResponseSha256": "3ff75702d333763697d1c8d3ac8a21b8b0085ca42ba1ee1b7d51d1071e49a493",
+        "normalization": {
+          "policy": "pm-oneshot-transport/v1",
+          "attempted": true,
+          "escapedStringControlCharacters": 53,
+          "identicalFileDuplicatesCollapsed": 1,
+          "actions": [
+            {
+              "kind": "escape-unescaped-string-control",
+              "count": 53
+            },
+            {
+              "kind": "collapse-identical-file",
+              "count": 1
+            }
+          ]
+        },
+        "normalizedResponseSha256": "831fb34d373da9493cf5386340a8baef419d9a39d3946334a958b43fd4c787fb",
+        "payloadSha256": "e04e0a02269e67da3252944bdf762ca9ea5f0f9a0125aae8b5962e5ce4aba631"
+      },
+      "files": [
+        {
+          "path": "result.md",
+          "sha256": "968e03db5bc95b4f7202451d0130ca870477f68de45a49f8098b496015c20fc9",
+          "bytes": 3644
+        }
+      ]
+    },
+    {
+      "responseId": "b95819ff-5a33-4893-858f-a465bcd6fd9e",
+      "baselineCode": "passed",
+      "after": "passed",
+      "receipt": {
+        "rawResponseSha256": "8a40cb8144cd1c2d3acc71d72d7a6a370c98a0d921721d928f43c9d2b27f2626",
+        "normalization": {
+          "policy": "pm-oneshot-transport/v1",
+          "attempted": true,
+          "escapedStringControlCharacters": 0,
+          "identicalFileDuplicatesCollapsed": 0,
+          "actions": []
+        },
+        "normalizedResponseSha256": "8a40cb8144cd1c2d3acc71d72d7a6a370c98a0d921721d928f43c9d2b27f2626",
+        "payloadSha256": "8a40cb8144cd1c2d3acc71d72d7a6a370c98a0d921721d928f43c9d2b27f2626"
+      },
+      "files": [
+        {
+          "path": "result.md",
+          "sha256": "53c66e15a8fe60ae06e84476c82f286efc288c69cdbb12b06214f1c30a8384ac",
+          "bytes": 2026
+        }
+      ]
+    },
+    {
+      "responseId": "d566f8fb-d56b-4157-af7e-c2257cf4d9ab",
+      "baselineCode": "DUPLICATE_ARTIFACT",
+      "after": "passed",
+      "receipt": {
+        "rawResponseSha256": "6f73f8e8525ac91a160f0609db7d41d93f13d72cb8be92a81ec226c95349da21",
+        "normalization": {
+          "policy": "pm-oneshot-transport/v1",
+          "attempted": true,
+          "escapedStringControlCharacters": 0,
+          "identicalFileDuplicatesCollapsed": 1,
+          "actions": [
+            {
+              "kind": "collapse-identical-file",
+              "count": 1
+            }
+          ]
+        },
+        "normalizedResponseSha256": "6f73f8e8525ac91a160f0609db7d41d93f13d72cb8be92a81ec226c95349da21",
+        "payloadSha256": "de885ed8b0f777145e873898a22b0563f357205d4ca09dffd899daeace110752"
+      },
+      "files": [
+        {
+          "path": "result.md",
+          "sha256": "be9016c6eda0f7ed5488694186dff92761af7f9cfdced5c48bd24e6826a8de0b",
+          "bytes": 3179
+        }
+      ]
+    },
+    {
+      "responseId": "c6e4e7ea-702d-4c0a-a428-6558b8617f25",
+      "baselineCode": "DUPLICATE_ARTIFACT",
+      "after": "passed",
+      "receipt": {
+        "rawResponseSha256": "4427e7041aa1815599b1d6dc0af646858a10c5a8316ceff4c66487aac4784483",
+        "normalization": {
+          "policy": "pm-oneshot-transport/v1",
+          "attempted": true,
+          "escapedStringControlCharacters": 0,
+          "identicalFileDuplicatesCollapsed": 1,
+          "actions": [
+            {
+              "kind": "collapse-identical-file",
+              "count": 1
+            }
+          ]
+        },
+        "normalizedResponseSha256": "4427e7041aa1815599b1d6dc0af646858a10c5a8316ceff4c66487aac4784483",
+        "payloadSha256": "2add5c413fe00f1d4bedc9481a78baf38938c3e74d210e65f85796042301ed42"
+      },
+      "files": [
+        {
+          "path": "result.md",
+          "sha256": "9237c873c279193c06046e0ceade11607f14a94e97fd856d50e8f77db25573c7",
+          "bytes": 2833
+        }
+      ]
+    }
+  ]
+}

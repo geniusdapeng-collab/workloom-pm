@@ -1,0 +1,21 @@
+TAP version 13
+# {"schema":"workloom.pm-mcd-closure/v1","group":"closure","violations":[],"publicStartupHasPmKnowledge":false}
+# Subtest: MCD closure: actual assertions, no paid I/O
+ok 1 - MCD closure: actual assertions, no paid I/O
+  ---
+  duration_ms: 137.888958
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 180.076791
+
+
+exit_code=0 signal=none error=none
+assertion_validation={"ok":true,"errors":[],"testSummary":{"total":1,"passed":1,"failed":0,"cancelled":0,"skipped":0,"todo":0}}

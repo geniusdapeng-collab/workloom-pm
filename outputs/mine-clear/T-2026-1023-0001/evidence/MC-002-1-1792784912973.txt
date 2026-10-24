@@ -1,0 +1,21 @@
+TAP version 13
+# {"schema":"workloom.pm-mcd-nested-summary/v1","group":"dsh_process","kind":"node","report":"/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/dsh_process-1792784913217-01c4a23a-0ca4-4939-8f4d-328f39332d48.node.jsonl","sha256":"b2d0dacc5af8e5659a643bb716700a65c58ffcc6bf8f60a692d6a769843bb358","actualPassed":8,"actualTotal":8,"pending":0,"files":1}
+# Subtest: MCD dsh_process: actual assertions, no paid I/O
+ok 1 - MCD dsh_process: actual assertions, no paid I/O
+  ---
+  duration_ms: 12050.735834
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 12128.007666
+
+
+exit_code=0 signal=none error=none
+assertion_validation={"ok":true,"errors":[],"testSummary":{"total":1,"passed":1,"failed":0,"cancelled":0,"skipped":0,"todo":0}}

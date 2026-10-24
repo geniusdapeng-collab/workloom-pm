@@ -1,0 +1,21 @@
+TAP version 13
+# {"schema":"workloom.pm-mcd-nested-summary/v1","group":"aipm","kind":"vitest","report":"/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/aipm-1792784810252-899b7008-4f3a-4ffb-ad10-b6e194fd6f23.vitest.json","sha256":"f1ae8800c30fee8f5cde199625cb053061c10044d1baff49d902bf91517139d1","actualPassed":13,"actualTotal":13,"pending":0,"files":["/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server/src/industry/ai-pm/aipm-integrity.test.ts"]}
+# Subtest: MCD aipm: actual assertions, no paid I/O
+ok 1 - MCD aipm: actual assertions, no paid I/O
+  ---
+  duration_ms: 3978.8745
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4560.802292
+
+
+exit_code=0 signal=none error=none
+assertion_validation={"ok":true,"errors":[],"testSummary":{"total":1,"passed":1,"failed":0,"cancelled":0,"skipped":0,"todo":0}}

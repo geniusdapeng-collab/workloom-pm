@@ -1,0 +1,21 @@
+TAP version 13
+# {"schema":"workloom.pm-mcd-nested-summary/v1","group":"router_lazy","kind":"vitest","report":"/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/router_lazy-1792784826275-b2d81102-2b0d-428e-b44a-c93f3f8040f4.vitest.json","sha256":"900a063748df4d5979ec8805071af3a44b569a16bd31b2e4068a3e7cc4be498b","actualPassed":8,"actualTotal":8,"pending":0,"files":["/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server/src/industry/ai-pm/router.test.ts","/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/server/test/demo-login.test.ts"]}
+# Subtest: MCD router_lazy: actual auth-only module loading without eager PM database service
+ok 1 - MCD router_lazy: actual auth-only module loading without eager PM database service
+  ---
+  duration_ms: 2692.824208
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2756.371916
+
+
+exit_code=0 signal=none error=none
+assertion_validation={"ok":true,"errors":[],"testSummary":{"total":1,"passed":1,"failed":0,"cancelled":0,"skipped":0,"todo":0}}

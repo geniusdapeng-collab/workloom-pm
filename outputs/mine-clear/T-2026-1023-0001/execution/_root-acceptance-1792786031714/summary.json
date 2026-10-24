@@ -1,0 +1,145 @@
+{
+  "schema": "workloom.pm-mcd-actor-batch/v1",
+  "actor": "/root",
+  "role": "acceptance",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "startedAt": "2026-10-23T20:07:11.714Z",
+  "finishedAt": "2026-10-23T20:08:04.544Z",
+  "declaredCards": [
+    "MC-006",
+    "MC-007",
+    "MC-008",
+    "MC-010",
+    "MC-011",
+    "MC-012",
+    "MC-013",
+    "MC-101",
+    "MC-109",
+    "MC-111",
+    "MC-116"
+  ],
+  "results": [
+    {
+      "id": "MC-006",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:11.747Z",
+      "finishedAt": "2026-10-23T20:07:13.694Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-007",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:13.738Z",
+      "finishedAt": "2026-10-23T20:07:15.226Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-008",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:15.253Z",
+      "finishedAt": "2026-10-23T20:07:29.101Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-010",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:29.134Z",
+      "finishedAt": "2026-10-23T20:07:33.300Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-011",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:33.328Z",
+      "finishedAt": "2026-10-23T20:07:36.656Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-012",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:36.685Z",
+      "finishedAt": "2026-10-23T20:07:40.280Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-013",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:40.309Z",
+      "finishedAt": "2026-10-23T20:07:43.740Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-101",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:43.767Z",
+      "finishedAt": "2026-10-23T20:07:44.577Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-109",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:44.603Z",
+      "finishedAt": "2026-10-23T20:07:58.710Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-111",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:07:58.737Z",
+      "finishedAt": "2026-10-23T20:08:01.067Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "MC-116",
+      "actor": "/root",
+      "role": "acceptance",
+      "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+      "startedAt": "2026-10-23T20:08:01.097Z",
+      "finishedAt": "2026-10-23T20:08:04.544Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "complete": true
+}

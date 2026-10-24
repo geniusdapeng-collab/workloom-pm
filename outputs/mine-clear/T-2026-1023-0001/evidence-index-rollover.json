@@ -1,0 +1,11 @@
+{
+  "schema": "workloom.pm-evidence-index-rollover/v1",
+  "at": "2026-10-23T19:55:19.316962+00:00",
+  "oldCommit": "cc86cf9dee7101131912cd0e427b78a90d3494aa",
+  "nextCommit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "archivedIndex": "evidence-index.cc86cf9dee7101131912cd0e427b78a90d3494aa.json",
+  "archivedIndexSha256": "eb3eae1b402d2f44993eaed4088da8e4d03fa0e24e96f0f31a7dce158ab55716",
+  "oldRuns": 22,
+  "oldRunsAndOutputsPreserved": true,
+  "reason": "Existing executor forbids mixed commits in one evidence-index. Preserve prior exact index and let its original capture create a new current index; no run result or commit is rewritten."
+}

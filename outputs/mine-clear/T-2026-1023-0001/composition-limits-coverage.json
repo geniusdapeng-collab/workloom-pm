@@ -1,0 +1,314 @@
+{
+  "schemaVersion": "workloom.pm-composition-limits-coverage/v1",
+  "at": "2026-10-23T18:00:04.332Z",
+  "agent": "/root/intent_audit",
+  "sourceRevision": {
+    "baseCommit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "workingTreeDirty": true
+  },
+  "scope": "Current composition seam + service output/coding limits, exact four edited files and their direct local dependency inventory; earlier audit/team/IA07 coverage are separate evidence, not silently upgraded.",
+  "counts": {
+    "total": 33,
+    "A": 6,
+    "B": 27,
+    "C": 0,
+    "D": 0
+  },
+  "files": [
+    {
+      "path": "apps/server/src/industry/ai-pm/artifacts.ts",
+      "grade": "B",
+      "bytes": 8407,
+      "lines": 162,
+      "sha256": "5708d4ff169ab1328b5212e18a0f751f20d174f82abd8ef26fa790cea8318e8d",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/code-verifier.ts",
+      "grade": "B",
+      "bytes": 9453,
+      "lines": 144,
+      "sha256": "9b5083f83a0537b06bf85d51583c5fae194bfde302a223ea396b3821b8208bc6",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/contract.ts",
+      "grade": "B",
+      "bytes": 7878,
+      "lines": 142,
+      "sha256": "10e9726dd13e8e2904bb834c8da2475c6c06d3900997399782b64b60793ba66f",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/dsh-adapter.ts",
+      "grade": "B",
+      "bytes": 27910,
+      "lines": 384,
+      "sha256": "2da77ec73ce5f3c0707d4b46d7c336a9fa26b95effca03f70eadc5b502405d7d",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/employees.ts",
+      "grade": "B",
+      "bytes": 3612,
+      "lines": 61,
+      "sha256": "922f5730e022b93c8212e37364aa723b4141ea755194306b1ce2233565fff031",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/one-shot-response.ts",
+      "grade": "B",
+      "bytes": 4679,
+      "lines": 91,
+      "sha256": "15bf8b5501c5156b5338d46e746d0b46631527813e07349cdfe29eeb594a6a5d",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/one-shot-text.test.ts",
+      "grade": "A",
+      "bytes": 6218,
+      "lines": 73,
+      "sha256": "8c4f510dbf1cf8b0fdb51427a6690c315eba6273bd982729b4f65dcfb9adff3a",
+      "readMode": "complete semantic reading before edit, then exact patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/policy.ts",
+      "grade": "B",
+      "bytes": 5210,
+      "lines": 74,
+      "sha256": "5d7223e727524594f40db0cb0628726769d9e951c817f5051bfd8508a09e8472",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/router.ts",
+      "grade": "A",
+      "bytes": 7310,
+      "lines": 131,
+      "sha256": "3c637674071b4c3fc45a52ffb6cb04564dfa3bf2d289bac40cd00d5af7aa3d50",
+      "readMode": "complete semantic reading before edit, then exact patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/service.ts",
+      "grade": "A",
+      "bytes": 28649,
+      "lines": 380,
+      "sha256": "cce031c580f34c54577c584a4bb5e3e70839191608abe02418696ef76b0a086e",
+      "readMode": "complete semantic reading before edit, then exact patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/store.ts",
+      "grade": "B",
+      "bytes": 29998,
+      "lines": 383,
+      "sha256": "659c9d5e88750dfc595e93c482362ae54b3c0a71324b247a0775f97b6221d4ea",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/team.pg.test.ts",
+      "grade": "A",
+      "bytes": 24906,
+      "lines": 339,
+      "sha256": "8e6e8d78a256a64fd4c13a8bb6f7fa7450f00d9cf8355f0a1719030ee0728667",
+      "readMode": "complete semantic reading before edit, then exact patch review"
+    },
+    {
+      "path": "apps/server/src/industry/ai-pm/types.ts",
+      "grade": "A",
+      "bytes": 3588,
+      "lines": 84,
+      "sha256": "8586310acff2777a3cd460e71c4bd978980a62068292dbf2e1aa289f9be0fbb0",
+      "readMode": "complete semantic reading before edit, then exact patch review"
+    },
+    {
+      "path": "apps/server/src/industry/hotel/acquisition-planner.ts",
+      "grade": "B",
+      "bytes": 17138,
+      "lines": 320,
+      "sha256": "4a3ae8f3d1b2c5a02784593e96fa185aff84e8c20fc121c2a49af11a3c6ba929",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/runtime/thread-runner.ts",
+      "grade": "B",
+      "bytes": 27371,
+      "lines": 544,
+      "sha256": "0f41585f49789163e197660e56a9861d0d11c5776aeacdde44abc6d86df9a7d5",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/access-authority.ts",
+      "grade": "B",
+      "bytes": 19524,
+      "lines": 477,
+      "sha256": "a4fe5d31fbb1b6108ea5571bef5a22bd5f775b63005190f30d62985fda2f2378",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/active-bundle.ts",
+      "grade": "B",
+      "bytes": 8924,
+      "lines": 229,
+      "sha256": "448849e14ed4e02dded987af0d82617d937ea27145b56381b7e0bb2866310be8",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/aipm.ts",
+      "grade": "B",
+      "bytes": 13687,
+      "lines": 258,
+      "sha256": "d00054906d1c81bca29e140327301e7670b2773be418c4501af476fd0485900b",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/bundle.ts",
+      "grade": "B",
+      "bytes": 60993,
+      "lines": 1257,
+      "sha256": "486b8661226e6ccfbe5502d4715286f288657639e8a64275b5c751bddfb046ea",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/eval.ts",
+      "grade": "B",
+      "bytes": 33817,
+      "lines": 771,
+      "sha256": "9d8462016875f4a8a9b6efe4532c51a75782ad07edcf079d9af0e1a559eb32fe",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/events.ts",
+      "grade": "B",
+      "bytes": 3017,
+      "lines": 65,
+      "sha256": "37f2a8f1841182626286a02168f810717b2b62cee9aa535e825566497de76c85",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/inspection-adapter.ts",
+      "grade": "B",
+      "bytes": 5618,
+      "lines": 161,
+      "sha256": "e1d10ea9e29d26d74dacf7162b80b47fc544fea1171d56d07a14628ab080ec49",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/kb.ts",
+      "grade": "B",
+      "bytes": 18645,
+      "lines": 398,
+      "sha256": "dffa3d25d81461f180d3b069eff03454e80209cdfa9ee575c3bba7f00235cbad",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/llm.ts",
+      "grade": "B",
+      "bytes": 5027,
+      "lines": 121,
+      "sha256": "ab4794f52733bdf57806cd033070f1d07b38a3994d30d397a5bfc16f380e9eb4",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/onboarding-continuity.ts",
+      "grade": "B",
+      "bytes": 18026,
+      "lines": 446,
+      "sha256": "1493eb0026e10a1624ff87645ecda92ae50ca05c019a03f3534a55649d8b42a3",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/onboarding-truth.ts",
+      "grade": "B",
+      "bytes": 6994,
+      "lines": 197,
+      "sha256": "4485dc007bbf0f9c40b29cd6174ac2fdbf83d5e6d0197e332c6b9d577207860b",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/router.ts",
+      "grade": "B",
+      "bytes": 42910,
+      "lines": 858,
+      "sha256": "ab98ce5a23fb5cfac6ab3e5abe5299d0f19497cc3d5465ab4adae7f0a8515ec6",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/service/service-front-publication.ts",
+      "grade": "B",
+      "bytes": 7493,
+      "lines": 161,
+      "sha256": "4e83b3297c0319e80ce3ae453a3d85a3f343928152793b85659213ae75a16bc9",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/trpc/accounts-router.ts",
+      "grade": "B",
+      "bytes": 31132,
+      "lines": 610,
+      "sha256": "21afb2e19cd71536bbf8b74e5160a5e304b0daeee02f043250935d0a8bfe570d",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/trpc/context.ts",
+      "grade": "B",
+      "bytes": 9187,
+      "lines": 234,
+      "sha256": "e0ad9965497d1b6a9c8226f17dde044e1920fcfaa833938cdee499918fdc9cc6",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/trpc/credits-router.ts",
+      "grade": "B",
+      "bytes": 4309,
+      "lines": 105,
+      "sha256": "ab1d46eea7a4d7645c567f6f8f2e150198ba5c58bfa4653817341f84f9ef6e31",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/trpc/overlay-router.ts",
+      "grade": "B",
+      "bytes": 14334,
+      "lines": 304,
+      "sha256": "20ac3839ac1a775a5fd86a095f1b57f393358e1bf25aaa03b95107f8ac43438b",
+      "readMode": "direct dependency interface/location and current-byte digest; no fresh whole-file semantic review claimed"
+    },
+    {
+      "path": "apps/server/src/trpc/router.ts",
+      "grade": "A",
+      "bytes": 185603,
+      "lines": 3772,
+      "sha256": "de4cce773b33aaa8083020659a9e9fbfd00aa8fde99d610a82ee13b83e549efe",
+      "readMode": "complete semantic reading before edit, then exact patch review"
+    }
+  ],
+  "packageInterfaces": [
+    "@trpc/server",
+    "@workloom/base/bundles",
+    "@workloom/base/captain",
+    "@workloom/base/evolve",
+    "@workloom/base/fence-engine",
+    "@workloom/base/im-channels",
+    "@workloom/base/inspection",
+    "@workloom/base/model-router",
+    "@workloom/base/night-shift",
+    "@workloom/base/review-console",
+    "@workloom/base/skill-ops",
+    "@workloom/base/skills",
+    "@workloom/base/tenancy",
+    "@workloom/base/workdata",
+    "@workloom/db",
+    "@workloom/runtime",
+    "@workloom/shared",
+    "hono",
+    "node:assert/strict",
+    "node:crypto",
+    "node:fs",
+    "node:fs/promises",
+    "node:os",
+    "node:path",
+    "node:test",
+    "pg",
+    "vitest",
+    "zod"
+  ],
+  "exclusions": "Unrelated transitive business implementations and third-party package sources were not freshly semantically audited. Router.ts was read completely in 9 contiguous segments (1-450 through3601-EOF), replacing only this current-tree file's earlier sample coverage; original immutable audit report stays unchanged."
+}

@@ -1,0 +1,18 @@
+{
+  "id": "MC-004",
+  "actor": "/root",
+  "role": "repair",
+  "result": "pass",
+  "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-004-0-1792784809421.json",
+        "sha256": "8805c830c33e91fe17af7478dcbb2028b2e3be0e17bf65fce08c013142e3396d",
+        "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+      }
+    }
+  ]
+}
+

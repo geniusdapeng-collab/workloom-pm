@@ -1,0 +1,18 @@
+{
+  "id": "MC-104",
+  "actor": "/root/sandbox_prepare",
+  "role": "repair",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-104-0-1792785575689.json",
+        "sha256": "25277377733652890032b886f39b4e71fb6cacd321c8195549a0af22ae4d3ae1",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

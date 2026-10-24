@@ -6,6 +6,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import {
   bundledNpmCliCandidates,
+  copyReviewedRuntimeLock,
   runtimeInputSha256,
   verifyInstalledRuntimeTarget,
   verifyRuntimeDepsLock,
@@ -102,6 +103,66 @@ test("package-lock 必须锁定完整三目标原生包与 registry integrity", 
   const rootDrift = packageLock();
   rootDrift.packages[""].dependencies.esbuild = "0.27.0";
   assert.throws(() => verifyRuntimePackageLock(manifest(), rootDrift), /根依赖/u);
+});
+
+test("刷新保留已审阅的依赖闭包；损坏或残缺旧锁不能静默重解算", () => {
+  const root = mkdtempSync(join(tmpdir(), "workloom-runtime-existing-lock-"));
+  const destination = mkdtempSync(join(tmpdir(), "workloom-runtime-lock-target-"));
+  const lockDirectory = join(root, ".workloom-runtime-deps");
+  mkdirSync(lockDirectory);
+  try {
+    assert.equal(copyReviewedRuntimeLock(root, destination), false);
+    writeFileSync(join(lockDirectory, "package.json"), JSON.stringify(manifest()));
+    assert.throws(() => copyReviewedRuntimeLock(root, destination), /不完整/u);
+    const reviewed = packageLock();
+    reviewed.packages["node_modules/previous-transitive"] = registryEntry("1.0.0");
+    writeFileSync(join(lockDirectory, "package-lock.json"), JSON.stringify(reviewed));
+    assert.equal(copyReviewedRuntimeLock(root, destination), true);
+    assert.deepEqual(JSON.parse(readFileSync(join(destination, "package-lock.json"), "utf8")), reviewed);
+    reviewed.packages["node_modules/previous-transitive"].resolved = "https://untrusted.invalid/package.tgz";
+    writeFileSync(join(lockDirectory, "package-lock.json"), JSON.stringify(reviewed));
+    assert.throws(() => copyReviewedRuntimeLock(root, destination), /官方 registry/u);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+    rmSync(destination, { recursive: true, force: true });
+  }
+});
+
+test("DSH 的 sharp 与 koffi 原生闭包必须覆盖三个发行目标", () => {
+  const lock = packageLock();
+  for (const [parent, prefix, version] of [["sharp", "@img/sharp", "0.35.5"], ["koffi", "@koromix/koffi", "3.1.1"]]) {
+    lock.packages[`node_modules/${parent}`] = registryEntry(version);
+    for (const [os, cpu] of [["darwin", "arm64"], ["darwin", "x64"], ["win32", "x64"]]) {
+      lock.packages[`node_modules/${prefix}-${os}-${cpu}`] = registryEntry(version, { os: [os], cpu: [cpu] });
+    }
+  }
+  assert.doesNotThrow(() => verifyRuntimePackageLock(manifest(), lock));
+  delete lock.packages["node_modules/@img/sharp-win32-x64"];
+  assert.throws(() => verifyRuntimePackageLock(manifest(), lock), /win32-x64 原生包/u);
+  lock.packages["node_modules/@img/sharp-win32-x64"] = registryEntry("0.35.5", { os: ["win32"], cpu: ["x64"] });
+  delete lock.packages["node_modules/@koromix/koffi-darwin-x64"];
+  assert.throws(() => verifyRuntimePackageLock(manifest(), lock), /darwin-x64 原生包/u);
+});
+
+test("锁与安装目录都拒绝缺失必需peer；嵌套寻址和optional peer遵守包合同", () => {
+  const lock = packageLock();
+  lock.packages["node_modules/outer/node_modules/plugin"] = registryEntry("1.0.0", {
+    peerDependencies: { "required-peer": "^1.0.0", "optional-peer": "^1.0.0" },
+    peerDependenciesMeta: { "optional-peer": { optional: true } },
+  });
+  assert.throws(() => verifyRuntimePackageLock(manifest(), lock), /缺少必需 peer.*required-peer/u);
+  lock.packages["node_modules/outer/node_modules/required-peer"] = registryEntry("1.0.0");
+  assert.doesNotThrow(() => verifyRuntimePackageLock(manifest(), lock));
+
+  const stage = mkdtempSync(join(tmpdir(), "workloom-runtime-peer-stage-"));
+  try {
+    writePackage(stage, "esbuild", { name: "esbuild", version: "0.28.2", peerDependencies: { "required-peer": "^1.0.0" } });
+    writePackage(stage, "@esbuild/darwin-arm64", { name: "@esbuild/darwin-arm64", version: "0.28.2", os: ["darwin"], cpu: ["arm64"] });
+    const verified = { manifest: manifest(), packageLock: packageLock() };
+    assert.throws(() => verifyInstalledRuntimeTarget(stage, "darwin", "arm64", verified), /缺少必需 peer/u);
+    writePackage(stage, "required-peer", { name: "required-peer", version: "1.0.0" });
+    assert.doesNotThrow(() => verifyInstalledRuntimeTarget(stage, "darwin", "arm64", verified));
+  } finally { rmSync(stage, { recursive: true, force: true }); }
 });
 
 test("安装后目标校验拒绝宿主架构原生包并生成稳定 inventory 摘要", () => {

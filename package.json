@@ -1,5 +1,8 @@
 {
-  "name": "workloom-im",
+  "name": "workloom-pm",
+  "productName": "WorkLoom PM",
+  "workloomPortOffset": 200,
+  "workloomStartPath": "/development",
   "version": "0.1.1",
   "private": true,
   "type": "module",
@@ -21,11 +24,14 @@
     "demo": "TOOL_UNVERIFIED_RATE=0 tsx --env-file=.env scripts/demo.ts",
     "doctor": "bash scripts/doctor.sh",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm test:governance && pnpm test:reset-safety && pnpm test:payload-boundary && pnpm test:release-assets && pnpm test:action-trust && pnpm test:release-policy && pnpm test:desktop-bootstrap && pnpm -r --if-present test && pnpm test:oss",
+    "test": "pnpm test:governance && pnpm test:reset-safety && pnpm test:payload-boundary && pnpm test:release-assets && pnpm test:action-trust && pnpm test:release-policy && pnpm test:desktop-bootstrap && pnpm test:desktop-source && pnpm -r --if-present test && pnpm test:oss",
     "test:reset-safety": "node --test scripts/reset-safety.test.mjs",
-    "test:payload-boundary": "node --test scripts/product-runtime.test.mjs scripts/payload-policy.test.mjs scripts/pack-nm-merge.test.mjs scripts/runtime-deps-lock.test.mjs",
+    "test:payload-boundary": "node --test scripts/product-runtime.test.mjs scripts/payload-policy.test.mjs scripts/pack-nm-merge.test.mjs scripts/runtime-deps-lock.test.mjs scripts/prune-workspace-deps.test.mjs",
     "runtime:deps:refresh": "node scripts/runtime-deps-lock.mjs refresh",
     "runtime:deps:verify": "node scripts/runtime-deps-lock.mjs verify",
+    "pm:eval": "tsx --env-file=.env apps/server/src/industry/ai-pm/acceptance/evaluate.mts",
+    "pm:budget:test": "node --test scripts/pm-budget-proxy.test.mjs",
+    "test:pm-dsh": "node --import tsx --test apps/server/src/industry/ai-pm/acceptance/dsh-integration.mts",
     "test:release-assets": "node --test scripts/release-assets.test.mjs",
     "test:action-trust": "node --test scripts/action-trust-policy.test.mjs",
     "test:release-policy": "node --test scripts/release-publisher-policy.test.mjs scripts/desktop-release-policy.test.mjs scripts/desktop-release-state.test.mjs scripts/desktop-workflow-path.test.mjs scripts/desktop-release-finalizer.test.mjs",
@@ -47,7 +53,7 @@
     "projections:check": "tsx scripts/generate-client-projections.mts",
     "ui:governance": "node --test scripts/ui-governance-rules.test.mjs scripts/check-webc-shell-contract.test.mjs && node scripts/verify-ui-governance.mjs",
     "ui:governance:test": "node --test scripts/ui-governance-rules.test.mjs",
-    "ui:e2e": "playwright test",
+    "ui:e2e": "node --test scripts/ui-e2e-preview.test.mjs && playwright test",
     "ui:e2e:update": "playwright test --update-snapshots",
     "pc-shell:verify": "node scripts/verify-pc-shell.mjs",
     "secrets:scan": "node scripts/secret-scan.mjs --files AGENTS.md AGENTS.repo.md WORKLOOM_PRODUCT_CONTEXT.md",
@@ -91,8 +97,9 @@
     "acceptance:coverage": "node scripts/acceptance/coverage.mjs",
     "acceptance:report": "node scripts/acceptance/report-v3.mjs",
     "acceptance:report:v2": "node scripts/acceptance/report.mjs",
-    "test:governance": "node --test scripts/delivery/*.test.mjs scripts/acceptance/fleet-run.test.mjs scripts/acceptance/lib/environment-safety.test.mjs scripts/acceptance/lib/outcome-contract.test.mjs scripts/acceptance/lib/live/budget.test.mjs scripts/acceptance/lib/live/live-truth.test.mjs scripts/acceptance/lib/live/providers.test.mjs scripts/acceptance/lib/live/usage.test.mjs scripts/acceptance/lib/live/audit.test.mjs scripts/acceptance/lib/live/providers-http.test.mjs scripts/capability-status.test.mjs scripts/oss-inventory.test.mjs scripts/oss-watch.test.mjs scripts/tools/provision-safety.test.mjs sync/direct-push.test.mjs scripts/acceptance/lib/live/product.test.mjs scripts/acceptance/lib/live/media-negative.test.mjs scripts/acceptance/lib/live/live-cli.test.mjs scripts/acceptance/outcome.test.mjs scripts/acceptance/lib/profile-contract.test.mjs scripts/acceptance/profile-check.test.mjs scripts/ui-release-registration.test.mjs scripts/acceptance/lib/live/dsh-process.test.mjs scripts/acceptance/lib/live/live-cli-wire.test.mjs sync/fanout-safety.test.mjs",
-    "test:media": "node --test scripts/acceptance/lib/live/media-decoder.test.mjs scripts/acceptance/lib/live/live-cli-browser.test.mjs"
+    "test:governance": "node --test scripts/delivery/*.test.mjs scripts/acceptance/fleet-run.test.mjs scripts/acceptance/lib/environment-safety.test.mjs scripts/acceptance/lib/outcome-contract.test.mjs scripts/acceptance/lib/live/budget.test.mjs scripts/acceptance/lib/live/live-truth.test.mjs scripts/acceptance/lib/live/providers.test.mjs scripts/acceptance/lib/live/usage.test.mjs scripts/acceptance/lib/live/audit.test.mjs scripts/acceptance/lib/live/providers-http.test.mjs scripts/capability-status.test.mjs scripts/oss-inventory.test.mjs scripts/oss-watch.test.mjs scripts/tools/provision-safety.test.mjs sync/direct-push.test.mjs scripts/acceptance/lib/live/product.test.mjs scripts/acceptance/lib/live/media-negative.test.mjs scripts/acceptance/lib/live/live-cli.test.mjs scripts/acceptance/outcome.test.mjs scripts/acceptance/lib/profile-contract.test.mjs scripts/acceptance/profile-check.test.mjs scripts/ui-release-registration.test.mjs scripts/acceptance/lib/live/dsh-process.test.mjs scripts/acceptance/lib/live/live-cli-wire.test.mjs sync/fanout-safety.test.mjs scripts/ui-e2e-preview.test.mjs",
+    "test:media": "node --test scripts/acceptance/lib/live/media-decoder.test.mjs scripts/acceptance/lib/live/live-cli-browser.test.mjs",
+    "test:desktop-source": "node --import tsx --test scripts/desktop-app.test.mts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
@@ -108,5 +115,5 @@
     "vitest": "^5.0.1",
     "yaml": "2.9.0"
   },
-  "description": "WorkLoom IM · 企业级 Agent IM 底座（智能班组 + 围栏 + 人审 + 夜班）"
+  "description": "WorkLoom PM · AI 产品经理带领 AI 研发团队，从用户意图到真实产物、验证与交付回执"
 }

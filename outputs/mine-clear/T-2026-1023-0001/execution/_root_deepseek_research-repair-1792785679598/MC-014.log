@@ -1,0 +1,18 @@
+{
+  "id": "MC-014",
+  "actor": "/root/deepseek_research",
+  "role": "repair",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-014-0-1792785683349.json",
+        "sha256": "9a542e90a233deb6c5f451e76b9ac917206c60bc0e2bc95947b28cd9ef48a9be",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

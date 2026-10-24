@@ -1,0 +1,52 @@
+{
+  "id": "MC-107",
+  "kind": "fix",
+  "covers": [
+    "MC-006"
+  ],
+  "title": "统一执行入口恢复绑定的完整目标与版本",
+  "batch": 2,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "apps/server/src/runtime/thread-runner.ts:374@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "ddf4f9f2329e449402bbe4613e295a3fd3b9dc104339199ebb06f92efe11127b",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    }
+  ],
+  "fix_plan": "从原dispatch事件恢复goal_ref/version并核验档案，所有旧调度/恢复入口共用。",
+  "blast_radius": "无绑定旧线程继续原goal；绑定丢失/漂移拒绝，不隐式改规划。",
+  "conflict_paths": [
+    "apps/server/src/runtime/thread-runner.ts"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+      "expect": "queued/paused恢复将精确长目标送真实规划入口；缺失、无版本或版本漂移先拒绝并留回执，不用短标题冒充原目标。",
+      "command": "node --test assertions/legacy.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/legacy.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/legacy.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root/sandbox_prepare",
+  "eligible_acceptance_actors": [
+    "/root/intent_audit"
+  ],
+  "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+}

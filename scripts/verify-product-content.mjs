@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { resolveDesktopWorkflowPath } from "./desktop-workflow-path.mjs";
+import { validateProductStartPath } from "./product-runtime.mjs";
 
 const root = process.cwd();
 let repositoryRoot = root;
@@ -38,6 +39,12 @@ if (product) {
   if (!Number.isInteger(product.desktop?.portOffset) || product.desktop.portOffset < 0 || product.desktop.portOffset > 900) {
     errors.push("桌面端口偏移必须为 0 到 900 的整数");
   }
+  let startPath;
+  try { startPath = validateProductStartPath(product.desktop?.startPath); }
+  catch (error) { errors.push(error.message); }
+  if (product.clients?.bPc?.secretaryAutoScan !== undefined && typeof product.clients.bPc.secretaryAutoScan !== "boolean") {
+    errors.push("B 端 secretaryAutoScan 必须是布尔值");
+  }
   for (const [client, spec] of Object.entries(product.clients ?? {})) {
     if (spec?.enabled !== true) errors.push(`${client} 未启用；正式产品必须明确提供三端`);
     const clientDir = path.resolve(root, spec?.entry ?? "");
@@ -50,6 +57,7 @@ if (product) {
   }
   const packageJson = requiredJson(path.join(root, "package.json"), "根 package.json");
   if (packageJson && packageJson.name !== product.packageName) errors.push("产品清单 packageName 与根 package.json 不一致");
+  if (packageJson && (packageJson.workloomStartPath ?? "/") !== startPath) errors.push("package.json 启动路径与产品清单不一致");
   const defaultBundle = path.join(bundlesRoot, product.defaultBundle ?? "", "bundle.json");
   if (!fs.existsSync(defaultBundle)) errors.push(`默认行业包不存在：${product.defaultBundle ?? "未配置"}`);
 
@@ -58,6 +66,7 @@ if (product) {
   if (!builder.includes(`appId: ${product.release?.appId}`)) errors.push("electron-builder appId 与产品清单不一致");
   if (!builder.includes(`productName: ${product.displayName}`)) errors.push("electron-builder productName 与产品清单不一致");
   if (!builder.includes(`workloomPortOffset: ${product.desktop?.portOffset}`)) errors.push("electron-builder 端口偏移与产品清单不一致");
+  if (startPath !== "/" && !builder.includes(`workloomStartPath: ${startPath}`)) errors.push("electron-builder 启动路径与产品清单不一致");
   for (const marker of [
     "notarize: true",
     "hardenedRuntime: true",

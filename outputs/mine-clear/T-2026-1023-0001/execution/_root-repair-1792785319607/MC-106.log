@@ -1,0 +1,18 @@
+{
+  "id": "MC-106",
+  "actor": "/root",
+  "role": "repair",
+  "result": "pass",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-106-0-1792785322504.json",
+        "sha256": "3683d27d49c568eb64c769a2cdc0f9a5cbd1cdbe07c9ae5f48d802fa8a3a2e13",
+        "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d"
+      }
+    }
+  ]
+}
+

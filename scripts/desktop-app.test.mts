@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { createServer } from "node:net";
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
@@ -11,7 +12,10 @@ import {
   ElectronExecutableMissingError,
   portBusy,
   resolveElectronExecutable,
+  resolveDesktopLaunchConfig,
   resolveSourceWorkspace,
+  sourceSupportDirectory,
+  validateDesktopModelConfig,
 } from "./desktop-app.mts";
 
 function write(path: string, content = "") {
@@ -153,6 +157,106 @@ test("Electron 源码环境精确映射端口、源码上下文与隔离 userDat
   assert.equal(env.WORKLOOM_RENDER_SMOKE, "0");
   assert.equal(env.WORKLOOM_WEB_URL, undefined);
   assert.equal(env.WORKLOOM_SERVER_URL, undefined);
+});
+
+test("未显式指定 userData 时仍按产品身份隔离源码客户端", () => {
+  const root = dirname(dirname(fileURLToPath(import.meta.url)));
+  const env = buildElectronEnvironment({ environment: {}, webPort: 5373, serverPort: 8987,
+    sourceRoot: root, sourceNode: process.execPath, smoke: false });
+  assert.equal(typeof env.WORKLOOM_SUPPORT_DIR, "string");
+  assert.equal(basename(env.WORKLOOM_SUPPORT_DIR!), "workloom-pm");
+});
+
+function productFixture(envText = "", offset = 200) {
+  const root = mkdtempSync(join(tmpdir(), "workloom-product-launch-test-"));
+  write(join(root, "package.json"), JSON.stringify({ name: "workloom-example", productName: "Example Product", workloomPortOffset: offset }));
+  write(join(root, "product.manifest.json"), JSON.stringify({ schemaVersion: "workloom.product/v1", productId: "workloom-example",
+    role: "industry", displayName: "Example Product", repository: "example/product", demoWorkspaceSlug: "example-workspace", demoMemberNo: "MEM-001", desktop: { portOffset: offset } }));
+  write(join(root, ".env"), envText);
+  return root;
+}
+
+test("源码默认server/web端口从产品偏移派生，dev与preview保持同一口径", () => {
+  const root = productFixture();
+  try {
+    const config = resolveDesktopLaunchConfig(root, {});
+    assert.equal(config.serverPort, 8987); assert.equal(config.webPort, 5373);
+    assert.equal(config.environment.SERVER_PORT, config.environment.WORKLOOM_SERVER_PORT);
+    assert.equal(config.environment.WEB_PORT, config.environment.WORKLOOM_WEB_PORT);
+    assert.equal(config.environment.WORKLOOM_APP_TITLE, "Example Product");
+    assert.equal(basename(config.environment.WORKLOOM_SUPPORT_DIR!), "workloom-example");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("先读取根.env，再由显式进程env及别名覆盖，server/web/Electron值一致", () => {
+  const root = productFixture("SERVER_PORT=18001\nWEB_PORT=18002\nLLM_PROVIDER=deepseek\nDEEPSEEK_API_KEY=fake-file-key\n");
+  try {
+    const fromFile = resolveDesktopLaunchConfig(root, {});
+    assert.equal(fromFile.serverPort, 18001); assert.equal(fromFile.webPort, 18002);
+    const fromProcess = resolveDesktopLaunchConfig(root, { WORKLOOM_SERVER_PORT: "19001", WEB_PORT: "19002", DEEPSEEK_API_KEY: "fake-process-key" });
+    assert.equal(fromProcess.serverPort, 19001); assert.equal(fromProcess.webPort, 19002);
+    assert.equal(fromProcess.environment.DEEPSEEK_API_KEY, "fake-process-key");
+    const electron = buildElectronEnvironment({ environment: fromProcess.environment, serverPort: fromProcess.serverPort,
+      webPort: fromProcess.webPort, sourceRoot: root, sourceNode: process.execPath, smoke: false });
+    assert.equal(electron.SERVER_PORT, "19001"); assert.equal(electron.WORKLOOM_SERVER_PORT, "19001");
+    assert.equal(electron.WEB_PORT, "19002"); assert.equal(electron.WORKLOOM_WEB_PORT, "19002");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("源码启动路径从产品清单到 Electron 贯通，显式配置优先且拒绝注入", () => {
+  const root = productFixture("WORKLOOM_START_PATH=/from-file\n");
+  try {
+    assert.equal(resolveDesktopLaunchConfig(root, {}).environment.WORKLOOM_START_PATH, "/from-file");
+    const config = resolveDesktopLaunchConfig(root, { WORKLOOM_START_PATH: "/development" });
+    const electron = buildElectronEnvironment({ environment: config.environment, webPort: config.webPort,
+      serverPort: config.serverPort, sourceRoot: root, sourceNode: process.execPath, smoke: false });
+    assert.equal(electron.WORKLOOM_START_PATH, "/development");
+    for (const startPath of ["https://evil.invalid", "//evil.invalid", "/../admin", "/%2e%2e/admin", "/development?x=1"]) {
+      assert.throws(() => resolveDesktopLaunchConfig(root, { WORKLOOM_START_PATH: startPath }), /startPath/);
+    }
+    write(join(root, ".env"), "");
+    assert.equal(resolveDesktopLaunchConfig(root, {}).environment.WORKLOOM_START_PATH, "/");
+    rmSync(join(root, "product.manifest.json"));
+    write(join(root, "package.json"), JSON.stringify({ name: "workloom-example", workloomStartPath: "/package-default" }));
+    assert.equal(resolveDesktopLaunchConfig(root, {}).environment.WORKLOOM_START_PATH, "/package-default");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("显式偏移覆盖产品默认，缺manifest时可用package声明，损坏manifest不降级", () => {
+  const root = productFixture();
+  try {
+    assert.equal(resolveDesktopLaunchConfig(root, { WORKLOOM_PORT_OFFSET: "300" }).serverPort, 9087);
+    rmSync(join(root, "product.manifest.json"));
+    assert.equal(resolveDesktopLaunchConfig(root, {}).serverPort, 8987);
+    write(join(root, "product.manifest.json"), "{broken}");
+    assert.throws(() => resolveDesktopLaunchConfig(root, {}), /无法解析/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("非法端口、相同端口和越界偏移在启动前阻断", () => {
+  const root = productFixture();
+  try {
+    for (const environment of [{ SERVER_PORT: "abc" }, { WEB_PORT: "0" }, { SERVER_PORT: "65536" },
+      { SERVER_PORT: "19000", WEB_PORT: "19000" }, { WORKLOOM_PORT_OFFSET: "901" }]) {
+      assert.throws(() => resolveDesktopLaunchConfig(root, environment), /端口|PORT/);
+    }
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("产品userData按系统目录隔离，明确配置支持目录优先", () => {
+  const root = productFixture();
+  try {
+    assert.equal(sourceSupportDirectory(root, {}, "darwin", "/example-home"), "/example-home/Library/Application Support/workloom-example");
+    assert.equal(sourceSupportDirectory(root, { XDG_CONFIG_HOME: "/config" }, "linux", "/example-home"), "/config/workloom-example");
+    assert.equal(sourceSupportDirectory(root, { WORKLOOM_SUPPORT_DIR: ".runtime" }, "darwin", "/example-home"), join(root, ".runtime"));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("真实DeepSeek缺Key阻断且说明配置入口，显式mock仅是演示", () => {
+  assert.throws(() => validateDesktopModelConfig({}), /DEEPSEEK_API_KEY.*不会自动切换/);
+  assert.throws(() => validateDesktopModelConfig({ LLM_PROVIDER: "deepseek", DEEPSEEK_API_KEY: " " }), /尚未配置/);
+  assert.doesNotThrow(() => validateDesktopModelConfig({ LLM_PROVIDER: "deepseek", DEEPSEEK_API_KEY: "fake-test-only-key" }));
+  assert.doesNotThrow(() => validateDesktopModelConfig({ LLM_PROVIDER: "mock" }));
 });
 
 test("冒烟 support/userData 每次唯一且成功或失败收尾都可幂等清理", () => {

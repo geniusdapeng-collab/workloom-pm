@@ -1,0 +1,24 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "metrics_native",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "--test-reporter=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/scripts/delivery/node-test-reporter.mjs",
+    "--test-reporter-destination=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/metrics_native-1792782273218-7ba2922a-be56-43bc-9e6f-e8918bd371fd.node.jsonl",
+    "--test-reporter=tap",
+    "--test-reporter-destination=stdout",
+    "--import",
+    "tsx",
+    "--test",
+    "--test-concurrency=1",
+    "apps/server/src/industry/ai-pm/acceptance/metrics.node-test.mjs"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm",
+  "startedAt": "2026-10-23T19:04:33.222Z",
+  "finishedAt": "2026-10-23T19:04:38.096Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "TAP version 13\n# Subtest: repairs never replace the first attempt or disappear from the attempt denominator\nok 1 - repairs never replace the first attempt or disappear from the attempt denominator\n  ---\n  duration_ms: 2.934584\n  type: 'test'\n  ...\n# Subtest: unknown predictions count as false negatives and an unobserved class has null recall\nok 2 - unknown predictions count as false negatives and an unobserved class has null recall\n  ---\n  duration_ms: 0.45725\n  type: 'test'\n  ...\n# Subtest: a timeout fallback does not inflate LLM recall and a rule-only result makes no paid claim\nok 3 - a timeout fallback does not inflate LLM recall and a rule-only result makes no paid claim\n  ---\n  duration_ms: 1.618708\n  type: 'test'\n  ...\n# Subtest: Wilson intervals preserve small-sample uncertainty and reject impossible counts\nok 4 - Wilson intervals preserve small-sample uncertainty and reject impossible counts\n  ---\n  duration_ms: 1.456583\n  type: 'test'\n  ...\n# Subtest: a timed-out classifier remains a missed LLM attempt even when its rule fallback is right\nok 5 - a timed-out classifier remains a missed LLM attempt even when its rule fallback is right\n  ---\n  duration_ms: 5.492042\n  type: 'test'\n  ...\n# Subtest: classifier repair preserves first/last/attempt LLM outcomes separately from route fallback success\nok 6 - classifier repair preserves first/last/attempt LLM outcomes separately from route fallback success\n  ---\n  duration_ms: 2.052458\n  type: 'test'\n  ...\n# Subtest: the historical fourteen-role shape keeps five first, thirteen latest and thirteen of twenty-three attempts\nok 7 - the historical fourteen-role shape keeps five first, thirteen latest and thirteen of twenty-three attempts\n  ---\n  duration_ms: 2.210208\n  type: 'test'\n  ...\n# Subtest: zero paid classifiers plus eight free rules leave every paid/LLM rate unmeasured\nok 8 - zero paid classifiers plus eight free rules leave every paid/LLM rate unmeasured\n  ---\n  duration_ms: 0.558042\n  type: 'test'\n  ...\n# Subtest: the four-role chain accepts ancestor material forwarding and rejects duplicate, extra or disconnected roles\nok 9 - the four-role chain accepts ancestor material forwarding and rejects duplicate, extra or disconnected roles\n  ---\n  duration_ms: 0.706958\n  type: 'test'\n  ...\n# Subtest: active intent capacity retains three physical calls for model-planned search and one for direct search\nok 10 - active intent capacity retains three physical calls for model-planned search and one for direct search\n  ---\n  duration_ms: 0.674958\n  type: 'test'\n  ...\n1..10\n# tests 10\n# suites 0\n# pass 10\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 317.663584\n",
+  "stderr": ""
+}

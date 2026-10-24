@@ -1,0 +1,24 @@
+{
+  "schema": "workloom.pm-mcd-nested-run/v1",
+  "group": "guest_access",
+  "executable": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "args": [
+    "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/node_modules/vitest/vitest.mjs",
+    "run",
+    "src/shell/NavigationAccess.guest.test.tsx",
+    "src/shell/IndustryRoutes.test.tsx",
+    "src/shell/NavMenu.test.ts",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/guest_access-1792785786747-a9a3f96c-397a-41ad-9a76-7e20edfd4f4e.vitest.json"
+  ],
+  "cwd": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/workloom-pm/apps/web",
+  "startedAt": "2026-10-23T20:03:06.747Z",
+  "finishedAt": "2026-10-23T20:03:08.501Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "JSON report written to /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/runs/guest_access-1792785786747-a9a3f96c-397a-41ad-9a76-7e20edfd4f4e.vitest.json\n",
+  "stderr": ""
+}

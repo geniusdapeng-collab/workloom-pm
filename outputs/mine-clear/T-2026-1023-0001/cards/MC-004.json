@@ -1,0 +1,54 @@
+{
+  "id": "MC-004",
+  "kind": "problem",
+  "title": "AI-PM来源抓取失败被标为真实成功",
+  "severity": "P1",
+  "level": "L2",
+  "batch": 2,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "apps/server/src/service/aipm.ts:176@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    },
+    {
+      "type": "code",
+      "ref": "apps/server/src/service/aipm.ts:167@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "371656fa9fbc2820a06070831e4df94e7b2ccdc525e3481c87681a4681797b61",
+      "note": "A: RSS source outcome was inferred solely from the presence of llm"
+    }
+  ],
+  "root_cause": {
+    "file": "apps/server/src/service/aipm.ts",
+    "line": 176,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "competitorScan/industryRadar"
+  },
+  "trigger_path": "竞品URL返回404/500/空正文，或所有RSS失败但LLM配置存在，仍可能mock:false且空事实。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "竞品URL返回404/500/空正文，或所有RSS失败但LLM配置存在，仍可能mock:false且空事实。",
+      "expect": "失败/空来源标未核实且错误可见；有效来源与持久化真实结果分别统计，不把模型配置当来源成功。",
+      "command": "node --test assertions/aipm.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/aipm.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/aipm.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+}

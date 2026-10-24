@@ -55,6 +55,8 @@ test("产品清单派生仓库、品牌与隔离端口", () => {
       demoWorkspaceSlug: "example-demo",
       demoMemberNo: "MEM-X01",
       portOffset: 321,
+      startPath: "/",
+      secretaryAutoScan: true,
       serverPort: 9108,
       webPort: 5494,
       pgPort: 5753,
@@ -62,6 +64,38 @@ test("产品清单派生仓库、品牌与隔离端口", () => {
     });
   } finally {
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("产品首屏与自动扫描由清单显式控制，Vite 传递精确布尔值", () => {
+  const root = fixture(manifest({ desktop: { portOffset: 321, startPath: "/development" },
+    clients: { bPc: { secretaryAutoScan: false } } }));
+  const scripts = join(root, "scripts");
+  mkdirSync(scripts);
+  copyFileSync(join(SCRIPTS_DIR, "product-runtime.mjs"), join(scripts, "product-runtime.mjs"));
+  copyFileSync(join(SCRIPTS_DIR, "vite-product.mjs"), join(scripts, "vite-product.mjs"));
+  try {
+    const product = loadProductRuntime(root);
+    assert.equal(product.startPath, "/development");
+    assert.equal(product.secretaryAutoScan, false);
+    const result = execFileSync(process.execPath, ["--input-type=module", "--eval",
+      `const { workloomProductVite } = await import(${JSON.stringify(pathToFileURL(join(scripts, "vite-product.mjs")).href)}); process.stdout.write(JSON.stringify(workloomProductVite("测试端").define));`,
+    ], { cwd: root, encoding: "utf8" });
+    assert.equal(JSON.parse(result).__WORKLOOM_SECRETARY_AUTO_SCAN__, "false");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("产品启动路径拒绝外部地址、编码穿越、查询和错误扫描类型", () => {
+  for (const startPath of [null, "", "//evil.invalid", "https://evil.invalid", "/../admin", "/development/..", "/%2e%2e/admin",
+    "/development?redirect=x", "/development#hash", "/development/", "/a\\b", "/a\nb"]) {
+    const root = fixture(manifest({ desktop: { portOffset: 1, startPath } }));
+    try { assert.throws(() => loadProductRuntime(root), /startPath/); }
+    finally { rmSync(root, { recursive: true, force: true }); }
+  }
+  for (const secretaryAutoScan of [null, "false", 0, {}]) {
+    const root = fixture(manifest({ clients: { bPc: { secretaryAutoScan } } }));
+    try { assert.throws(() => loadProductRuntime(root), /secretaryAutoScan/); }
+    finally { rmSync(root, { recursive: true, force: true }); }
   }
 });
 

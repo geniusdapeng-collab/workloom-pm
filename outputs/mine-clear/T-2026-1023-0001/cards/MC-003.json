@@ -1,0 +1,48 @@
+{
+  "id": "MC-003",
+  "kind": "problem",
+  "title": "客户端载荷清理会删除第三方必需的nested依赖",
+  "severity": "P1",
+  "level": "L3",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "scripts/pack-electron-payload.sh:117@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "755bf17f0e36f0c441df01ed2af10ad803a1c88c2f02167af8287e41d1047a1e",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    }
+  ],
+  "root_cause": {
+    "file": "scripts/pack-electron-payload.sh",
+    "line": 117,
+    "commit": "e5d76398484cac7d8ac50b6c27905765a59fd50f",
+    "symbol": "runtime node_modules pruning"
+  },
+  "trigger_path": "运行期npm闭包具有第三方内部node_modules时，旧find按目录名批量删除，使已安装DSH等依赖无法加载。",
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "运行期npm闭包具有第三方内部node_modules时，旧find按目录名批量删除，使已安装DSH等依赖无法加载。",
+      "expect": "只删除复制的一方工作区node_modules；第三方nested依赖可真实import；锁文件与运行期清单一致。",
+      "command": "node --test assertions/payload.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/payload.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/payload.test.mjs",
+    "evidence": null
+  },
+  "fixed_by": null,
+  "verified_by": null,
+  "notes": "卡片于修复过程中补录。审计固定原e5提交，初始dirty_count=1保留；未伪造动手前修复提交/干净基线。已有红绿日志另作发现留痕，正式MCD闭环待干净提交后由运行器实际执行。"
+}

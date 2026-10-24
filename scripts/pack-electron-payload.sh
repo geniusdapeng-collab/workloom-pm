@@ -113,10 +113,10 @@ for pkgjson in "${INTERNAL_PACKAGE_MANIFESTS[@]}"; do
   pdir="$(dirname "$pkgjson")"
   mkdir -p "$R/node_modules/$(dirname "$pname")"
   copy "$pdir" "$R/node_modules/$pname"
+  # 只移除刚复制的 workspace 包自带依赖；npm ci 的第三方嵌套树是版本边界，
+  # 删除它会让 dsh 等运行时在客户机上出现 MODULE_NOT_FOUND / 错版加载。
+  node scripts/prune-workspace-deps.mjs "$R/node_modules" "$pname"
 done
-find "$R/node_modules" -mindepth 2 -maxdepth 4 -type d -name node_modules -prune -exec rm -rf {} + 2>/dev/null || true
-# ⚠️ 必须 -mindepth 2：根目录本身也叫 node_modules，不带 mindepth 会整目录自毁
-#（hyperreality/workloom v1.0.0 冒烟「tsx 缺失」实证）；maxdepth 4 覆盖 @scope/pkg/node_modules
 
 # ---------- 3. Node 官方二进制（按平台/架构） ----------
 echo "→ Node ${NODE_VER} ${PLATFORM}-${ARCH}…"
@@ -197,6 +197,15 @@ for f in runtime/node_modules/tsx/package.json runtime/node_modules/hono/package
          runtime/product.manifest.json runtime/apps/web/vite.config.ts; do
   [ -f "$OUT/$f" ] || { echo "❌ 载荷自检失败：$f 缺失"; exit 1; }
 done
+# PM 的真实 Harness 由 server 直接依赖锁定；缺运行时不得继续出安装包。
+if node -e 'process.exit(require("./apps/server/package.json").dependencies?.["@deepseek-ai/dsh"] ? 0 : 1)'; then
+  for f in runtime/node_modules/@deepseek-ai/dsh/package.json runtime/node_modules/@deepseek-ai/dsh/lib/bin.js \
+           runtime/apps/server/src/industry/ai-pm/dsh-adapter.ts runtime/apps/server/src/industry/ai-pm/dsh-workspace.plugin.mjs \
+           runtime/apps/server/src/industry/ai-pm/code-verifier.ts runtime/apps/server/src/industry/ai-pm/code-test-runner.mjs \
+           runtime/apps/server/src/industry/ai-pm/code-test-preload.mjs; do
+    [ -f "$OUT/$f" ] || { echo "❌ PM Harness 载荷不完整：$f 缺失"; exit 1; }
+  done
+fi
 # 种子脚本按仓各异（seed-aipm/seed-trading/seed-video…），存在其一即可
 compgen -G "$OUT/runtime/scripts/seed*.ts" > /dev/null || { echo "❌ 载荷自检失败：runtime/scripts/seed*.ts 缺失"; exit 1; }
 if [ "$PLATFORM" = "win" ]; then
@@ -208,6 +217,7 @@ else
   [ -f "$OUT/pg/bin/initdb" ] || { echo "❌ 载荷自检失败：pg/bin/initdb 缺失"; exit 1; }
 fi
 node scripts/payload-policy.mjs assert-runtime "$R"
+node scripts/verify-runtime-preview.mjs "$R" "$NM_STAGE/node_modules" --target-os "$TARGET_OS" --target-cpu "$TARGET_CPU"
 echo "✓ 载荷自检通过"
 
 # ---------- 10. 载荷压缩包（electron-builder extraResources 对 **/node_modules/** 有硬排除，

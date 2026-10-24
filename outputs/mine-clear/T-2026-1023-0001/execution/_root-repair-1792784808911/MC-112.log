@@ -1,0 +1,18 @@
+{
+  "id": "MC-112",
+  "actor": "/root",
+  "role": "repair",
+  "result": "pass",
+  "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-112-0-1792784820005.json",
+        "sha256": "064a1e3acb85fad7e7d3c40b06ee128c3858a87dd8a79045bb6279ec62749caf",
+        "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+      }
+    }
+  ]
+}
+

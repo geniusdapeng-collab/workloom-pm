@@ -1,0 +1,18 @@
+{
+  "schema": "workloom.production-vite-config-test/v1",
+  "name": "production Vite configuration loads with only locked runtime dependencies",
+  "expected": "Vite preview config loads without a dev-only Vitest installation",
+  "fixture": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-vite-runtime-TQEucd",
+  "stage": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-runtime-stage",
+  "startedAt": "2026-10-23T18:54:00.654Z",
+  "vitestInstalled": false,
+  "passed": false,
+  "actual": {
+    "loaded": false,
+    "name": "Error",
+    "code": "ERR_MODULE_NOT_FOUND",
+    "message": "Cannot find package 'vitest' imported from /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-runtime-stage/node_modules/.vite-temp/vite.config.ts.timestamp-1792781649073-2c259207fcaa6.mjs"
+  },
+  "fixtureCleaned": true,
+  "finishedAt": "2026-10-23T18:54:10.414Z"
+}

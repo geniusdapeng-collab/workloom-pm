@@ -1,0 +1,18 @@
+{
+  "id": "MC-116",
+  "actor": "/root/intent_audit",
+  "role": "repair",
+  "result": "pass",
+  "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa",
+  "assertions": [
+    {
+      "result": "pass",
+      "run": {
+        "path": "runs/MC-116-0-1792784969895.json",
+        "sha256": "49cb98539efb311bef80b5847c83cf4e5286f3648de17cf37abc1fb5b01bd07d",
+        "commit": "cc86cf9dee7101131912cd0e427b78a90d3494aa"
+      }
+    }
+  ]
+}
+

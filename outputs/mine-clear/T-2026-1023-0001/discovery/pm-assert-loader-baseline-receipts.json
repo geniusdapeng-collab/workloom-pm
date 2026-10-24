@@ -1,0 +1,131 @@
+[
+  {
+    "name": "loader",
+    "receipt": {
+      "backend": "macos-seatbelt-node24",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "TEST_LOG:{\"file\":\"/private/var/folders/dj/mkh6fwbd4mb6ycp933xfty4h0000gn/T/workloom-pm-verify-g2yt9s/trusted.test.cjs\",\"message\":\"(node:87641) ExperimentalWarning: Frozen intristics is an experimental feature and might change at any time\\n\"}\nTEST_LOG:{\"file\":\"/private/var/folders/dj/mkh6fwbd4mb6ycp933xfty4h0000gn/T/workloom-pm-verify-g2yt9s/trusted.test.cjs\",\"message\":\"(Use `node --trace-warnings ...` to show where the warning was created)\\n\"}\n\nPM_TEST_RECEIPT:f1a0ea9d04d942b09e536abd4cfb58450ce7bcbfe0996dfbba3eecd35d96b8cf:{\"success\":true,\"counts\":{\"tests\":1,\"failed\":0,\"passed\":1,\"cancelled\":0,\"skipped\":0,\"todo\":0,\"topLevel\":1,\"suites\":0},\"completedTests\":1}\n",
+      "stderr": "(node:87640) SecurityWarning: The flag --allow-child-process must be used with extreme caution. It could invalidate the permission model.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+      "timedOut": false,
+      "cancelled": false,
+      "outputLimited": false,
+      "stdoutSha256": "098af4effa788a09b49fd62dfd72317fd43deabc819eafce54d1ac76cf370f18",
+      "stderrSha256": "630e0ba7ac02c12a3d8f3be658a35a0dd96cce342e187fd71c99f30d6b9d9b7b",
+      "testSummary": {
+        "success": true,
+        "counts": {
+          "tests": 1,
+          "failed": 0,
+          "passed": 1,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "topLevel": 1,
+          "suites": 0
+        },
+        "completedTests": 1
+      },
+      "files": [
+        {
+          "path": "wrong.cjs",
+          "sha256": "9f7a4880f2afcb9e4e603c2d66e217e8c1df572c5336c7376db73ee49bab7f7a"
+        },
+        {
+          "path": "trusted.test.cjs",
+          "sha256": "926228461704489994c00da5fc5db8fcf9203ffeef4de2c33dbf13528d4e8a71"
+        }
+      ],
+      "tests": [
+        "trusted.test.cjs"
+      ],
+      "testOrigin": "trusted-evaluator"
+    }
+  },
+  {
+    "name": "cache",
+    "receipt": {
+      "backend": "macos-seatbelt-node24",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "TEST_LOG:{\"file\":\"/private/var/folders/dj/mkh6fwbd4mb6ycp933xfty4h0000gn/T/workloom-pm-verify-E4WFvh/trusted.test.cjs\",\"message\":\"(node:87643) ExperimentalWarning: Frozen intristics is an experimental feature and might change at any time\\n\"}\nTEST_LOG:{\"file\":\"/private/var/folders/dj/mkh6fwbd4mb6ycp933xfty4h0000gn/T/workloom-pm-verify-E4WFvh/trusted.test.cjs\",\"message\":\"(Use `node --trace-warnings ...` to show where the warning was created)\\n\"}\n\nPM_TEST_RECEIPT:02ce92731e4d1fdb7d5a4c1d78821358faa05a43c1c3820d74322c355ed381a0:{\"success\":true,\"counts\":{\"tests\":1,\"failed\":0,\"passed\":1,\"cancelled\":0,\"skipped\":0,\"todo\":0,\"topLevel\":1,\"suites\":0},\"completedTests\":1}\n",
+      "stderr": "(node:87642) SecurityWarning: The flag --allow-child-process must be used with extreme caution. It could invalidate the permission model.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+      "timedOut": false,
+      "cancelled": false,
+      "outputLimited": false,
+      "stdoutSha256": "29cbdcf918aa13ebe1edb46e604528c0a6999f88a3db5e5e8254dbf023edcf99",
+      "stderrSha256": "87049966512d665eaa408deec47564f15b4ef2824e3fd44522a25326b4fad9bf",
+      "testSummary": {
+        "success": true,
+        "counts": {
+          "tests": 1,
+          "failed": 0,
+          "passed": 1,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "topLevel": 1,
+          "suites": 0
+        },
+        "completedTests": 1
+      },
+      "files": [
+        {
+          "path": "wrong.cjs",
+          "sha256": "345eb7bd8a034eea6700a90e460a11db4b8457b91b1a66b5debd1dbe3a4a3dcd"
+        },
+        {
+          "path": "trusted.test.cjs",
+          "sha256": "9fe00763a5fcb3a77d6cda32e6de7daa914c50910499d22d90fba21ec02297e3"
+        }
+      ],
+      "tests": [
+        "trusted.test.cjs"
+      ],
+      "testOrigin": "trusted-evaluator"
+    }
+  },
+  {
+    "name": "hook",
+    "receipt": {
+      "backend": "macos-seatbelt-node24",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "TEST_LOG:{\"file\":\"/private/var/folders/dj/mkh6fwbd4mb6ycp933xfty4h0000gn/T/workloom-pm-verify-hWkccO/trusted.test.mjs\",\"message\":\"(node:87650) ExperimentalWarning: Frozen intristics is an experimental feature and might change at any time\\n\"}\nTEST_LOG:{\"file\":\"/private/var/folders/dj/mkh6fwbd4mb6ycp933xfty4h0000gn/T/workloom-pm-verify-hWkccO/trusted.test.mjs\",\"message\":\"(Use `node --trace-warnings ...` to show where the warning was created)\\n\"}\n\nPM_TEST_RECEIPT:4ce8ec757884a5bc68fc30abb9b4ded36b4f6b6728a91343dd9836295d1dac6a:{\"success\":true,\"counts\":{\"tests\":1,\"failed\":0,\"passed\":1,\"cancelled\":0,\"skipped\":0,\"todo\":0,\"topLevel\":1,\"suites\":0},\"completedTests\":1}\n",
+      "stderr": "(node:87649) SecurityWarning: The flag --allow-child-process must be used with extreme caution. It could invalidate the permission model.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+      "timedOut": false,
+      "cancelled": false,
+      "outputLimited": false,
+      "stdoutSha256": "303ec09e00db0afa8769fabf69e0d682e21ccc61b5da2d8da1aaa0bead16b37b",
+      "stderrSha256": "6214ee640c131d6fec06a5f24b83716cf8bb255c613a07419aea0e84457df10b",
+      "testSummary": {
+        "success": true,
+        "counts": {
+          "tests": 1,
+          "failed": 0,
+          "passed": 1,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "topLevel": 1,
+          "suites": 0
+        },
+        "completedTests": 1
+      },
+      "files": [
+        {
+          "path": "wrong.mjs",
+          "sha256": "dcaafcd2451098795818f60295d5537ece3818d3b95cffba87ad12abdeea2a73"
+        },
+        {
+          "path": "trusted.test.mjs",
+          "sha256": "77ffdff67b187165686693ef55b3158709616dd4998c25012797d1b83956e1ea"
+        }
+      ],
+      "tests": [
+        "trusted.test.mjs"
+      ],
+      "testOrigin": "trusted-evaluator"
+    }
+  }
+]

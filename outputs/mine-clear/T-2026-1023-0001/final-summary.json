@@ -1,0 +1,141 @@
+{
+  "schema": "workloom.pm-final-mcd-summary/v1",
+  "at": "2026-10-23T20:24:37.459839+00:00",
+  "commit": "686c07a7f0e266ff91660c4680f9d8fa4d8c980d",
+  "totalCards": 34,
+  "problemCards": 14,
+  "fixCards": 20,
+  "verifiedCards": 34,
+  "sourceCleanMain": true,
+  "roleSeparationAllCards": true,
+  "actualBatches": [
+    {
+      "actor": "/root",
+      "role": "acceptance",
+      "cards": [
+        "MC-006",
+        "MC-007",
+        "MC-008",
+        "MC-010",
+        "MC-011",
+        "MC-012",
+        "MC-013",
+        "MC-101",
+        "MC-109",
+        "MC-111",
+        "MC-116"
+      ],
+      "summary": "mine-clear/T-2026-1023-0001/execution/_root-acceptance-1792786031714/summary.json"
+    },
+    {
+      "actor": "/root/deepseek_research",
+      "role": "acceptance",
+      "cards": [
+        "MC-002",
+        "MC-004",
+        "MC-102",
+        "MC-103",
+        "MC-105",
+        "MC-112",
+        "MC-113",
+        "MC-114",
+        "MC-117"
+      ],
+      "summary": "mine-clear/T-2026-1023-0001/execution/_root_deepseek_research-acceptance-1792785835439/summary.json"
+    },
+    {
+      "actor": "/root/intent_audit",
+      "role": "acceptance",
+      "cards": [
+        "MC-003",
+        "MC-005",
+        "MC-009",
+        "MC-014",
+        "MC-104",
+        "MC-106",
+        "MC-107",
+        "MC-108",
+        "MC-110",
+        "MC-115",
+        "MC-118",
+        "MC-119",
+        "MC-120"
+      ],
+      "summary": "mine-clear/T-2026-1023-0001/execution/_root_intent_audit-acceptance-1792785768816/summary.json"
+    },
+    {
+      "actor": "/root/sandbox_prepare",
+      "role": "acceptance",
+      "cards": [
+        "MC-001"
+      ],
+      "summary": "mine-clear/T-2026-1023-0001/execution/_root_sandbox_prepare-acceptance-1792785993330/summary.json"
+    },
+    {
+      "actor": "/root",
+      "role": "repair",
+      "cards": [
+        "MC-004",
+        "MC-005",
+        "MC-105",
+        "MC-106",
+        "MC-112",
+        "MC-115",
+        "MC-119"
+      ],
+      "summary": "mine-clear/T-2026-1023-0001/execution/_root-repair-1792785319607/summary.json"
+    },
+    {
+      "actor": "/root/deepseek_research",
+      "role": "repair",
+      "cards": [
+        "MC-001",
+        "MC-009",
+        "MC-014",
+        "MC-101",
+        "MC-110",
+        "MC-118",
+        "MC-120"
+      ],
+      "summary": "mine-clear/T-2026-1023-0001/execution/_root_deepseek_research-repair-1792785679598/summary.json"
+    },
+    {
+      "actor": "/root/intent_audit",
+      "role": "repair",
+      "cards": [
+        "MC-002",
+        "MC-010",
+        "MC-011",
+        "MC-012",
+        "MC-013",
+        "MC-102",
+        "MC-111",
+        "MC-113",
+        "MC-114",
+        "MC-116"
+      ],
+      "summary": "mine-clear/T-2026-1023-0001/execution/_root_intent_audit-repair-1792785456781/summary.json"
+    },
+    {
+      "actor": "/root/sandbox_prepare",
+      "role": "repair",
+      "cards": [
+        "MC-003",
+        "MC-006",
+        "MC-007",
+        "MC-008",
+        "MC-103",
+        "MC-104",
+        "MC-107",
+        "MC-108",
+        "MC-109",
+        "MC-117"
+      ],
+      "summary": "mine-clear/T-2026-1023-0001/execution/_root_sandbox_prepare-repair-1792785547955/summary.json"
+    }
+  ],
+  "formalGate": "mine-clear/T-2026-1023-0001/gate-final-main.json",
+  "handoff": "mine-clear/T-2026-1023-0001/handoff.json",
+  "environment": "local-preview",
+  "boundary": "Registered issue assertions passed in actual separated Codex sessions. This is not a whole-repository zero-bug claim, complete RDAS276, or production business acceptance."
+}

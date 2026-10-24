@@ -1,0 +1,27 @@
+work/pm-vite-runtime-TQEucd/apps/web/vite.config.ts (4:29) [33m[UNRESOLVED_IMPORT] [0mCould not resolve 'vitest/config' in work/pm-vite-runtime-TQEucd/apps/web/vite.config.ts
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m work/pm-vite-runtime-TQEucd/apps/web/vite.config.ts:4:30 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m4 │[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249md[0m[38;5;249me[0m[38;5;249mf[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249me[0m[38;5;249mC[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249mf[0m[38;5;249mi[0m[38;5;249mg[0m[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m"vitest/config"[38;5;249m;[0m
+ [38;5;240m  │[0m                              ───────┬───────  
+ [38;5;240m  │[0m                                     ╰───────── Module not found, treating it as an external dependency
+[38;5;246m───╯[0m
+
+failed to load config from /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-vite-runtime-TQEucd/apps/web/vite.config.ts
+{
+  "schema": "workloom.production-vite-config-test/v1",
+  "name": "production Vite configuration loads with only locked runtime dependencies",
+  "expected": "Vite preview config loads without a dev-only Vitest installation",
+  "fixture": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-vite-runtime-TQEucd",
+  "stage": "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-runtime-stage",
+  "startedAt": "2026-10-23T18:54:00.654Z",
+  "vitestInstalled": false,
+  "passed": false,
+  "actual": {
+    "loaded": false,
+    "name": "Error",
+    "code": "ERR_MODULE_NOT_FOUND",
+    "message": "Cannot find package 'vitest' imported from /Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/work/pm-runtime-stage/node_modules/.vite-temp/vite.config.ts.timestamp-1792781649073-2c259207fcaa6.mjs"
+  },
+  "fixtureCleaned": true,
+  "finishedAt": "2026-10-23T18:54:10.414Z"
+}

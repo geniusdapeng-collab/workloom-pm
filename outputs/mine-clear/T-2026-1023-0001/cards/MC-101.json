@@ -1,0 +1,53 @@
+{
+  "id": "MC-101",
+  "kind": "fix",
+  "covers": [
+    "MC-001"
+  ],
+  "title": "DeepSeek完整completion/function tools协议",
+  "batch": 1,
+  "state": "open",
+  "evidence": [
+    {
+      "type": "code",
+      "ref": "packages/base/model-router/providers.ts:97@e5d76398484cac7d8ac50b6c27905765a59fd50f",
+      "sha256": "8bbd358b29e2d4f6ba174be3530d0cd0b42a9547ec730ec44033d98c619a64a9",
+      "note": "A: original committed implementation; code evidence is not a claim of a pre-repair dynamic failure"
+    }
+  ],
+  "fix_plan": "保留兼容chat；新增完整消息、工具多轮、thinking、结束状态与必需usage验证。",
+  "blast_radius": "旧模型路由兼容面与新PM真实provider共享底层，缺usage不得静默计0。",
+  "conflict_paths": [
+    "packages/base/model-router/providers.ts",
+    "packages/base/model-router/deepseek-tools.ts"
+  ],
+  "assertions": [
+    {
+      "kind": "property",
+      "given": "本任务隔离PG55437/临时文件及模型协议夹具；实际模型与GitHub凭据均不进入子进程。",
+      "expect": "工具调用和reasoning消息往返保留；截断/未知usage/预算拒绝不能成为成功；预算请求前预占，零收费夹具断言全通过。",
+      "command": "node --test assertions/providers.test.mjs (outer TestsStream + nested actual test-count validation)",
+      "exec": {
+        "file": "/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "/Users/mac/Documents/Codex/2026-10-23/workloom-im-https-github-com-geniusdapeng/outputs/mine-clear/T-2026-1023-0001/assertions/providers.test.mjs"
+        ]
+      },
+      "last_result": "not-run"
+    }
+  ],
+  "regression": {
+    "command": "node --test assertions/providers.test.mjs",
+    "evidence": null
+  },
+  "rollback": "回滚最终含本修复的真实提交；保留原始历史、append-only事件与费用台账，禁止修改源仓或清除运行证据。",
+  "fixed_by": null,
+  "verified_by": null,
+  "proposed_repair_actor": "/root/deepseek_research",
+  "eligible_acceptance_actors": [
+    "/root"
+  ],
+  "notes": "本卡是修复准备态，不能把补录卡片表述为先于源码修复完成的MCD过程。正式执行必须绑定后续干净提交。"
+}

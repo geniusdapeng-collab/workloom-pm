@@ -1,0 +1,228 @@
+{
+  "schema": "workloom.pm-mcd-execution-safety-review/v1",
+  "at": "2026-10-23T19:35:47.493Z",
+  "evidenceGrade": "B",
+  "cards": 33,
+  "groups": 18,
+  "testFiles": 27,
+  "inputs": [
+    {
+      "path": "assertions/run-group.mjs",
+      "sha256": "a63cf1db48ac91c0794594a50a2e3f3df3043535a24dc519e4a44c0b00269c9c"
+    },
+    {
+      "path": "assertions/specs.json",
+      "sha256": "b431bfc68f53fbeb6bd84a16faa3b9084fb6e1193d06222e1c1736ff9651e07b"
+    },
+    {
+      "path": "actor-plan.json",
+      "sha256": "cfbff7c6cb29ced90967c699f301b0e00d45c31f35428fa8d5536d8e2833f93d"
+    },
+    {
+      "path": "ledger.json",
+      "sha256": "da61919f9632a6b844366a43ed814acb7ddc08f19d7c486877cc984ce8b96ef9"
+    }
+  ],
+  "environment": {
+    "parentAllowlist": [
+      "PATH",
+      "HOME",
+      "TMPDIR",
+      "LANG",
+      "LC_ALL",
+      "USER",
+      "SystemRoot"
+    ],
+    "childModelMode": "mock/explicit local provider fixtures",
+    "databaseUrls": [
+      "postgres://pm_sandbox@127.0.0.1:55437/workloom_pm_sandbox",
+      "postgres://workloom_app@127.0.0.1:55437/workloom_pm_sandbox",
+      "postgres://workloom_gateway@127.0.0.1:55437/workloom_pm_sandbox"
+    ],
+    "realApiCredentialPassThrough": false,
+    "nodeOptionsPassThrough": false,
+    "envFileFlag": false
+  },
+  "checks": {
+    "onlyApprovedSandboxDatabaseConfigured": true,
+    "noOperationalEvalOrSeedResetReleaseCommandSelected": true,
+    "testFilesOrdinaryAndPresent": true,
+    "oneRepairAndDifferentAcceptancePerCard": true,
+    "allRepairsBeforeAcceptance": true,
+    "sharedLedgerLockRequired": true,
+    "nestedExactFilesAndRealNonzeroCountsRequired": true
+  },
+  "assignments": [
+    {
+      "id": "MC-001",
+      "repair": "/root/deepseek_research",
+      "acceptance": "/root/sandbox_prepare"
+    },
+    {
+      "id": "MC-002",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root/deepseek_research"
+    },
+    {
+      "id": "MC-003",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-004",
+      "repair": "/root",
+      "acceptance": "/root/deepseek_research"
+    },
+    {
+      "id": "MC-005",
+      "repair": "/root",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-006",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-007",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-008",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-009",
+      "repair": "/root/deepseek_research",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-101",
+      "repair": "/root/deepseek_research",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-102",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root/deepseek_research"
+    },
+    {
+      "id": "MC-103",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root/deepseek_research"
+    },
+    {
+      "id": "MC-104",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-105",
+      "repair": "/root",
+      "acceptance": "/root/deepseek_research"
+    },
+    {
+      "id": "MC-106",
+      "repair": "/root",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-107",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-108",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-109",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-110",
+      "repair": "/root/deepseek_research",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-111",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-112",
+      "repair": "/root",
+      "acceptance": "/root/deepseek_research"
+    },
+    {
+      "id": "MC-113",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root/deepseek_research"
+    },
+    {
+      "id": "MC-114",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root/deepseek_research"
+    },
+    {
+      "id": "MC-115",
+      "repair": "/root",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-010",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-011",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-012",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-013",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-116",
+      "repair": "/root/intent_audit",
+      "acceptance": "/root"
+    },
+    {
+      "id": "MC-014",
+      "repair": "/root/deepseek_research",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-117",
+      "repair": "/root/sandbox_prepare",
+      "acceptance": "/root/deepseek_research"
+    },
+    {
+      "id": "MC-118",
+      "repair": "/root/deepseek_research",
+      "acceptance": "/root/intent_audit"
+    },
+    {
+      "id": "MC-119",
+      "repair": "/root",
+      "acceptance": "/root/intent_audit"
+    }
+  ],
+  "limitations": [
+    "This is full metadata/runner configuration verification, not an operating-system network proof for every test child.",
+    "Native preview opens only fresh loopback HTTP and checks home bytes; it does not execute browser JavaScript or log into a product.",
+    "Formal run-assertions is still forbidden until root supplies the exact clean source commit and dispatches one actual actor at a time.",
+    "Every actual execution still has to pass its real assertions; this review cannot turn not-run cards green."
+  ]
+}

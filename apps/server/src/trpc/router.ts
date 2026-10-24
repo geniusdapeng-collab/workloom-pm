@@ -8,6 +8,7 @@
  * 本文件同时是前端类型源：apps/web 经 `@workloom/server/router` 导入 AppRouter 类型。
  */
 import { z } from "zod";
+import type { Hono } from "hono";
 import { TRPCError } from "@trpc/server";
 import type pg from "pg";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -32,6 +33,7 @@ import {
 } from "../runtime/thread-runner.js";
 import { applyKbPublishAfterApproval, searchKB } from "../service/kb.js";
 import { acquisitionQuestPlanner } from "../industry/hotel/acquisition-planner.js";
+import { createPmTeamRouter } from "../industry/ai-pm/router.js";
 import {
   actionProcedure,
   capabilityActionProcedure,
@@ -3738,6 +3740,10 @@ export const appRouter = router({
 });
 
 export type AppRouter = typeof appRouter;
+/** 产品 HTTP 接线仅由行业组合根声明，公共启动入口只消费通用路由集合。 */
+export const productHttpRoutes: Array<{ path: string; router: Hono<any> }> = [
+  { path: "/api/pm", router: createPmTeamRouter() },
+];
 /** 上下文类型经 router 入口再导出（前端 AppRouter 类型可移植性，TS2742） */
 export type { TrpcContext } from "./context.js";
 export type { ExamSummary } from "../service/eval.js";
