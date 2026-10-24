@@ -14,6 +14,8 @@ WorkLoom PM 面向产品负责人、创业者和小型研发团队。它完整�
 
 正式工作入口是 PC 工作台的 **「开发场域」`/development`**：PM 团队视图用于目标、任务图、执行与产物；原有 DevFabric 开发场域保留为可切换的工作模式。桌面客户端与浏览器开发入口共享服务端。
 
+Codex 等 Agent 可通过 **`pnpm pm:agent` JSON CLI 或 `pnpm pm:agent:mcp` stdio 服务**直接调用同一 PM 后端，完成岗位查询、提交目标、执行、等待和核对原始产物。成员会话从进程环境注入；调用保留现有权限、围栏和预算，机器回执通过后仍需语义验收。接入方式与请求示例见 [PM Agent 调用指南](docs/pm-agent.md)。
+
 本仓的交付证据以 [PM-EVALUATION.md](docs/PM-EVALUATION.md) 中标明的源码、模型、样本与实际结果为准。岗位定义、技能文件、演示种子和历史测试徽章都不能代替一次真实交付；本 README 不把它们换算成成功率，也不宣称已有签名安装包。
 
 ## 给谁用，解决什么问题
@@ -193,13 +195,14 @@ pnpm runtime:deps:verify
 下方为继承的基座能力目录，由生成器维护；它描述代码入口，不能当作 PM 真实任务通过率。本产品首次源码启动使用上文的 `pnpm app:dev`；自动块内保留的 `preview:all` 首启提示属于上游快照。修改能力面后运行 `pnpm capabilities` / `pnpm capabilities:check`。
 
 <!-- CAPABILITIES:BEGIN -->
-<!-- 本区块由 scripts/generate-capabilities.mjs 自动生成（2026-10-05），请勿手改；重跑 pnpm capabilities 更新 -->
+<!-- 本区块由 scripts/generate-capabilities.mjs 自动生成（2026-10-24），请勿手改；重跑 pnpm capabilities 更新 -->
 
 ## 🧩 系统能力速览（自动生成 · 与代码同步）
 
 > 以下为源码目录与入口清单；实际调用及结果状态见能力导览的独立证据字段，未验证项不能作交付承诺。
 
 - 🖥 **三端应用入口**：PC 端 · B 端工作台 · 移动端 · B 端高保真 · 移动端 · C 端 AI 服务前台
+- 🧭 **PM 任务调用（CLI / MCP）**：PM JSON CLI · PM MCP stdio
 - 🏨 **行业 Bundle（垂直能力包）**：bundles/ai-pm/ · bundles/hotel/ · bundles/platform/
 - 🧑‍💼 **数字员工与数字人（本仓自带）**：数字员工中心（`/agents`） · 织伴数字人（Live2D 常驻浮层） · 语音与口型引擎 · Live2D 渲染后端与资产
 - 🖐 **操作电脑能力（本仓自带 · 可装生产工作站）**：computer-use 三层感知入口 · HTTP 远程驱动 + MCP server

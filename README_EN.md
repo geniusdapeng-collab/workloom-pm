@@ -14,6 +14,8 @@ WorkLoom PM is for product owners, founders, and small development teams. It inh
 
 The PC workspace entry is **Development, `/development`**. The PM team view presents goals, task dependencies, execution, and artifacts. The original DevFabric development workspace remains available as another view. Desktop and browser development clients use the same server.
 
+Codex and other agents can call the same PM backend through the **`pnpm pm:agent` JSON CLI or `pnpm pm:agent:mcp` stdio service** to inspect roles, submit goals, execute, wait, and verify original artifacts. Member sessions come from the process environment. Existing permissions, fences, and budgets apply, and semantic review remains necessary after machine receipts pass. See the [PM Agent integration guide](docs/pm-agent.md) for setup and request examples.
+
 For actual delivery results, use the source revision, model, samples, and evidence recorded in [PM-EVALUATION.md](docs/PM-EVALUATION.md). Employee definitions, skill files, seeded examples, and historical test badges do not establish a live success rate. This README does not advertise a signed WorkLoom PM installer.
 
 ## Who it helps

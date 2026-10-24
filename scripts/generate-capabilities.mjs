@@ -47,6 +47,13 @@ groups.push({
   ].filter(Boolean),
 });
 
+// PM adapters are product entry metadata; availability still requires independent run evidence.
+const pmAgentEntries = [
+  has("pm:agent") && existsSync(join(ROOT, "scripts/pm-agent.mjs")) && { name: "PM JSON CLI", how: "`pnpm pm:agent --help`；docs/pm-agent.md", desc: "通过已有成员会话调用 PM 任务和产物 API；权限、围栏、预算与语义验收继续生效" },
+  has("pm:agent:mcp") && existsSync(join(ROOT, "scripts/pm-agent-mcp.mjs")) && { name: "PM MCP stdio", how: "`pnpm pm:agent:mcp`；docs/pm-agent.md", desc: "按初始化协议提供十个 PM 工具；会话仅来自进程环境，不接收模型密钥" },
+].filter(Boolean);
+if (pmAgentEntries.length) groups.push({ icon: "🧭", title: "PM 任务调用（CLI / MCP）", items: pmAgentEntries });
+
 if (bundles.length) groups.push({
   icon: "🏨", title: "行业 Bundle（垂直能力包）",
   items: bundles.map((b) => ({ name: `bundles/${b}/`, how: `见 bundles/${b}/ 目录`, desc: "围栏/技能/员工/对象/管线定义；装配结果需按环境验证" })),
