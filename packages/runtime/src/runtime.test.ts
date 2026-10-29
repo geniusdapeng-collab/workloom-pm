@@ -101,6 +101,38 @@ describe("ask 事实面排序与落款（MC-111）", () => {
     expect(askedAskDomains("现在有多少进行中的任务？")).toContain("threads");
     expect(askedAskDomains("房间里的毛巾多久更换一次？")).toEqual(["kb"]);
   });
+
+  it("截断标记也计入 120 字硬闸，不能先截 120 字再追加标记", async () => {
+    const { enforceAnswerLimits, ASK_ANSWER_MAX_CHARS } = await import("./ask.js");
+    const answer = enforceAnswerLimits("长".repeat(ASK_ANSWER_MAX_CHARS * 2));
+    expect(answer).toContain("已截断");
+    expect(answer.length).toBeLessThanOrEqual(ASK_ANSWER_MAX_CHARS);
+  });
+
+  it("工单事实查询失败必须标未核实，不能伪报为 0 条", async () => {
+    const { defaultAskFactProvider } = await import("./ask.js");
+    const client = {
+      async query(sql: string) {
+        if (/FROM c_tickets/i.test(sql)) throw new Error("injected ticket fact failure");
+        if (/FROM biz_events WHERE workspace_id=\$1 AND created_at/i.test(sql)) return { rows: [] };
+        if (/FROM night_runs/i.test(sql)) return { rows: [] };
+        if (/count\(\*\)::text AS n FROM biz_events WHERE workspace_id=\$1/i.test(sql)) {
+          return { rows: [{ n: "1" }] };
+        }
+        return { rows: [{ n: "0" }] };
+      },
+      release() {},
+    };
+    const pool = { connect: async () => client };
+    const result = await defaultAskFactProvider(
+      pool as never,
+      { tenantId: "tenant-fixture", workspaceId: "workspace-fixture" },
+      "今天服务台有多少工单？",
+    );
+    const ticket = result.facts.find((fact) => fact.domain === "tickets");
+    expect(ticket?.value).not.toContain("0 条未办结");
+    expect(ticket?.value).toMatch(/未核实|不可用|失败/);
+  });
 });
 
 describe("计划模板（演示剧本）", async () => {
