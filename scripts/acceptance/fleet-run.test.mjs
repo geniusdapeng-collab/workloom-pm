@@ -89,6 +89,26 @@ test('G07: production avoids checkout/pull/install/seed/local probes and propaga
     assert.ok(step.argv.includes('--evidence-root'));
   }
 });
+test('G07: local preview executes the profile startup command and isolated ports instead of fixed preview:all', async (t) => {
+  const f = fixture(t);
+  const profilePath = join(f.repo, 'acceptance', 'profile.json');
+  const profile = JSON.parse(readFileSync(profilePath, 'utf8'));
+  profile.startup = {
+    command: `${process.execPath} ${join(f.repo, 'custom-start.cjs')}`,
+    ports: { pc: 3100, bMobile: 3101, cMobile: 3102, server: 3103 },
+  };
+  writeFileSync(profilePath, JSON.stringify(profile));
+  writeFileSync(join(f.repo, 'custom-start.cjs'), `require('node:fs').appendFileSync(process.env.START_LOG, 'profile-start\\n'); setInterval(() => {}, 1000);\n`);
+  writeFileSync(join(f.bin, 'lsof'), `#!${process.execPath}\nimport {appendFileSync} from 'node:fs';const args=process.argv.slice(2);appendFileSync(process.env.COMMAND_LOG,JSON.stringify({name:'lsof',args})+'\\n');if(!(args.includes('-ti')||args.includes('-t')))console.log('server :3103\\npc :3100\\nb :3101\\nc :3102');\n`, { mode: 0o755 });
+  const startLog = join(f.root, 'profile-start.log');
+
+  const result = await run(f, ['--skip-regression'], { START_LOG: startLog });
+  assert.equal(result.state.steps.preview.status, 'pass', result.out);
+  assert.equal(readFileSync(startLog, 'utf8').trim(), 'profile-start');
+  const commands = readLog(f.commandLog);
+  assert.equal(commands.some((command) => command.name === 'pnpm' && command.args.includes('preview:all')), false, JSON.stringify(commands));
+  assert.equal(result.state.notes.some((note) => note.includes('startup.command')), true);
+});
 test('G06: report unverified exit 2 is preserved in aggregate result', async (t) => {
   const f = fixture(t, { reportExit: 2 });
   const result = await run(f, ['--skip-regression']);
