@@ -19,7 +19,7 @@ export function loadChromium(repoRoot) {
     return null;
   };
   const direct = tryLoad("playwright") ?? tryLoad("@playwright/test");
-  if (direct) return direct;
+  if (direct) return configuredChromium(direct);
 
   const pnpmDir = join(repoRoot, "node_modules", ".pnpm");
   if (existsSync(pnpmDir)) {
@@ -29,9 +29,21 @@ export function loadChromium(repoRoot) {
         const candidate = join(pnpmDir, dir, "node_modules", pkg);
         if (!existsSync(candidate)) continue;
         const chromium = tryLoad(candidate);
-        if (chromium) return chromium;
+        if (chromium) return configuredChromium(chromium);
       }
     }
   }
   throw new Error("未找到 playwright / @playwright/test：请在本仓执行 pnpm install（或把 playwright 加入 devDependencies）后再跑 L3/L4");
+}
+
+/** Explicit local-runtime fallback for offline machines; CI should use the pinned bundled browser. */
+function configuredChromium(chromium) {
+  const executablePath = process.env.WORKLOOM_PLAYWRIGHT_EXECUTABLE?.trim();
+  if (!executablePath) return chromium;
+  return {
+    ...chromium,
+    launch(options = {}) {
+      return chromium.launch({ ...options, executablePath: options.executablePath ?? executablePath });
+    },
+  };
 }
