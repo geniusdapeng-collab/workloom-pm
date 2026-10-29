@@ -530,6 +530,18 @@ export class AssistantService {
           });
         },
       });
+      // Usage is already known at this point. Persist the budget before the
+      // message ledger so a later persistence constraint cannot discard real
+      // provider usage and falsely freeze all subsequent paid calls.
+      await this.store.settleBudget(scope, {
+        budgetDate,
+        usage: result.usage,
+        reservedCalls: 1,
+        reservedSearchCalls,
+        searchCallsUsed,
+        blockedReason: result.usage ? undefined : "模型响应缺少完整用量，预算账本已冻结",
+      });
+      settled = true;
       await this.store.finishRun(scope, run.id, {
         responseId: result.responseId,
         responseModel: result.model,
@@ -539,15 +551,6 @@ export class AssistantService {
           { type: "text", text: result.text },
           ...searchResultParts(searchReceipt),
         ],
-      });
-      settled = true;
-      await this.store.settleBudget(scope, {
-        budgetDate,
-        usage: result.usage,
-        reservedCalls: 1,
-        reservedSearchCalls,
-        searchCallsUsed,
-        blockedReason: result.usage ? undefined : "模型响应缺少完整用量，预算账本已冻结",
       });
       await this.safeEvent(scope, {
         sessionId: run.sessionId,

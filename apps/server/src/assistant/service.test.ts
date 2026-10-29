@@ -164,6 +164,45 @@ describe("assistant web search orchestration", () => {
       searchCallsUsed: 1,
     }));
   });
+
+  it("settles known provider usage before message persistence so later storage failures do not freeze the budget", async () => {
+    const store = fakeStore();
+    const usage = { promptTokens: 50, completionTokens: 12, totalTokens: 62 };
+    const model: AssistantModelClient = {
+      model: "deepseek-flash",
+      stream: vi.fn(async () => ({
+        text: "真实回答",
+        model: "deepseek-flash",
+        responseId: "resp-persist-failure",
+        usage,
+      })),
+    };
+    store.finishRun.mockRejectedValueOnce(new Error("message persistence failed"));
+    const service = new AssistantService({
+      store: store as unknown as AssistantStore,
+      model,
+      search: { configured: true, search: vi.fn(async () => ({ ...searchReceipt, results: [] })) },
+      events: { append: vi.fn() },
+      taskFacade: {} as never,
+    });
+    await service.send(assistantIdentity, run.sessionId, {
+      text: "search with persistence failure",
+      mode: "ask",
+      clientMessageId: "client-3",
+      webSearch: true,
+    });
+    await vi.waitFor(() => expect(store.failRun).toHaveBeenCalledOnce());
+    expect(store.settleBudget).toHaveBeenCalledWith(assistantIdentity.assistantScope, expect.objectContaining({
+      usage,
+      reservedCalls: 1,
+      reservedSearchCalls: 1,
+      searchCallsUsed: 1,
+    }));
+    expect(store.settleBudget).not.toHaveBeenCalledWith(
+      assistantIdentity.assistantScope,
+      expect.objectContaining({ blockedReason: expect.any(String) }),
+    );
+  });
 });
 
 describe("assistant system prompt", () => {
