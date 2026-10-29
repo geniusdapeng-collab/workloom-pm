@@ -27,6 +27,31 @@ if [[ ! -f /etc/os-release ]]; then printf '/etc/os-release missing.\n' >&2; exi
 arch="$(uname -m)"
 case "$arch" in x86_64) runtime_arch="x64" ;; aarch64|arm64) runtime_arch="arm64" ;; *) printf 'Unsupported architecture: %s\n' "$arch" >&2; exit 1 ;; esac
 
+database_url() {
+  (
+    export DB_URL_USER="$1"
+    export DB_URL_PASSWORD="$2"
+    export DB_URL_NAME="$3"
+    export DB_URL_HOST="${4:-127.0.0.1}"
+    export DB_URL_PORT="${5:-5432}"
+    export DB_URL_SOCKET="${6:-}"
+    exec "$root/runtime/current/bin/node" -e '
+      const url = new URL("postgresql://localhost");
+      url.username = process.env.DB_URL_USER;
+      url.password = process.env.DB_URL_PASSWORD;
+      if (process.env.DB_URL_SOCKET) {
+        url.host = "";
+        url.searchParams.set("host", process.env.DB_URL_SOCKET);
+      } else {
+        url.hostname = process.env.DB_URL_HOST;
+        url.port = process.env.DB_URL_PORT;
+      }
+      url.pathname = `/${process.env.DB_URL_NAME}`;
+      process.stdout.write(url.href);
+    '
+  )
+}
+
 mem_kb="$(awk '/MemTotal/ {print $2}' /proc/meminfo)"
 disk_kb="$(df -Pk /opt | awk 'NR==2 {print $4}')"
 if (( mem_kb < 1500000 )); then printf 'At least 1.5 GiB RAM is required for preflight; current %s KiB.\n' "$mem_kb" >&2; exit 1; fi
@@ -89,9 +114,9 @@ service_secret="${SERVICE_C_SECRET:-$(openssl rand -hex 32)}"
 
 if [[ ! -f "$config_root/runtime.env" ]]; then
   install -m 0600 /dev/null "$config_root/runtime.env"
-  node_url_owner="postgresql://workloom_owner:${owner_password}@127.0.0.1:5432/workloom_pm"
-  node_url_app="postgresql://workloom_app:${app_password}@127.0.0.1:5432/workloom_pm"
-  node_url_gateway="postgresql://workloom_gateway:${gateway_password}@127.0.0.1:5432/workloom_pm"
+  node_url_owner="$(database_url workloom_owner "$owner_password" workloom_pm)"
+  node_url_app="$(database_url workloom_app "$app_password" workloom_pm)"
+  node_url_gateway="$(database_url workloom_gateway "$gateway_password" workloom_pm)"
   {
     printf 'NODE_ENV=production\n'
     printf 'SERVER_HOST=127.0.0.1\nSERVER_PORT=8988\nWEB_PORT=5373\n'
@@ -131,19 +156,18 @@ runuser -u workloom-pm -- env HOME="$data_root" PATH="$PATH" \
   "$root/tooling/bin/pnpm" -C "$release/apps/web" build
 
 WORKLOOM_OWNER_PASSWORD="$owner_password" APP_DB_PASSWORD="$app_password" GATEWAY_DB_PASSWORD="$gateway_password" \
-  runuser -u postgres -- "$root/runtime/current/bin/node" "$release/deploy/linux/bootstrap-db.mjs"
+  runuser -u postgres --preserve-environment -- "$root/runtime/current/bin/node" "$release/deploy/linux/bootstrap-db.mjs"
 
-owner_url="postgresql://workloom_owner:${owner_password}@127.0.0.1:5432/workloom_pm"
-app_url="postgresql://workloom_app:${app_password}@127.0.0.1:5432/workloom_pm"
-gateway_url="postgresql://workloom_gateway:${gateway_password}@127.0.0.1:5432/workloom_pm"
-runuser -u postgres -- env \
-  DATABASE_URL="postgresql:///workloom_pm?host=/var/run/postgresql" \
-  APP_DB_PASSWORD="$app_password" GATEWAY_DB_PASSWORD="$gateway_password" \
-  NODE_ENV=production \
+migration_url="$(database_url postgres "" workloom_pm 127.0.0.1 5432 /var/run/postgresql)"
+owner_url="$(database_url workloom_owner "$owner_password" workloom_pm)"
+app_url="$(database_url workloom_app "$app_password" workloom_pm)"
+gateway_url="$(database_url workloom_gateway "$gateway_password" workloom_pm)"
+DATABASE_URL="$migration_url" APP_DB_PASSWORD="$app_password" GATEWAY_DB_PASSWORD="$gateway_password" NODE_ENV=production \
+  runuser -u postgres --preserve-environment -- \
   "$root/runtime/current/bin/node" "$release/node_modules/tsx/dist/cli.mjs" "$release/scripts/migrate.ts"
 
-runuser -u workloom-pm -- env DATABASE_URL="$owner_url" DATABASE_APP_URL="$app_url" DATABASE_GATEWAY_URL="$gateway_url" \
-  NODE_ENV=production LLM_PROVIDER=mock \
+DATABASE_URL="$owner_url" DATABASE_APP_URL="$app_url" DATABASE_GATEWAY_URL="$gateway_url" NODE_ENV=production LLM_PROVIDER=mock \
+  runuser -u workloom-pm --preserve-environment -- \
   "$root/runtime/current/bin/node" "$release/node_modules/tsx/dist/cli.mjs" "$release/scripts/seed-aipm.ts"
 
 ln -sfn "$release" "$root/current"

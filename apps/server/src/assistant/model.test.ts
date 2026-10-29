@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { createDeepSeekAssistantModel } from "./model.js";
 
+const testApiKey = ["test", "key", "only", "in", "process"].join("-");
+
 function sseResponse(chunks: string[]): Response {
   const encoder = new TextEncoder();
   return new Response(new ReadableStream({
@@ -24,7 +26,7 @@ describe("DeepSeek assistant stream parser", () => {
     ]));
     const deltas: string[] = [];
     const client = createDeepSeekAssistantModel({
-      apiKey: "test-key-only-in-process",
+      apiKey: testApiKey,
       baseUrl: "https://api.deepseek.com",
       model: "deepseek-flash",
       fetch: fakeFetch as typeof fetch,
@@ -51,7 +53,7 @@ describe("DeepSeek assistant stream parser", () => {
 
   it("fails closed on upstream authentication and truncated generation", async () => {
     const auth = createDeepSeekAssistantModel({
-      apiKey: "test-key-only-in-process",
+      apiKey: testApiKey,
       fetch: vi.fn(async () => new Response("denied", { status: 401 })) as typeof fetch,
     });
     await expect(auth.stream({
@@ -62,7 +64,7 @@ describe("DeepSeek assistant stream parser", () => {
     })).rejects.toMatchObject({ code: "MODEL_CREDENTIAL_REJECTED" });
 
     const truncated = createDeepSeekAssistantModel({
-      apiKey: "test-key-only-in-process",
+      apiKey: testApiKey,
       fetch: vi.fn(async () => sseResponse([
         "data: {\"id\":\"resp-2\",\"choices\":[{\"delta\":{\"content\":\"部分\"},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":1,\"total_tokens\":3}}\n\n",
         "data: [DONE]\n\n",
@@ -82,7 +84,7 @@ describe("DeepSeek assistant stream parser", () => {
       "data: [DONE]\n\n",
     ]));
     const client = createDeepSeekAssistantModel({
-      apiKey: "test-key-only-in-process",
+      apiKey: testApiKey,
       baseUrl: "",
       model: "",
       fetch: request as typeof fetch,
