@@ -3,7 +3,7 @@
  * geo/hotel 工作区的通用 orchestrator 清单顺序不能决定派给谁——按任务语义选岗。
  */
 import { describe, expect, it } from "vitest";
-import { preferredDispatchPresets } from "./dispatch-routing.js";
+import { preferredDispatchPresets, preferredDispatchRulePresets } from "./dispatch-routing.js";
 
 describe("派活岗位路由（N-13）", () => {
   it("生图/海报类目标 → 视觉岗位优先", () => {
@@ -30,5 +30,25 @@ describe("派活岗位路由（N-13）", () => {
   it("未命中任何语义 → 回落行业默认指挥岗位", () => {
     const list = preferredDispatchPresets({ goal: "处理一下积压的事", industry: "geo-growth" });
     expect(list[0]).toBe("growth-lead");
+  });
+
+  it.each([
+    ["chief-pm", "支付故障、配色和文案错别字只有一个开发人日，请排P0/P1/P2、执行顺序、停止条件和验收证据"],
+    ["requirement-analyst", "设计小团队反馈收集功能，包含三个场景、字段约束、状态流转和边界验收"],
+    ["competitor-scout", "扫描竞品新版本功能变化，做来源核实与威胁评级"],
+    ["data-insight", "计算访问到付费漏斗转化率并输出本周指标异动日报"],
+    ["user-listener", "聚类本周用户差评、情绪和代表原声，并起草回复建议"],
+    ["doc-writer", "根据已经确认的需求材料撰写完整PRD和用户可读版本说明"],
+    ["industry-radar", "汇总本周AI行业政策、模型发布和投融资动态，附来源"],
+    ["release-guardian", "为明天版本制作发布检查单、回滚预案和变更日志"],
+    ["dev-orchestrator", "把需求拆成开发任务并实现一个可通过测试的JavaScript模块"],
+    ["model-scout", "用产品评测集比较候选模型的质量、时延、成本和换型风险"],
+    ["eval-master", "设计正常边界和对抗评测集，并回归badcase"],
+    ["prompt-curator", "版本化生产prompt，比较新旧版回归差异并给出回滚评估"],
+    ["red-teamer", "对上线候选做提示注入、越权、路径穿越和SSRF红队扫描"],
+    ["knowledge-curator", "盘点知识库过期与冲突条目，并生成团队学习周刊"],
+  ])("AI-PM 目标优先派给职责匹配的 %s", (employee, goal) => {
+    expect(preferredDispatchPresets({ goal, industry: "ai-pm" })[0]).toBe(employee);
+    expect(preferredDispatchRulePresets({ goal, industry: "ai-pm" })[0]).toBe(employee);
   });
 });

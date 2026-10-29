@@ -7,6 +7,7 @@ import {
   type PmAssetBinding, type PmRun, type PmRunDetail, type PmRunStatus, type PmScope, type PmTask, type PmTaskPlan,
 } from "./types.js";
 import { assertNoSecrets } from "./contract.js";
+import type { PmOwnerCorrection } from "./planning.js";
 
 type Row = Record<string, unknown>;
 const stamp = (value: unknown) => value instanceof Date ? value.toISOString() : String(value);
@@ -51,6 +52,8 @@ export interface PlanningReceipt {
   modelId: string; responseId?: string; promptTokens: number; completionTokens: number; source: "model" | "explicit-employee";
   assetBinding?: PmAssetBinding;
   assetBindingSource?: "verified-catalog";
+  /** Server-side corrections from output ownership back to the responsible employee. */
+  ownerCorrections?: PmOwnerCorrection[];
 }
 export interface FailureMetering {
   usage: { promptTokens: number; completionTokens: number };

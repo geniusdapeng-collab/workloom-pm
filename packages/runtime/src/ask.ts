@@ -118,17 +118,34 @@ export const defaultAskFactProvider: AskFactProvider = async (app, scope, questi
 
   /**
    * MC-111（M3 联动）：服务台工单与夜班此前不在 ask 事实面内——问「今天多少工单」只能拿知识库 FAQ 顶包。
-   * 两个只读计数（RLS 同库同上下文）；查询失败按 0 处理不阻塞回答（不劣化既有行为）。
+   * 两个只读计数（RLS 同库同上下文）。查询失败不能被折算成 0：
+   * 用户问到工单时显式标「暂未核实」，未问到时跳过该事实，避免把故障伪装成经营事实。
    */
-  const openTickets = await queryCount(
-    app, scope,
-    `SELECT count(*)::text AS n FROM c_tickets WHERE workspace_id=$1 AND status IN ('created','assigned','processing')`,
-  ).catch(() => 0);
-  const breached = await queryCount(
-    app, scope,
-    `SELECT count(*)::text AS n FROM c_tickets WHERE workspace_id=$1 AND status IN ('created','assigned','processing') AND sla_due_at < now()`,
-  ).catch(() => 0);
-  if (openTickets > 0 || /工单|报修|报障|派单|服务台|客诉/.test(question)) {
+  const asksTickets = /工单|报修|报障|派单|服务台|客诉/.test(question);
+  let openTickets: number | undefined;
+  let breached: number | undefined;
+  try {
+    [openTickets, breached] = await Promise.all([
+      queryCount(
+        app, scope,
+        `SELECT count(*)::text AS n FROM c_tickets WHERE workspace_id=$1 AND status IN ('created','assigned','processing')`,
+      ),
+      queryCount(
+        app, scope,
+        `SELECT count(*)::text AS n FROM c_tickets WHERE workspace_id=$1 AND status IN ('created','assigned','processing') AND sla_due_at < now()`,
+      ),
+    ]);
+  } catch {
+    if (asksTickets) {
+      facts.push({
+        label: "服务台工单",
+        value: "暂未核实（工单事实读取失败，请人工核对）",
+        domain: "tickets",
+      });
+      sources.push("c_tickets（读取失败）");
+    }
+  }
+  if (openTickets !== undefined && breached !== undefined && (openTickets > 0 || asksTickets)) {
     facts.push({
       label: "服务台工单",
       value: `${openTickets} 条未办结${breached > 0 ? `（SLA 超时 ${breached} 条）` : ""}`,
@@ -444,23 +461,37 @@ export interface AskResult {
  * 拦腰砍断，甚至只剩半行字；按行保留至少保证"能放下的整条事实都完整"。
  * 首行（最高优先级事实）即使单条超预算也保留其开头——露头比全丢有价值。
  */
-function enforceAnswerLimits(text: string): string {
+export function enforceAnswerLimits(text: string, maxChars = ASK_ANSWER_MAX_CHARS): string {
   const clean = text.trim();
-  if (clean.length <= ASK_ANSWER_MAX_CHARS) return clean;
+  if (clean.length <= maxChars) return clean;
+  const marker = "…（已截断）";
+  const budget = Math.max(0, maxChars - marker.length);
+  if (budget === 0) return marker.slice(0, maxChars);
   const lines = clean.split("\n");
   const kept: string[] = [];
   let used = 0;
   for (const line of lines) {
     const cost = kept.length === 0 ? line.length : line.length + 1; // +1 = 换行符
-    if (used + cost <= ASK_ANSWER_MAX_CHARS) {
+    if (used + cost <= budget) {
       kept.push(line);
       used += cost;
       continue;
     }
-    if (kept.length === 0) kept.push(line.slice(0, ASK_ANSWER_MAX_CHARS));
+    if (kept.length === 0) kept.push(line.slice(0, budget));
     break;
   }
-  return `${kept.join("\n").trimEnd()}…（已截断）`;
+  return `${kept.join("\n").trimEnd()}${marker}`;
+}
+
+/**
+ * Add a required system notice inside the same answer budget. The notice is
+ * reserved first; the user content yields space instead of breaking the hard
+ * limit or silently dropping a safety warning.
+ */
+export function appendAnswerNotice(answer: string, notice: string, maxChars = ASK_ANSWER_MAX_CHARS): string {
+  const suffix = `\n${notice.trim()}`;
+  if (suffix.length >= maxChars) return enforceAnswerLimits(notice, maxChars);
+  return `${enforceAnswerLimits(answer, maxChars - suffix.length)}${suffix}`;
 }
 
 /** 读取本工作区生效围栏规则（ask 输出闸门用；返回 null=加载失败——A-06：与"无规则"区分，闸门失效必须留痕不得静默放行） */
@@ -572,18 +603,18 @@ ${input.goal}
   // A-06 修复（端口 growth 排雷）：规则加载失败（DB 抖动等）此前按空规则集恒 auto 静默放行——
   // 行业 ask.deliver 红线失效且无留痕。现在显式标注闸门不可用（保守口径：可见降级，不假装闸门生效）。
   if (askRules === null) {
-    answer = `${answer}\n（输出闸门暂不可用，本回答未经行业规则校验，请人工核对关键事实）`;
+    answer = appendAnswerNotice(answer, "（输出闸门暂不可用，本回答未经行业规则校验，请人工核对关键事实）");
   }
   const gate = judgeAnswer(askRules ?? [], answer);
   if (gate.level === "block") {
     // 行业事实红线：不投递原答案，改为安全回执（并把触发规则写进 basis 供复盘）
     answer = `该回答触发了行业事实红线（${gate.triggeredBy.join("、")}），已拦截。请核对账本事实后人工确认。`;
   } else if (gate.level === "review") {
-    answer = `${answer}\n（该回答已按行业规则标记复核：${gate.triggeredBy.join("、")}）`;
+    answer = appendAnswerNotice(answer, `（该回答已按行业规则标记复核：${gate.triggeredBy.join("、")}）`);
   }
   if (via === "rule" && modelDegraded) {
     // GR-05 第③条：全链不可用时用户必须看得见，不能悄悄给一份"看起来一样"的答案
-    answer = `${answer}\n（实时模型暂不可用，本回答来自确定性快照）`;
+    answer = appendAnswerNotice(answer, "（实时模型暂不可用，本回答来自确定性快照）");
   }
 
   // D16 同构：app 池单事务——事件与线程状态同一 COMMIT（appendEventInTx 走 SECURITY DEFINER 特权函数）

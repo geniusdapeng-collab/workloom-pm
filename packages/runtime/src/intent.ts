@@ -54,11 +54,19 @@ export function ruleBasedRoute(text: string): IntentResult {
    */
   const hasInterrogative = /怎么样|如何|多少|什么|为什么|哪[个家些条]|几时|多久|情况|是否|有没有|吗|呢/.test(t);
   const leadingDirective = /^(?:帮我|请|去|把|给|替|生成|创建|执行|发布|调整|改成|提交|派|发|做一|写一|跑一|统计一下|整理成|出一)/.test(t);
+  /**
+   * 中文常把明确指令写成礼貌问句："能帮我发布这版吗？".
+   * 只要开头是能力/许可式请求且句中含动作词，就按交付任务处理；
+   * "能告诉我现在有多少待审批吗？" 没有动作词，仍保持 ask。
+   */
+  const politeActionRequest = /^(?:能|可以|能否|可不可以|能不能)(?:帮我|替我)?/.test(t)
+    && ACTION_WORDS.test(t);
   // 疑问标记可以出现在句中（"……情况怎么样？给我结论"），只要开头不是祈使动词就按问答处理
-  if (hasInterrogative && !leadingDirective) {
+  if (hasInterrogative && !leadingDirective && !politeActionRequest) {
     return { kind: "routed", mode: "ask", rationale: "问句（含疑问标记且无祈使动词开头），按查询/问答处理", via: "rule" };
   }
-  if (/^(问|请问|查|统计|多少|哪家|什么是|为什么)/.test(t) || /吗[？?]$/.test(t)) {
+  if (/^(问|请问|查|统计|多少|哪家|什么是|为什么)/.test(t)
+    || (!politeActionRequest && /吗[？?]$/.test(t))) {
     return { kind: "routed", mode: "ask", rationale: "查询/问答句式，不产生执行任务", via: "rule" };
   }
   if (!ACTION_WORDS.test(t) && (/多少|什么|怎么|哪家|哪个|哪些|几时|多久|吗|呢/.test(t) || /[？?]$/.test(t))) {

@@ -124,7 +124,12 @@ try {
   writeFileSync(join(REPO_DIR, "outputs", "acceptance", "fleet-run-state.json"), JSON.stringify(state, null, 1));
   process.exit(1);
 }
-const childEnv = { ACCEPTANCE_ENV_KIND: ENV_KIND, ACCEPTANCE_ALLOW_PROD_WRITES: environment.allowWrites ? "1" : "0", ACCEPTANCE_PROFILE_PATH: PROFILE_PATH };
+const childEnv = {
+  ACCEPTANCE_ENV_KIND: ENV_KIND,
+  ACCEPTANCE_ALLOW_PROD_WRITES: environment.allowWrites ? "1" : "0",
+  ACCEPTANCE_PROFILE_PATH: PROFILE_PATH,
+  SERVER_BASE: environment.urls.api,
+};
 const ARTIFACT_ROOT = join(REPO_DIR, "outputs", "acceptance");
 const REGRESSION_EXECUTOR = fileURLToPath(new URL("./lib/regression-evidence.mjs", import.meta.url));
 const STAGE_OUTPUTS = {
@@ -451,12 +456,22 @@ async function startPreview() {
     const logPath = join(REPO_DIR, "outputs", "acceptance", "preview.log");
     mkdirSync(join(REPO_DIR, "outputs", "acceptance"), { recursive: true });
     // 与 run() 同口径：本机 pnpm 10 的 verify-deps-before-run 会因未批准构建脚本直接顶掉预览
-    preview = spawn("pnpm", ["--config.verify-deps-before-run=false", "preview:all"], {
+    const startupCommand = typeof profile.startup?.command === "string" ? profile.startup.command.trim() : "";
+    const executable = startupCommand
+      ? process.platform === "win32" ? "cmd.exe" : "/bin/sh"
+      : "pnpm";
+    const executableArgs = startupCommand
+      ? process.platform === "win32" ? ["/d", "/s", "/c", startupCommand] : ["-c", startupCommand]
+      : ["--config.verify-deps-before-run=false", "preview:all"];
+    preview = spawn(executable, executableArgs, {
       cwd: REPO_DIR,
       detached: true,
       stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env, ...childEnv },
     });
+    state.notes.push(startupCommand
+      ? "preview 使用 acceptance/profile.json#startup.command"
+      : "preview 使用兼容默认 pnpm preview:all（profile 未声明 startup.command）");
     const stream = [];
     preview.stdout?.on("data", (d) => stream.push(d.toString()));
     preview.stderr?.on("data", (d) => stream.push(d.toString()));

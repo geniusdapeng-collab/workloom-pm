@@ -681,7 +681,7 @@ function AgentProfilePage({ agentId }: { agentId: string }) {
                         title={e.sessionId ? "查看关联任务的决策链路" : "无关联任务"}
                         className="flex w-full min-w-0 cursor-pointer flex-wrap items-center gap-2 rounded-lg border-l-2 border-line bg-bg800/30 px-2.5 py-1.5 text-left hover:border-l-gold"
                       >
-                        <EventIdChip id={e.eventId} />
+                        <EventIdChip id={e.eventId} interactive={false} />
                         <span className="min-w-0 flex-1 break-words text-body text-ink2">
                           {actionText(e.action)}
                           {e.ruleResults.length > 0 && <span className="ml-1 text-body text-warn">{e.ruleResults.map((result) => dictText(RULE_RESULT_TEXT, result)).join("、")}</span>}

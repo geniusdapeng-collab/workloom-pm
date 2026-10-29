@@ -11,6 +11,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { cliArgs, findRepoRoot, loadProfile, urlsOf } from "./lib/profile.mjs";
 import { loadChromium } from "./lib/playwright.mjs";
+import { countDecisionSignals, firstValuePassed, isFirstValueText } from "./lib/experience-rules.mjs";
 import { loginAsMember, productIdOf } from "./lib/session.mjs";
 
 const args = cliArgs();
@@ -89,19 +90,25 @@ async function ensureRightPanel(target) {
 async function firstValue() {
   const t0 = now();
   await page.goto(`${URLs.pc}${R.home}`, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2500);
-  const skip = page.getByRole("button", { name: /跳过开场|跳过/ }).first();
-  const ceremony = (await skip.count()) > 0;
+  let ceremony = false;
   let skipMs = null;
-  if (ceremony) { await skip.click({ timeout: 6000 }).catch(() => undefined); skipMs = now() - t0; }
+  const pmHome = productIdOf(REPO_ROOT) === "workloom-pm";
   let text = "";
+  let valueMs = 0;
+  // 开场组件与业务内容都可能按需加载；同一预算内等待“跳过按钮或首价值”，谁先出现先处理。
   for (let i = 0; i < 60; i += 1) {
+    const skip = page.getByRole("button", { name: /跳过开场|跳过/ }).first();
+    if (await skip.count()) {
+      ceremony = true;
+      await skip.click({ timeout: 6000 });
+      skipMs = now() - t0;
+    }
     text = await page.evaluate(() => document.body.innerText);
-    if (/晨报|经营简报|待决|决策包/.test(text)) break;
-    await page.waitForTimeout(300);
+    valueMs = now() - t0;
+    if (isFirstValueText(pmHome ? "workloom-pm" : "legacy", text)) break;
+    await page.waitForTimeout(250);
   }
-  const valueMs = now() - t0;
-  const decisions = (text.match(/待决|待我(拍板|审批)|需你拍板|待审/g) ?? []).length;
+  const decisions = countDecisionSignals(text);
   return {
     id: "EXP-01", persona: "owner", journey: "首启（0–10 分钟）", dimension: "首启与首价值 / 掌控感",
     name: "打开工作台即看到今日经营与待拍板事项",
@@ -111,7 +118,13 @@ async function firstValue() {
     actual: { 有欢迎仪式: ceremony, 跳过毫秒: skipMs, 首次价值毫秒: valueMs, 待决提及: decisions },
     metric: `首次价值 ${(valueMs / 1000).toFixed(1)}s`,
     evidence: await shot(page, "exp-01-first-value"),
-    pass: Boolean(text) && valueMs <= T.firstValueMs && decisions > 0 && (decisions <= T.decisionQuota * 3),
+    pass: firstValuePassed({
+      productId: pmHome ? "workloom-pm" : "legacy",
+      text,
+      elapsedMs: valueMs,
+      budgetMs: T.firstValueMs,
+      decisionQuota: T.decisionQuota,
+    }),
   };
 }
 
@@ -133,13 +146,29 @@ async function approval() {
   const advance = page.locator('button:has-text("推进")').first();
   await advance.waitFor({ state: "visible", timeout: 15000 }).catch(() => undefined);
   let clicked = false;
+  let clickError = null;
+  let decisionStatus = null;
   let afterText = "";
   if (await advance.count()) {
     await advance.scrollIntoViewIfNeeded().catch(() => undefined);
-    await advance.click({ timeout: 12000 }).catch(() => undefined);
-    clicked = true;
-    await page.waitForTimeout(3000);
-    afterText = await page.evaluate(() => document.body.innerText);
+    try {
+      const decision = page.waitForResponse(
+        (response) => response.request().method() === "POST" && response.url().includes("/trpc/approvals.decide"),
+        { timeout: 15000 },
+      );
+      await advance.click({ timeout: 12000 });
+      const response = await decision;
+      decisionStatus = response.status();
+      clicked = response.ok();
+      await page.waitForFunction(
+        () => /账本事件|已写入事件账本|已采纳|已批准/.test(document.body.innerText),
+        null,
+        { timeout: 8000 },
+      );
+      afterText = await page.evaluate(() => document.body.innerText);
+    } catch (error) {
+      clickError = String(error).split("\n")[0];
+    }
   }
   const singleMs = now() - t0;
   const wroteBack = /账本事件|已写入事件账本|已采纳|已批准/.test(afterText);
@@ -149,7 +178,16 @@ async function approval() {
     precondition: "审批页有待审项；成员具备审批权限",
     steps: ["打开审批中心", "（窄内容区）展开右栏抽屉", "选中一条待审", "点按「推进」并核对写回"],
     expected: `三手势齐全；单件 ≤${T.approvalMs / 1000}s；写回有账本编号`,
-    actual: { 右栏抽屉展开: openedPanel, 待审条目: pendingItems, 手势: rods, 实际点击: clicked, 写回提示: wroteBack, 单件毫秒: singleMs },
+    actual: {
+      右栏抽屉展开: openedPanel,
+      待审条目: pendingItems,
+      手势: rods,
+      实际点击: clicked,
+      决定响应状态: decisionStatus,
+      点击错误: clickError,
+      写回提示: wroteBack,
+      单件毫秒: singleMs,
+    },
     metric: `单件 ${(singleMs / 1000).toFixed(1)}s`,
     evidence: await shot(page, "exp-02-approval"),
     pass: rods.advance && rods.calibrate && rods.brake && clicked && wroteBack && singleMs <= T.approvalMs,
@@ -202,6 +240,30 @@ async function brake() {
    * 制动杆位置各仓不同：行业仓挂在经营报告页，基座只在夜班中心（且要求有夜班在跑）。
    * 依次探测 reports → night；找不到就如实记「未接线」——红线只看审批/派活/治理，不看这一条。
    */
+  const auth = { authorization: `Bearer ${TOKEN}` };
+  const currentResponse = await page.request.get(`${URLs.api}/trpc/nightShift.current`, { headers: auth });
+  const currentJson = await currentResponse.json();
+  const before = currentJson?.result?.data?.run;
+  let runId = before?.status === "running" ? before.id : null;
+  if (!runId) {
+    if (before?.status === "paused") {
+      const resumed = await page.request.post(`${URLs.api}/trpc/nightShift.resume`, { headers: auth, data: { runId: before.id } });
+      if (!resumed.ok()) throw new Error(`夜班恢复失败：HTTP ${resumed.status()}`);
+      runId = before.id;
+    } else {
+      const candidatesResponse = await page.request.get(`${URLs.api}/trpc/nightShift.candidates`, { headers: auth });
+      const candidatesJson = await candidatesResponse.json();
+      const candidateIds = (candidatesJson?.result?.data ?? [])
+        .map((candidate) => candidate?.id)
+        .filter((id) => typeof id === "string");
+      const started = await page.request.post(`${URLs.api}/trpc/nightShift.start`, {
+        headers: auth,
+        data: { runDate: new Date().toLocaleDateString("sv-SE"), candidateIds },
+      });
+      if (!started.ok()) throw new Error(`夜班出征失败：HTTP ${started.status()}`);
+      runId = (await started.json())?.result?.data?.runId ?? null;
+    }
+  }
   let has = false;
   let enabled = false;
   let where = null;
@@ -238,13 +300,16 @@ async function brake() {
     const cancel = page.getByRole("button", { name: /^撤回$/ }).first();
     if (await cancel.count()) await cancel.click({ timeout: 4000 }).catch(() => undefined);
   }
+  if (runId && before?.status !== "running") {
+    await page.request.post(`${URLs.api}/trpc/nightShift.pause`, { headers: auth, data: { runId } });
+  }
   return {
     id: "EXP-04", persona: "owner", journey: "异常处理", dimension: "掌控感",
     name: "随时可暂停/制动（入口可达 + 二次确认 + 撤回）",
     precondition: "经营报告页可用",
     steps: ["打开经营报告", "定位制动杆", "点开二次确认", "撤回（不污染运行态）"],
     expected: "入口可达且可执行；确认层写明生效范围；有撤回路径",
-    actual: { 入口存在: has, 命中页面: where, 可执行: enabled, 确认层: dialog },
+    actual: { 入口存在: has, 命中页面: where, 可执行: enabled, 确认层: dialog, 前置夜班状态: before?.status ?? "none", 临时出征: before?.status !== "running" },
     evidence: await shot(page, "exp-04-brake"),
     pass: has && enabled && dialog,
   };
