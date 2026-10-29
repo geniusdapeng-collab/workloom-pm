@@ -8,6 +8,8 @@ This deployment keeps WorkLoom PM independent from PengManager:
   `/app/c`.
 - The DeepSeek key and launch public key live only in
   `/etc/workloom-pm/runtime.env` (`0600`).
+- DeepSeek Search uses the same server-side credential and has a separate
+  `ASSISTANT_DAILY_SEARCH_LIMIT` hard budget (default 100 calls/day).
 - Linux code tests run under `bubblewrap` with a private network namespace,
   read-only system mounts, a disposable workspace, and a 30-second wall clock.
 

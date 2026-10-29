@@ -35,6 +35,7 @@ const SendMessage = z.object({
   clientMessageId: ClientMessageId,
   text: z.string().trim().min(1).max(32_000),
   mode: z.enum(["ask", "task"]).default("ask"),
+  webSearch: z.boolean().default(false),
 }).strict();
 const ArchiveSession = z.object({
   archived: z.boolean(),

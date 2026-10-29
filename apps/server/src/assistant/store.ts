@@ -7,6 +7,7 @@ import type {
   AssistantRunEvent,
   AssistantRunStatus,
   AssistantScope,
+  AssistantSearchStatus,
   AssistantSession,
   AssistantUsage,
 } from "./types.js";
@@ -57,6 +58,11 @@ function runRow(row: Row): AssistantRun {
     threadId: nullableString(row.thread_id),
     responseId: nullableString(row.response_id),
     usage: (row.usage ?? {}) as AssistantUsage,
+    webSearchRequested: Boolean(row.web_search_requested),
+    searchStatus: (row.search_status ?? "not_requested") as AssistantSearchStatus,
+    searchQuery: nullableString(row.search_query),
+    searchResultCount: Number(row.search_result_count ?? 0),
+    searchCompletedAt: nullableStamp(row.search_completed_at),
     errorCode: nullableString(row.error_code),
     error: nullableString(row.error),
     userMessageId: String(row.user_message_id),
@@ -94,6 +100,7 @@ export interface CreateTurnInput {
   mode: "ask" | "task";
   model: string;
   clientMessageId: string;
+  webSearch: boolean;
 }
 
 export interface AssistantStore {
@@ -113,6 +120,12 @@ export interface AssistantStore {
   historyForRun(scope: AssistantScope, runId: string, limit?: number): Promise<AssistantMessage[]>;
   getRun(scope: AssistantScope, id: string): Promise<AssistantRun>;
   setRunThread(scope: AssistantScope, runId: string, threadId: string): Promise<void>;
+  updateSearchState(scope: AssistantScope, runId: string, input: {
+    status: AssistantSearchStatus;
+    query?: string | null;
+    resultCount?: number;
+    completedAt?: Date | null;
+  }): Promise<void>;
   startRun(scope: AssistantScope, runId: string): Promise<void>;
   appendEvent(scope: AssistantScope, runId: string, sessionId: string, type: string, payload?: Record<string, unknown>): Promise<void>;
   updateAssistantText(scope: AssistantScope, runId: string, text: string): Promise<void>;
@@ -133,12 +146,14 @@ export interface AssistantStore {
     responseId?: string | null;
   }): Promise<void>;
   getEvents(scope: AssistantScope, runId: string, afterId: string, limit?: number): Promise<AssistantRunEvent[]>;
-  reserveBudget(scope: AssistantScope, runId: string, maxOutputTokens: number, reservedCalls?: number): Promise<{ budgetDate: string }>;
+  reserveBudget(scope: AssistantScope, runId: string, maxOutputTokens: number, reservedCalls?: number, reservedSearchCalls?: number): Promise<{ budgetDate: string }>;
   settleBudget(scope: AssistantScope, input: {
     budgetDate: string;
     usage?: AssistantUsage;
     reservedCalls: number;
     callsUsed?: number;
+    reservedSearchCalls?: number;
+    searchCallsUsed?: number;
     blockedReason?: string;
   }): Promise<void>;
   recoverInterrupted(scope: AssistantScope): Promise<number>;
@@ -358,8 +373,8 @@ export class PgAssistantStore implements AssistantStore {
       );
       const run = await client.query<Row>(
         `INSERT INTO assistant_runs(
-           id,session_id,tenant_id,workspace_id,owner_member_no,user_message_id,assistant_message_id,mode,model)
-         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+           id,session_id,tenant_id,workspace_id,owner_member_no,user_message_id,assistant_message_id,mode,model,web_search_requested)
+         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
          RETURNING *`,
         [
           runId,
@@ -371,6 +386,7 @@ export class PgAssistantStore implements AssistantStore {
           assistantMessageId,
           input.mode,
           input.model,
+          input.webSearch,
         ],
       );
       await client.query(
@@ -389,7 +405,13 @@ export class PgAssistantStore implements AssistantStore {
         `INSERT INTO assistant_run_events(run_id,session_id,tenant_id,workspace_id,type,payload)
          VALUES($1,$2,$3,$4,'message.start',$5::jsonb)`,
         [runId, input.sessionId, scope.tenantId, scope.workspaceId,
-          JSON.stringify({ userMessageId: insertedUser.rows[0].id, assistantMessageId, mode: input.mode, model: input.model })],
+          JSON.stringify({
+            userMessageId: insertedUser.rows[0].id,
+            assistantMessageId,
+            mode: input.mode,
+            model: input.model,
+            webSearch: input.webSearch,
+          })],
       );
       return {
         run: runRow(run.rows[0]!),
@@ -441,6 +463,35 @@ export class PgAssistantStore implements AssistantStore {
         [runId, scope.tenantId, scope.workspaceId, threadId],
       );
       if (!result.rowCount) throw new AssistantStoreError("RUN_NOT_FOUND", "运行不存在或无权修改", 404);
+    });
+  }
+
+  async updateSearchState(scope: AssistantScope, runId: string, input: {
+    status: AssistantSearchStatus;
+    query?: string | null;
+    resultCount?: number;
+    completedAt?: Date | null;
+  }): Promise<void> {
+    await this.tx(scope, async (client) => {
+      const result = await client.query(
+        `UPDATE assistant_runs
+            SET search_status=$4,
+                search_query=COALESCE($5,search_query),
+                search_result_count=COALESCE($6,search_result_count),
+                search_completed_at=$7,
+                updated_at=now()
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND web_search_requested=true`,
+        [
+          runId,
+          scope.tenantId,
+          scope.workspaceId,
+          input.status,
+          input.query ?? null,
+          input.resultCount ?? null,
+          input.completedAt ?? null,
+        ],
+      );
+      if (!result.rowCount) throw new AssistantStoreError("RUN_NOT_FOUND", "搜索运行不存在或未启用联网", 404);
     });
   }
 
@@ -584,11 +635,15 @@ export class PgAssistantStore implements AssistantStore {
     });
   }
 
-  async reserveBudget(scope: AssistantScope, runId: string, maxOutputTokens: number, reservedCalls = 1): Promise<{ budgetDate: string }> {
+  async reserveBudget(scope: AssistantScope, runId: string, maxOutputTokens: number, reservedCalls = 1, reservedSearchCalls = 0): Promise<{ budgetDate: string }> {
     const maxCalls = boundedInteger(process.env.ASSISTANT_DAILY_CALL_LIMIT, 300, 1, 100_000);
     const maxTokens = boundedInteger(process.env.ASSISTANT_DAILY_TOKEN_LIMIT, 2_000_000, 1_000, 100_000_000);
+    const maxSearchCalls = boundedInteger(process.env.ASSISTANT_DAILY_SEARCH_LIMIT, 100, 1, 100_000);
     if (!Number.isSafeInteger(reservedCalls) || reservedCalls < 1 || reservedCalls > 10_000) {
       throw new AssistantStoreError("INVALID_BUDGET_CONFIG", "预算调用预留必须是 1..10000 的整数", 503);
+    }
+    if (!Number.isSafeInteger(reservedSearchCalls) || reservedSearchCalls < 0 || reservedSearchCalls > 10_000) {
+      throw new AssistantStoreError("INVALID_BUDGET_CONFIG", "搜索预算预留必须是 0..10000 的整数", 503);
     }
     return this.tx(scope, async (client) => {
       const dateResult = await client.query<{ budget_date: string }>("SELECT current_date::text AS budget_date");
@@ -598,8 +653,8 @@ export class PgAssistantStore implements AssistantStore {
       // both pass their token check before either reservation is visible.
       await client.query(
         `INSERT INTO assistant_budgets(
-           budget_date,tenant_id,workspace_id,calls_reserved,calls_used,updated_at)
-         VALUES($1,$2,$3,0,0,now())
+           budget_date,tenant_id,workspace_id,calls_reserved,calls_used,search_calls_reserved,search_calls_used,updated_at)
+         VALUES($1,$2,$3,0,0,0,0,now())
          ON CONFLICT(budget_date,tenant_id,workspace_id) DO NOTHING`,
         [budgetDate, scope.tenantId, scope.workspaceId],
       );
@@ -613,25 +668,37 @@ export class PgAssistantStore implements AssistantStore {
       const calls = reserved + Number(row?.calls_used ?? 0);
       const promptTokens = Number(row?.prompt_tokens_used ?? 0);
       const completionTokens = Number(row?.completion_tokens_used ?? 0);
+      const searchReserved = Number(row?.search_calls_reserved ?? 0);
+      const searchCalls = searchReserved + Number(row?.search_calls_used ?? 0);
       const blocked = Boolean(row?.blocked);
       if (blocked) throw new AssistantStoreError("BUDGET_FROZEN", String(row?.blocked_reason ?? "预算账本已冻结"), 429);
       if (calls + reservedCalls > maxCalls) throw new AssistantStoreError("BUDGET_BLOCKED", `今日模型调用余额不足以预留 ${reservedCalls} 次`, 429);
+      if (searchCalls + reservedSearchCalls > maxSearchCalls) {
+        throw new AssistantStoreError("SEARCH_BUDGET_BLOCKED", `今日网页搜索余额不足以预留 ${reservedSearchCalls} 次`, 429);
+      }
       if (promptTokens + completionTokens + reserved * 8192 + maxOutputTokens > maxTokens) {
         throw new AssistantStoreError("BUDGET_BLOCKED", "今日 token 余额不足，本次请求未发出", 429);
       }
       await client.query(
         `INSERT INTO assistant_budgets(
-           budget_date,tenant_id,workspace_id,calls_reserved,calls_used,updated_at)
-         VALUES($1,$2,$3,$4,0,now())
+           budget_date,tenant_id,workspace_id,calls_reserved,calls_used,search_calls_reserved,search_calls_used,updated_at)
+         VALUES($1,$2,$3,$4,0,$5,0,now())
          ON CONFLICT(budget_date,tenant_id,workspace_id)
-         DO UPDATE SET calls_reserved=assistant_budgets.calls_reserved+$4,updated_at=now()`,
-        [budgetDate, scope.tenantId, scope.workspaceId, reservedCalls],
+         DO UPDATE SET calls_reserved=assistant_budgets.calls_reserved+$4,
+                       search_calls_reserved=assistant_budgets.search_calls_reserved+$5,
+                       updated_at=now()`,
+        [budgetDate, scope.tenantId, scope.workspaceId, reservedCalls, reservedSearchCalls],
       );
       await client.query(
         `INSERT INTO assistant_run_events(run_id,session_id,tenant_id,workspace_id,type,payload)
          SELECT $1,session_id,tenant_id,workspace_id,'usage.updated',$4::jsonb
            FROM assistant_runs WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3`,
-        [runId, scope.tenantId, scope.workspaceId, JSON.stringify({ budgetDate, reservedCalls, maxOutputTokens })],
+        [runId, scope.tenantId, scope.workspaceId, JSON.stringify({
+          budgetDate,
+          reservedCalls,
+          reservedSearchCalls,
+          maxOutputTokens,
+        })],
       );
       return { budgetDate };
     });
@@ -642,24 +709,34 @@ export class PgAssistantStore implements AssistantStore {
     usage?: AssistantUsage;
     reservedCalls: number;
     callsUsed?: number;
+    reservedSearchCalls?: number;
+    searchCallsUsed?: number;
     blockedReason?: string;
   }): Promise<void> {
     const callsUsed = input.callsUsed ?? 1;
+    const reservedSearchCalls = input.reservedSearchCalls ?? 0;
+    const searchCallsUsed = input.searchCallsUsed ?? 0;
     if (!Number.isSafeInteger(input.reservedCalls) || input.reservedCalls < 1 || input.reservedCalls > 10_000) {
       throw new AssistantStoreError("INVALID_BUDGET_CONFIG", "预算调用结算必须对应 1..10000 次预留", 503);
     }
     if (!Number.isSafeInteger(callsUsed) || callsUsed < 0 || callsUsed > 10_000) {
       throw new AssistantStoreError("INVALID_BUDGET_CONFIG", "已用调用数必须是 0..10000 的整数", 503);
     }
+    if (!Number.isSafeInteger(reservedSearchCalls) || reservedSearchCalls < 0 || reservedSearchCalls > 10_000
+      || !Number.isSafeInteger(searchCallsUsed) || searchCallsUsed < 0 || searchCallsUsed > 10_000) {
+      throw new AssistantStoreError("INVALID_BUDGET_CONFIG", "搜索预算结算必须是 0..10000 的整数", 503);
+    }
     await this.tx(scope, async (client) => {
       await client.query(
         `UPDATE assistant_budgets
             SET calls_reserved=GREATEST(0,calls_reserved-$4),
                 calls_used=calls_used+$5,
-                prompt_tokens_used=prompt_tokens_used+$6,
-                completion_tokens_used=completion_tokens_used+$7,
-                blocked=CASE WHEN $8::text IS NULL THEN blocked ELSE true END,
-                blocked_reason=COALESCE($8,blocked_reason),
+                search_calls_reserved=GREATEST(0,search_calls_reserved-$6),
+                search_calls_used=search_calls_used+$7,
+                prompt_tokens_used=prompt_tokens_used+$8,
+                completion_tokens_used=completion_tokens_used+$9,
+                blocked=CASE WHEN $10::text IS NULL THEN blocked ELSE true END,
+                blocked_reason=COALESCE($10,blocked_reason),
                 updated_at=now()
           WHERE budget_date=$1 AND tenant_id=$2 AND workspace_id=$3`,
         [
@@ -668,6 +745,8 @@ export class PgAssistantStore implements AssistantStore {
           scope.workspaceId,
           input.reservedCalls,
           callsUsed,
+          reservedSearchCalls,
+          searchCallsUsed,
           input.usage?.promptTokens ?? 0,
           input.usage?.completionTokens ?? 0,
           input.blockedReason ?? null,

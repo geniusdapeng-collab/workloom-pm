@@ -42,7 +42,7 @@ All routes are under `/api/assistant`.
 | POST | `/sessions/:id/archive` | Archive or unarchive |
 | DELETE | `/sessions/:id` | Soft delete |
 | GET | `/sessions/:id/messages` | Persisted messages |
-| POST | `/sessions/:id/messages` | Create ask/task run |
+| POST | `/sessions/:id/messages` | Create ask/task run; optional `webSearch: true` |
 | GET | `/runs/:id` | Run and linked PM evidence |
 | GET | `/runs/:id/events` | SSE from `Last-Event-ID` |
 | POST | `/runs/:id/stop` | Stop model or PM task |
@@ -54,12 +54,27 @@ limits. Ask mode calls DeepSeek Chat Completions with `stream=true`,
 `stream_options.include_usage=true`, thinking disabled, and a bounded output
 size. Task mode creates and monitors the existing PM team/DAG runtime.
 
+## Web search
+
+The web UI exposes an explicit `联网搜索` toggle. When enabled, the assistant
+calls DeepSeek `POST /v1/tools/search` before the answer or PM task, passes the
+returned summaries as clearly marked untrusted external material, and persists
+the actual source titles, URLs and search receipt. The model is instructed to
+cite only returned URLs and to disclose when results are empty or insufficient.
+
+Search is deliberately separate from Chat Completions. It uses the same
+DeepSeek credential and official origin, but has its own daily call budget.
+Search failures fail the request instead of silently degrading to an unsourced
+answer. Search and Fetch are read-only operations; fetched web text remains
+untrusted and cannot grant tool or publishing authority.
+
 ## Model budget
 
 `ASSISTANT_DAILY_CALL_LIMIT` defaults to 300 and
-`ASSISTANT_DAILY_TOKEN_LIMIT` defaults to 2,000,000. Every physical request is
-reserved locally before the provider call. Missing final usage freezes the
-ledger instead of recording zero.
+`ASSISTANT_DAILY_TOKEN_LIMIT` defaults to 2,000,000.
+`ASSISTANT_DAILY_SEARCH_LIMIT` defaults to 100. Every physical request is
+reserved locally before the provider call. Missing final model usage freezes the
+ledger instead of recording zero; search calls are accounted separately.
 
 ## Linux code execution
 

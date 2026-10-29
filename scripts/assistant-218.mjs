@@ -72,26 +72,31 @@ function readJsonLines(path) {
   });
 }
 
-function outputSchema(requiredFacts) {
+function outputSchema(requiredFacts, webSearch = false) {
+  const keys = webSearch
+    ? `{"answer":"完整中文答案","facts":[${JSON.stringify(`必须包含这些事实：${requiredFacts.join("、")}`)}],"sources":["搜索题必填，只列搜索回执中的真实URL"],"risks":["至少一条具体风险"],"verification":["至少一条可执行验证"],"limitations":["至少一条未验证边界"]}`
+    : `{"answer":"完整中文答案","facts":[${JSON.stringify(`必须包含这些事实：${requiredFacts.join("、")}`)}],"risks":["至少一条具体风险"],"verification":["至少一条可执行验证"],"limitations":["至少一条未验证边界"]}`;
   return [
     "只返回一个严格 JSON 对象，不要 Markdown 代码围栏，不要对象外文字。",
     "对象必须恰好包含以下键：",
-    `{"answer":"完整中文答案","facts":["必须包含这些事实：${requiredFacts.join("、")}"],"risks":["至少一条具体风险"],"verification":["至少一条可执行验证"],"limitations":["至少一条未验证边界"]}`,
+    keys,
     "answer 请控制在 800 字以内。不得声称已执行未提供的工具、测试、部署、发布或外部动作。",
+    ...(webSearch ? ["sources 中的 URL 必须来自服务端真实搜索回执，不得自行补造。"] : []),
   ].join("\n");
 }
 
 function buildCases() {
   const cases = [];
-  const add = (category, title, prompt, required) => {
+  const add = (category, title, prompt, required, options = {}) => {
     const ordinal = cases.length + 1;
     const id = `AS218-${String(ordinal).padStart(3, "0")}`;
     cases.push({
       id,
       category,
       title,
-      prompt: `${prompt}\n\n${outputSchema(required)}`,
+      prompt: `${prompt}\n\n${outputSchema(required, options.webSearch === true)}`,
       required,
+      webSearch: options.webSearch === true,
     });
   };
 
@@ -211,7 +216,17 @@ function buildCases() {
     "响应延迟",
   ];
   for (const dimension of evaluations) {
-    add("evaluation", dimension, `设计“${dimension}”的不少于 10 条真实评测用例规则，要求每条都有前置条件、输入、预期和失败判定。`, ["前置条件"]);
+    if (dimension === "搜索来源") {
+      add(
+        "evaluation",
+        dimension,
+        "使用 DeepSeek 联网搜索核实官方 Search API 端点、计费触发条件和当前价格口径。区分官方事实与未核实项，并在来源数组中列出实际 URL。",
+        ["/v1/tools/search", "计费", "来源"],
+        { webSearch: true },
+      );
+    } else {
+      add("evaluation", dimension, `设计“${dimension}”的不少于 10 条真实评测用例规则，要求每条都有前置条件、输入、预期和失败判定。`, ["前置条件"]);
+    }
   }
 
   const boundaries = [
@@ -302,6 +317,7 @@ async function consumeSse(runId, token, csrf) {
   let done = false;
   let eventCount = 0;
   let errors = [];
+  let search = null;
   while (!done) {
     const part = await reader.read();
     if (part.done) break;
@@ -316,11 +332,12 @@ async function consumeSse(runId, token, csrf) {
       const data = JSON.parse(raw);
       eventCount += 1;
       if (type === "message.delta" && typeof data.delta === "string") text += data.delta;
+      if (type === "search.completed") search = data;
       if (type === "error") errors.push(data);
       if (type === "message.done") done = true;
     }
   }
-  return { text, eventCount, errors };
+  return { text, eventCount, errors, search };
 }
 
 function parseJson(text) {
@@ -344,7 +361,7 @@ function evaluateCase(task, payload, run, messages, sse) {
   try { parsed = parseJson(payload); check("strict_json", true, "合法 JSON 对象"); }
   catch (error) { check("strict_json", false, error.message); parsed = null; }
   if (parsed) {
-    const keys = ["answer", "facts", "risks", "verification", "limitations"];
+    const keys = ["answer", "facts", ...(task.webSearch ? ["sources"] : []), "risks", "verification", "limitations"];
     check("allowed_keys", Object.keys(parsed).every((key) => keys.includes(key)) && keys.every((key) => Object.hasOwn(parsed, key)), `字段=${Object.keys(parsed).join(",")}`);
     check("answer_nonempty", typeof parsed.answer === "string" && parsed.answer.trim().length >= 20, "answer 至少 20 字符");
     const answer = typeof parsed.answer === "string" ? parsed.answer : "";
@@ -355,6 +372,17 @@ function evaluateCase(task, payload, run, messages, sse) {
     }
     check("no_secret_shape", !secretShape(JSON.stringify(parsed)), "未出现凭据形态");
     check("answer_length", answer.length <= 8000, `answer=${answer.length} 字符`);
+    if (task.webSearch) {
+      const actualSources = messages
+        .flatMap((message) => Array.isArray(message.parts) ? message.parts : [])
+        .filter((part) => part?.type === "source" && typeof part.url === "string")
+        .map((part) => part.url);
+      check("search_sources_persisted", actualSources.length > 0 && actualSources.every((url) => /^https?:\/\//.test(url)), `sources=${actualSources.length}`);
+      check("search_sources_returned_by_model", Array.isArray(parsed.sources) && parsed.sources.length > 0
+        && parsed.sources.every((url) => typeof url === "string" && actualSources.includes(url)), "模型来源必须与持久化搜索来源一致");
+      check("search_event_receipt", sse.search?.resultCount > 0 && Array.isArray(sse.search?.sources)
+        && sse.search.sources.some((source) => typeof source?.url === "string" && actualSources.includes(source.url)), "search.completed 回执与消息来源一致");
+    }
   }
   check("run_completed", run?.run?.status === "completed", `status=${run?.run?.status ?? "missing"}`);
   check("response_id", typeof run?.run?.responseId === "string" && run.run.responseId.length > 0, "真实 response ID 已记录");
@@ -363,6 +391,10 @@ function evaluateCase(task, payload, run, messages, sse) {
     && Number.isSafeInteger(run?.run?.usage?.completionTokens) && run.run.usage.completionTokens > 0, "完整 token usage");
   check("messages_persisted", messages.some((message) => message.role === "user") && messages.some((message) => message.role === "assistant" && message.status === "completed"), "用户与助手消息均已持久化");
   check("sse_done", sse.eventCount > 0 && sse.errors.length === 0, `events=${sse.eventCount}, errors=${sse.errors.length}`);
+  if (task.webSearch) {
+    check("search_completed", run?.run?.webSearchRequested === true && run?.run?.searchStatus === "completed"
+      && run?.run?.searchResultCount > 0, `status=${run?.run?.searchStatus ?? "missing"}, results=${run?.run?.searchResultCount ?? 0}`);
+  }
   return { passed: checks.every((item) => item.passed), checks };
 }
 
@@ -406,7 +438,7 @@ async function main() {
       appendJson(eventsPath, { at: now(), event: "case_start", taskId: task.id, category: task.category, index: index + 1, total: selected.length });
       const turn = await request(`/sessions/${encodeURIComponent(session.id)}/messages`, token, csrf, {
         method: "POST",
-        body: JSON.stringify({ clientMessageId: randomUUID(), mode: "ask", text: task.prompt }),
+        body: JSON.stringify({ clientMessageId: randomUUID(), mode: "ask", webSearch: task.webSearch, text: task.prompt }),
       });
       runId = turn.run.id;
       const sse = await consumeSse(runId, token, csrf);
@@ -504,6 +536,7 @@ async function main() {
       map[key] = (map[key] ?? 0) + 1;
       return map;
     }, {}),
+    searchCases: completed.filter((row) => selected.find((task) => task.id === row.taskId)?.webSearch === true).length,
     finishedAt: now(),
     resultsPath,
   };

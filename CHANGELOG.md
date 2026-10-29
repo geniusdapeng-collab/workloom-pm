@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-30
+
+- Add explicit DeepSeek Search support to the cloud assistant, with persisted
+  source cards, untrusted-web-content handling, and a separate daily search
+  budget.
+- Use the `Asia/Shanghai` business date in assistant prompts.
+- Keep the composer visible during long conversations at desktop and mobile
+  widths.
+
 本文件记录 WorkLoom IM 底座的变更历史。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)。
 
 ## [0.1.3] - 2026-10-29 · 云端研发工作台与鹏经理单点入口

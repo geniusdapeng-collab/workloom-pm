@@ -125,7 +125,7 @@ if [[ ! -f "$config_root/runtime.env" ]]; then
     printf 'LLM_PROVIDER=deepseek\nLLM_BASE_URL=https://api.deepseek.com\nLLM_MODEL=deepseek-flash\n'
     printf 'DEEPSEEK_API_KEY=%s\n' "$DEEPSEEK_API_KEY"
     printf 'ASSISTANT_PUBLIC_ORIGIN=https://%s\n' "$domain"
-    printf 'ASSISTANT_DAILY_CALL_LIMIT=300\nASSISTANT_DAILY_TOKEN_LIMIT=2000000\n'
+    printf 'ASSISTANT_DAILY_CALL_LIMIT=300\nASSISTANT_DAILY_TOKEN_LIMIT=2000000\nASSISTANT_DAILY_SEARCH_LIMIT=100\n'
     printf 'WORKLOOM_LAUNCH_PUBLIC_KEY_B64=%s\n' "$WORKLOOM_LAUNCH_PUBLIC_KEY_B64"
     printf 'PM_SANDBOX_ROOT=%s/pm-sandbox\nWORKLOOM_SUPPORT_DIR=%s\n' "$data_root" "$data_root"
     printf 'PM_LINUX_SANDBOX_BIN=/usr/bin/bwrap\nEVENT_BUS=memory\n'

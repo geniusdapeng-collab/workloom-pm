@@ -38,6 +38,7 @@ runDb("assistant budget ledger in isolated PostgreSQL", () => {
       mode: "task",
       model: "deepseek-flash",
       clientMessageId: `budget-${suffix}`,
+      webSearch: false,
     });
     run = turn.run;
   });
@@ -106,6 +107,51 @@ runDb("assistant budget ledger in isolated PostgreSQL", () => {
     } finally {
       if (previous === undefined) delete process.env.ASSISTANT_DAILY_TOKEN_LIMIT;
       else process.env.ASSISTANT_DAILY_TOKEN_LIMIT = previous;
+    }
+  });
+
+  it("enforces a separate daily search budget and settles search calls independently", async () => {
+    const previous = process.env.ASSISTANT_DAILY_SEARCH_LIMIT;
+    process.env.ASSISTANT_DAILY_SEARCH_LIMIT = "1";
+    try {
+      const reservations = await Promise.allSettled([
+        store.reserveBudget(scope, run.id, 4096, 1, 1),
+        store.reserveBudget(scope, run.id, 4096, 1, 1),
+      ]);
+      const admitted = reservations.find((result): result is PromiseFulfilledResult<{ budgetDate: string }> =>
+        result.status === "fulfilled");
+      expect(admitted).toBeDefined();
+      expect(reservations.filter((result) => result.status === "rejected")).toHaveLength(1);
+      await store.settleBudget(scope, {
+        budgetDate: admitted!.value.budgetDate,
+        usage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 },
+        reservedCalls: 1,
+        callsUsed: 1,
+        reservedSearchCalls: 1,
+        searchCallsUsed: 1,
+      });
+      const client = await app.connect();
+      try {
+        await client.query("BEGIN");
+        await client.query("SELECT set_config('app.tenant_id',$1,true)", [scope.tenantId]);
+        await client.query("SELECT set_config('app.workspace_id',$1,true)", [scope.workspaceId]);
+        const row = await client.query<{
+          search_calls_reserved: number;
+          search_calls_used: number;
+        }>(
+          `SELECT search_calls_reserved,search_calls_used
+             FROM assistant_budgets
+            WHERE budget_date=$1 AND tenant_id=$2 AND workspace_id=$3`,
+          [admitted!.value.budgetDate, scope.tenantId, scope.workspaceId],
+        );
+        expect(row.rows[0]).toMatchObject({ search_calls_reserved: 0, search_calls_used: 1 });
+        await client.query("ROLLBACK");
+      } finally {
+        client.release();
+      }
+    } finally {
+      if (previous === undefined) delete process.env.ASSISTANT_DAILY_SEARCH_LIMIT;
+      else process.env.ASSISTANT_DAILY_SEARCH_LIMIT = previous;
     }
   });
 });

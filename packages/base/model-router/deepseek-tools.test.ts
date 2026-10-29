@@ -112,10 +112,15 @@ describe("DeepSeek official search and fetch tools", () => {
   it("uses the exact official search endpoint and masks PII", async () => {
     const request = vi.fn(async () => Response.json({ results: [{ title: "Official", url: "https://example.org/", summary: "contact guest@example.org", content: "source" }] }));
     const [search] = createDeepSeekTools({ apiKey: "fake-test-only-key", fetch: request });
-    const result = await search!.execute({ query: "agent runtime", count: 3 }, { signal: signal() });
+    const result = await search!.execute({ query: "agent runtime", ori_question: "How does the agent runtime work?", count: 3 }, { signal: signal() });
     expect((request.mock.calls[0] as unknown as [string, RequestInit])[0]).toBe("https://api.deepseek.com/v1/tools/search");
     const options = (request.mock.calls[0] as unknown as [string, RequestInit])[1];
-    expect(JSON.parse(String(options.body))).toEqual({ query: "agent runtime", count: 3, need_content: true });
+    expect(JSON.parse(String(options.body))).toEqual({
+      query: "agent runtime",
+      ori_question: "How does the agent runtime work?",
+      count: 3,
+      need_content: true,
+    });
     expect(options.redirect).toBe("error");
     expect(JSON.stringify(result)).not.toContain("guest@example.org");
     expect(result).toMatchObject({ untrusted_external_content: true, results: [{ title: "Official" }] });
