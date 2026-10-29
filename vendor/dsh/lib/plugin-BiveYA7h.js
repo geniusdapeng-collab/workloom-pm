@@ -1,4 +1,4 @@
-import { t as INSTALL_ANCHOR } from "./profile-boot-BZ2ZjNWi.js";
+import { t as INSTALL_ANCHOR } from "./profile-boot-C14i-8IN.js";
 import { DEFAULT_PROFILE_BUNDLES, PROFILE_TEMPLATES, initProfile, readProfileCompatibility, resolveProfileDir } from "@deepseek-ai/dsh-app-boot";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";

@@ -70,7 +70,7 @@ test("real DSH performs read -> write -> final, with durable session and measure
     assert.match(delivered.files[0]!.content, /REQUIREMENT-42/);
     assert.equal(delivered.usage.promptTokens, 410);
     assert.equal(delivered.usage.completionTokens, 80);
-    assert.equal(delivered.receipt?.dshVersion, "0.2.0-rc.2");
+    assert.equal(delivered.receipt?.dshVersion, "0.2.1-rc.2");
     assert.equal(delivered.receipt?.toolCalls, 3);
     assert.equal(delivered.receipt?.exitCode, 0);
     assert.equal(delivered.receipt?.usageComplete, true);

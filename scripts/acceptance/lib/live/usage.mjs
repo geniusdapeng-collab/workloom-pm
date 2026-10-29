@@ -1,7 +1,7 @@
 /**
  * Exact usage for the pinned DSH durable event schema. Counters stay unavailable
  * when a boundary, attempt, route or authoritative sample is missing.
- * Schema and cache accounting: upstream dsh-v0.2.0-rc.2
+ * Schema and cache accounting: upstream dsh-v0.2.1-rc.2
  * packages/llm/token-meter/src/turn-usage.ts and core/session/src/types.ts.
  */
 const count = (value) => typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && !Object.is(value, -0);

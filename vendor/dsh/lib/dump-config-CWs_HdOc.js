@@ -1,4 +1,4 @@
-import { a as prepareProfile, n as PROFILE_ROOT_FILENAME, r as homePatchPath } from "./profile-boot-BZ2ZjNWi.js";
+import { a as prepareProfile, n as PROFILE_ROOT_FILENAME, r as homePatchPath } from "./profile-boot-C14i-8IN.js";
 import { loadOptionalPatches, loadOverlayPatches, renderConfigDump } from "@deepseek-ai/dsh-app-boot";
 import { join, resolve } from "node:path";
 import { existsSync } from "node:fs";
@@ -19,7 +19,7 @@ const NAME = "dsh";
 * (the recovery diagnostic for a broken `cordis.patch.yml`, which is then
 * never parsed).
 * @param patches - `--patch` overlay paths, in argv order.
-* @param fromDefaultProfile - shipped template used once to initialize a missing profile.
+* @param fromDefaultProfile - shipped template that replaces the profile before loading it.
 */
 function runDumpConfig(profile, defaultOnly, patches, fromDefaultProfile) {
 	const loaded = prepareProfile(profile, !defaultOnly, fromDefaultProfile);

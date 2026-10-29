@@ -1,12 +1,12 @@
-# WorkLoom 开源组件清单 · workloom-im
+# WorkLoom 开源组件清单 · workloom-pm
 
 <!-- 自动生成，请勿手改：node scripts/oss-inventory.mjs --write -->
 
 > 生成器：`scripts/oss-inventory.mjs`（离线事实）＋ `scripts/oss-watch.sh`（上游最新版本）
-> 仓库：workloom-ai/workloom-im ｜ 最近一次成功扫描：尚未记录已核实成功（运行 `pnpm oss:watch`） ｜ 最近尝试：未记录
+> 仓库：geniusdapeng-collab/workloom-pm ｜ 最近一次成功扫描：尚未记录已核实成功（运行 `pnpm oss:watch`） ｜ 最近尝试：未记录
 > 历史全量扫描/尝试（未核实）：2026-09-19T10:16:38.000Z
 > 每项上游版本按成功时间、查询状态和 TTL 单独判定；历史缓存与失败查询不作本次最新版本结论。
-> 统计：登记组件 98 个 ｜ npm 直接依赖 171 个 ｜ Python 依赖 5 个 ｜ 容器镜像 2 个
+> 统计：登记组件 98 个 ｜ npm 直接依赖 181 个 ｜ Python 依赖 7 个 ｜ 容器镜像 2 个
 
 ## 0. 维护机制（四件事）
 
@@ -23,23 +23,23 @@
 
 | # | 组件 | 开源地址 / 许可 | 当前使用版本 | 上游最新 | 状态 | 使用位置 | 注意事项 |
 |---|---|---|---|---|---|---|---|
-| 1 | DeepSeek Harness（dsh） | [github.com/deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) · MIT | 0.2.0-rc.2 | 0.2.0-rc.2（历史记录；未核实或已过期） | 运行时 | vendor/dsh（审计基线）、packages/runtime/dsh-gate（锁定运行时） | Agent 运行时地基：锁版 + 内部 fork 镜像，任何新版本（含 rc 预发布）即触发升级；永远单独一批，必过 E6 回归与 H-5 kill -9 重放；升级前必须 diff 依赖树（0.1.2-rc.1 已移除 node-pty；rc.2 起要求 Node ≥24 的 zstd API；0.2.0-rc.2 起家族子包改精确 pin、新增 koffi 原生依赖（平台预编译包随 optional deps 就位）与插件 DSH peer 兼容性门禁）。【2026-09-30 口径登记】npm `latest`/`next` 已切到 0.2.0-rc.2（`alpha` tag 停在 0.1.7-alpha.2），本仓锁定随之升至 0.2.0-rc.2（首次跨 minor 线）；E6/H-5 门禁的 Mock 端口可用 `DSH_GATE_MOCK_PORT` 覆盖（默认 8799，本机被 deepseek-proxy 常驻占用）。历史口径见 2026-09-20 记录：当时扫描器按 `latest` 判定，实际更新走 `alpha` tag，故一度以人工圈定为准 |
-| 2 | Cordis（插件元框架） | [github.com/cordiverse/cordis](https://github.com/cordiverse/cordis) · MIT | 4.0.4 | 4.0.2（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（插件元框架）、packages/runtime/plugins | 插件可撤销效果是技能绑定围栏、插件卸载即撤销的运行时保证；实际版本以 dsh 锁定树为准（上游独立仓为 4.0.0-rc 线，跟随 dsh 升级） |
-| 3 | Schemastery | [github.com/deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) · MIT | 3.18.4 | 3.18.2（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（配置 schema 引擎） | 配置文件校验引擎；随 dsh 锁定树升级，不单独升级 |
-| 4 | node-addon-require-builtin | [github.com/deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) · MIT | 0.1.6 | 0.1.6（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（原生插件加载） | dsh 原生插件加载依赖；随 dsh 锁定树升级 |
+| 1 | DeepSeek Harness（dsh） | [github.com/deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) · MIT | 0.2.1-rc.2 | 0.2.1-rc.2（历史记录；未核实或已过期） | 运行时 | vendor/dsh（审计基线）、packages/runtime/dsh-gate（锁定运行时） | Agent 运行时地基：锁版 + 内部 fork 镜像，任何新版本（含 rc 预发布）即触发升级；每次单独一批，必过 PM DSH 真实子进程回归、E6 回归与 H-5 kill -9 重放，并核对 vendor tarball integrity。0.2.1-rc.2 的官方发布说明明确适配 DeepSeek-V4.1-Flash-1017 与 Search/Fetch API；root workspace 和 dsh-gate 均锁同一家族版本，@opentelemetry/api 固定 1.9.0。E6/H-5 的 Mock 端口可用 DSH_GATE_MOCK_PORT 覆盖（默认 8799）。历史升级与回归见 vendor/dsh/VENDOR.md。 |
+| 2 | Cordis（插件元框架） | [github.com/cordiverse/cordis](https://github.com/cordiverse/cordis) · MIT | 4.0.5 | 4.0.2（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（插件元框架）、packages/runtime/plugins | 插件可撤销效果是技能绑定围栏、插件卸载即撤销的运行时保证；实际版本以 dsh 锁定树为准（上游独立仓为 4.0.0-rc 线，跟随 dsh 升级） |
+| 3 | Schemastery | [github.com/deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) · MIT | 3.18.5 | 3.18.2（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（配置 schema 引擎） | 配置文件校验引擎；随 dsh 锁定树升级，不单独升级 |
+| 4 | node-addon-require-builtin | [github.com/deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) · MIT | 0.1.9 | 0.1.6（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（原生插件加载） | dsh 原生插件加载依赖；随 dsh 锁定树升级 |
 | 5 | dsh-im 多平台 IM 接入插件 | [github.com/xmanrui/dsh-im](https://github.com/xmanrui/dsh-im) · MIT | 4.21.2 | 4.21.2（历史记录；未核实或已过期） | 运行时 | vendor/dsh-im（文档锁定）、scripts/install-im-channels.sh | 钉钉/企微/飞书官方通道首批启用；安装走 pin 版本 + integrity 校验；观察名单（微信 iLink、WhatsApp baileys 等非官方协议）不启用；Slack 枚举位保留未接线 |
 | 6 | Hono | [github.com/honojs/hono](https://github.com/honojs/hono) · MIT | 4.13.8 | 4.13.8（历史记录；未核实或已过期） | 运行时 | apps/server | HTTP 服务层；与 @hono/node-server 同批升级 |
 | 7 | @hono/node-server | [github.com/honojs/node-server](https://github.com/honojs/node-server) · MIT | 2.1.1 | 2.1.1（历史记录；未核实或已过期） | 运行时 | apps/server | 随 hono 同批升级；服务端启动路径变更需过 server 契约与 E2E |
 | 8 | tRPC | [github.com/trpc/trpc](https://github.com/trpc/trpc) · MIT | 11.19.0 | 11.19.0（历史记录；未核实或已过期） | 运行时 | apps/server（@trpc/server）、apps/web（@trpc/client） | server/client 必须同版同批升级，跨版本混用会直接破坏三端类型契约 |
-| 9 | Drizzle ORM | [github.com/drizzle-team/drizzle-orm](https://github.com/drizzle-team/drizzle-orm) · Apache-2.0 | 0.45.2 | 0.45.2（历史记录；未核实或已过期） | 运行时 | packages/db（client.ts / schema.ts） | 类型源与查询构造；DDL 事实源仍是手写 SQL migrations（D5 纪律：schema.ts 只做类型映射，禁止用 drizzle-kit 生成迁移） |
+| 9 | Drizzle ORM | [github.com/drizzle-team/drizzle-orm](https://github.com/drizzle-team/drizzle-orm) · Apache-2.0 | 0.45.2 / 0.45.4 | 0.45.2（历史记录；未核实或已过期） | 运行时 | packages/db（client.ts / schema.ts） | 类型源与查询构造；DDL 事实源仍是手写 SQL migrations（D5 纪律：schema.ts 只做类型映射，禁止用 drizzle-kit 生成迁移） |
 | 10 | node-postgres（pg） | [github.com/brianc/node-postgres](https://github.com/brianc/node-postgres) · MIT | 8.23.0 | 8.23.0（历史记录；未核实或已过期） | 运行时 | packages/db、packages/base、apps/server | PG 驱动；每个 workspace 必须同版，避免多实例连接池语义漂移 |
-| 11 | Zod | [github.com/colinhacks/zod](https://github.com/colinhacks/zod) · MIT | 4.6.5 | 4.6.5（历史记录；未核实或已过期） | 运行时 | apps/server、packages/base、packages/runtime | 事件与契约校验；v4 与 v3 API 差异大，升级必须全量跑契约测试 |
+| 11 | Zod | [github.com/colinhacks/zod](https://github.com/colinhacks/zod) · MIT | 4.6.5 / 4.6.7 | 4.6.5（历史记录；未核实或已过期） | 运行时 | apps/server、packages/base、packages/runtime | 事件与契约校验；v4 与 v3 API 差异大，升级必须全量跑契约测试 |
 | 12 | jose（JWT/JWS） | [github.com/panva/jose](https://github.com/panva/jose) · MIT | 6.2.12 | 6.2.12（历史记录；未核实或已过期） | 运行时 | apps/server、packages/base | 会话与租户令牌签发/校验；升级后必须过登录、跨租户越权（RLS）用例 |
 | 13 | yaml | [github.com/eemeli/yaml](https://github.com/eemeli/yaml) · ISC | 2.9.0 | 2.9.1（历史记录；未核实或已过期） | 运行时 | bundle/preset 解析、skills 声明、根脚本 | bundle 与技能 YAML 解析器；与 yaml-governance（治理固定解析器）同版。【2026-09-19 暂缓 2.9.1】治理单元由 base-scope.json#uiGovernanceCapability + verify-ui-consumer + install-ui-governance 精确校验（npm:yaml@2.9.0），单独升主 yaml 会与治理单元失配；需与治理单元同批走 stable-upgrade-pr 波次迁移 |
-| 14 | js-yaml | [github.com/nodeca/js-yaml](https://github.com/nodeca/js-yaml) · MIT | 4.2.0 | 5.4.2（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（CLI 配置解析） | dsh CLI 配置解析依赖；随 dsh 锁定树升级。【2026-09-19】dsh 0.1.5-rc.2 声明 ^4.2.0，实测解析 4.3.2；上游 latest 5.4.2 不在 dsh 兼容范围，不单独跟版 |
+| 14 | js-yaml | [github.com/nodeca/js-yaml](https://github.com/nodeca/js-yaml) · MIT | 4.3.2 | 5.4.2（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（CLI 配置解析） | dsh CLI 配置解析依赖；随 dsh 锁定树升级。【2026-09-19】dsh 0.1.5-rc.2 声明 ^4.2.0，实测解析 4.3.2；上游 latest 5.4.2 不在 dsh 兼容范围，不单独跟版 |
 | 15 | Commander | [github.com/tj/commander.js](https://github.com/tj/commander.js) · MIT | 15.0.0 | 15.0.0（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（CLI 参数） | dsh CLI 参数解析；随 dsh 锁定树升级 |
-| 16 | Execa | [github.com/sindresorhus/execa](https://github.com/sindresorhus/execa) · MIT | 10.0.0 | 10.0.1（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（子进程执行） | 子进程调用封装（随 dsh vendor 基线声明，非本仓直接依赖）；【2026-09-19】dsh 锁定树实测仍为 10.0.0，随 dsh 升级，不单独跟 10.0.1 |
-| 17 | ws | [github.com/websockets/ws](https://github.com/websockets/ws) · MIT | 8.21.0 | 8.21.3（历史记录；未核实或已过期） | 运行时 | apps/server（实时通道） | WebSocket 服务端；升级后过实时通道与重连用例 |
+| 16 | Execa | [github.com/sindresorhus/execa](https://github.com/sindresorhus/execa) · MIT | 10.0.1 | 10.0.1（历史记录；未核实或已过期） | 运行时 | 随 dsh 分发（子进程执行） | 子进程调用封装（随 dsh vendor 基线声明，非本仓直接依赖）；【2026-09-19】dsh 锁定树实测仍为 10.0.0，随 dsh 升级，不单独跟 10.0.1 |
+| 17 | ws | [github.com/websockets/ws](https://github.com/websockets/ws) · MIT | 8.21.3 | 8.21.3（历史记录；未核实或已过期） | 运行时 | apps/server（实时通道） | WebSocket 服务端；升级后过实时通道与重连用例 |
 | 18 | Agent Client Protocol SDK | [github.com/zed-industries/agent-client-protocol](https://github.com/zed-industries/agent-client-protocol) · Apache-2.0 | 1.4.0 | 1.4.0（历史记录；未核实或已过期） | 运行时 | apps/server、packages/runtime | 外部客户端（编辑器）接入协议；协议字段演进需与 dsh 的 acp 形态联调 |
 | 19 | PostgreSQL | [github.com/postgres/postgres](https://github.com/postgres/postgres) · PostgreSQL License | 17.11 | —（未扫描） | 运行时 | 桌面内嵌 PG（pack-macos / pack-windows）、docker-compose（CI/开发） | 桌面载荷内嵌 17.x（Postgres.app 2.9.6-17 / EDB 树），CI 用 pgvector/pgvector:pg17 镜像；小版本升级必须重跑迁移与 RLS 用例；服务器小版本以 PGDG 发布人工复核；上游 Docker tag 查询指向官方 library/postgres（https://hub.docker.com/_/postgres/tags），镜像 tag 与桌面实际锁定版本分别展示，不据上游 tag 自动改载荷。 |
 | 20 | pgvector | [github.com/pgvector/pgvector](https://github.com/pgvector/pgvector) · PostgreSQL License | 0.8.6 | v0.8.6（历史记录；未核实或已过期） | 运行时 | docker-compose 镜像 pgvector/pgvector:pg17、桌面内嵌（vector.dylib / vector.dll） | 向量检索扩展；扩展版本与 PG 主版本绑定，升级必须同时更新镜像与桌面载荷并跑检索用例 |
@@ -62,16 +62,16 @@
 | 37 | pixi.js | [github.com/pixijs/pixijs](https://github.com/pixijs/pixijs) · MIT | 6.5.10 | 8.21.0（历史记录；未核实或已过期） | 运行时 | apps/web（数字人/2D 舞台） | 当前锁 v6 线（pixi-live2d-display 兼容上限）；升级 v7/v8 必须同步替换 live2d 显示层。【2026-09-19 复核暂缓】上游已到 8.21.0，v6 线显示层无适配新版本，需先定 live2d 替换方案（产品裁决）再升 |
 | 38 | pixi-live2d-display | [github.com/guansss/pixi-live2d-display](https://github.com/guansss/pixi-live2d-display) · MIT | 0.4.0 | 0.4.0（历史记录；未核实或已过期） | 运行时 | apps/web（Live2D 数字人） | 0.4.0 仅支持 pixi v6 线；升级前先确认上游是否已适配 pixi v7+，否则锁版不动 |
 | 39 | grok-ball（织球 LoomBall 上游引擎） | [github.com/tycoding/grok-ball](https://github.com/tycoding/grok-ball) · MIT | 1.0.0 | —（未扫描） | 运行时 | apps/web/src/vendor/loomball（单文件 SVG 表情球引擎，118KB，零运行依赖，随仓 vendor + PINNED 锁 commit） | AI 班组状态可视化引擎：用 emotionId 表达岗位/班组工作状态（基座公共化 T-2026-0926-0001，源自 Growth 实验车道 T-2026-0926-0019）。产品内命名「织球 LoomBall」，上游兼容门面已在适配层删除（见 vendor/loomball/NOTICE.md）；升级走评审 + 重跑织球四份单测 + 三接入面真机走查，永不自动升级 |
-| 40 | Electron | [github.com/electron/electron](https://github.com/electron/electron) · MIT | 44.4.3 | 44.4.3（历史记录；未核实或已过期） | 运行时 | apps/desktop | 桌面壳（正式产品形态）；升级必须过打包载荷校验、真实窗口响应式与托盘/夜班行为验收 |
-| 41 | electron-builder | [github.com/electron-userland/electron-builder](https://github.com/electron-userland/electron-builder) · MIT | 26.15.3 | 26.15.3（历史记录；未核实或已过期） | 开发/构建 | apps/desktop（打包/签名） | 安装包与签名链路；升级后过 app:pack / app:dist 与发布资产校验 |
+| 40 | Electron | [github.com/electron/electron](https://github.com/electron/electron) · MIT | 44.10.0 | 44.4.3（历史记录；未核实或已过期） | 运行时 | apps/desktop | 桌面壳（正式产品形态）；升级必须过打包载荷校验、真实窗口响应式与托盘/夜班行为验收 |
+| 41 | electron-builder | [github.com/electron-userland/electron-builder](https://github.com/electron-userland/electron-builder) · MIT | 26.18.0 | 26.15.3（历史记录；未核实或已过期） | 开发/构建 | apps/desktop（打包/签名） | 安装包与签名链路；升级后过 app:pack / app:dist 与发布资产校验 |
 | 42 | Playwright | [github.com/microsoft/playwright](https://github.com/microsoft/playwright) · Apache-2.0 | 1.63.0 | 1.63.0（历史记录；未核实或已过期） | 开发/构建 | 三端 E2E（apps/*）、packages/base/computer-use/toolkit（Python 版，随工具链安装） | E2E 与 computer-use 浏览器驱动共用；升级必须重建 Linux 视觉基线（CNB ui-gate 在同一镜像内跑）；Python 侧版本由 toolkit/requirements.txt 约束 |
 | 43 | @axe-core/playwright | [github.com/dequelabs/axe-core-npm](https://github.com/dequelabs/axe-core-npm) · MPL-2.0 | 4.13.0 | 4.13.0（历史记录；未核实或已过期） | 开发/构建 | 三端无障碍门禁 | 与 @playwright/test 版本矩阵敏感，同批升级 |
-| 44 | Vitest | [github.com/vitest-dev/vitest](https://github.com/vitest-dev/vitest) · MIT | 5.0.1 | 5.0.1（历史记录；未核实或已过期） | 开发/构建 | packages/*、apps/server | 各 workspace 版本需对齐（历史存在 v3/v4 混用）；升级后全量跑 pnpm test |
-| 45 | tsx | [github.com/privatenumber/tsx](https://github.com/privatenumber/tsx) · MIT | 4.23.13 | 4.23.13（历史记录；未核实或已过期） | 开发/构建 | 根脚本、apps/server | TS 直跑器；升级后过 db:migrate/db:seed 与 server 启动 |
+| 44 | Vitest | [github.com/vitest-dev/vitest](https://github.com/vitest-dev/vitest) · MIT | 5.0.1 / 5.0.5 | 5.0.1（历史记录；未核实或已过期） | 开发/构建 | packages/*、apps/server | 各 workspace 版本需对齐（历史存在 v3/v4 混用）；升级后全量跑 pnpm test |
+| 45 | tsx | [github.com/privatenumber/tsx](https://github.com/privatenumber/tsx) · MIT | 4.23.13 / 4.23.15 | 4.23.13（历史记录；未核实或已过期） | 开发/构建 | 根脚本、apps/server | TS 直跑器；升级后过 db:migrate/db:seed 与 server 启动 |
 | 46 | TypeScript | [github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) · Apache-2.0 | 5.9.0 / 7.0.2 | 7.0.2（历史记录；未核实或已过期） | 开发/构建 | 全仓 typecheck | 7.0 原生化工具链；部分包仍锁 5.9（治理/UI 消费校验），升级按包分批，避免一次全仓 |
 | 47 | typescript-governance（别名固定解析器） | [github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) · Apache-2.0 | 5.9.3 | —（未扫描） | CI/流水线 | UI 治理/消费校验固定解析器（npm:typescript@5.9.3） | 治理脚本的固定解析器，不随主 TypeScript 升级；改动需与 sync/install-ui-governance.mjs 的 dependency 声明同步 |
 | 48 | yaml-governance（别名固定解析器） | [github.com/eemeli/yaml](https://github.com/eemeli/yaml) · ISC | 2.9.0 | —（未扫描） | CI/流水线 | UI 治理脚本固定 YAML 解析器（npm:yaml@2.9.0） | 与 sync/base-scope.json#uiGovernanceCapability.yamlDependency 保持同版 |
-| 49 | concurrently | [github.com/open-cli-tools/concurrently](https://github.com/open-cli-tools/concurrently) · MIT | 10.0.5 | 10.0.5（历史记录；未核实或已过期） | 开发/构建 | pnpm dev（多进程编排） | 开发编排；升级不影响生产载荷 |
+| 49 | concurrently | [github.com/open-cli-tools/concurrently](https://github.com/open-cli-tools/concurrently) · MIT | 10.0.6 | 10.0.5（历史记录；未核实或已过期） | 开发/构建 | pnpm dev（多进程编排） | 开发编排；升级不影响生产载荷 |
 | 50 | jsdom | [github.com/jsdom/jsdom](https://github.com/jsdom/jsdom) · MIT | 30.1.0 | 30.1.0（历史记录；未核实或已过期） | 开发/构建 | 前端单测环境 | DOM 测试环境；升级后跑三端单测 |
 | 51 | esbuild | [github.com/evanw/esbuild](https://github.com/evanw/esbuild) · MIT | 未引入 | 0.28.2（历史记录；未核实或已过期） | 运行时 | 桌面运行载荷（native 构建产物随包） | 传递依赖（vite/tsx 链路）随包分发；桌面载荷锁三平台二进制，升级必须重跑 runtime:deps:refresh + 载荷边界校验 |
 | 52 | rolldown | [github.com/rolldown/rolldown](https://github.com/rolldown/rolldown) · MIT | 未引入 | 1.2.9（历史记录；未核实或已过期） | 开发/构建 | vite 8 打包内核（native 二进制） | 随 vite 升级；桌面载荷含三平台绑定，注意 onlyBuiltDependencies 白名单 |
@@ -124,133 +124,143 @@
 
 ## 2. 全量直接依赖（本仓事实，含上游最新）
 
-### 2.1 npm 直接依赖（171 个，解析自 pnpm-lock.yaml）
+### 2.1 npm 直接依赖（181 个，解析自 pnpm-lock.yaml）
 
 | 包 | 当前版本 | 声明 | 类型 | 出现位置 | 上游最新 |
 |---|---|---|---|---|---|
 | `@agentclientprotocol/sdk` | 1.4.0（声明） | 1.4.0 | 开发 | vendor/dsh/package.json | 1.4.0（历史记录；未核实或已过期） |
 | `@axe-core/playwright` | 4.13.0 | 4.13.0 | 开发 | package.json | 4.13.0（历史记录；未核实或已过期） |
-| `@deepseek-ai/cordis` | 4.0.4（声明） | ~4.0.4 | 生产 | vendor/dsh/package.json | 4.0.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/cordis-plugin-include` | 1.0.9（声明） | ~1.0.9 | 生产 | vendor/dsh/package.json | 1.0.7（历史记录；未核实或已过期） |
-| `@deepseek-ai/cordis-plugin-loader` | 1.0.5（声明） | ~1.0.5 | 生产 | vendor/dsh/package.json | 1.0.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/cordis-plugin-timer` | 1.1.6（声明） | ~1.1.6 | 生产 | vendor/dsh/package.json | 1.1.4（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh` | 0.2.0-rc.2 | 0.2.0-rc.2 | 生产 | packages/runtime/dsh-gate/package.json | 0.1.5-rc.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-acp` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-acp-app` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-agent` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-agent-instructions` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-agent-loop` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-agent-loop-testkit` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-agent-preset` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-agent-tool-presentation` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-app-boot` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-atomic-write` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-attachment-local` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-base` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-bash-local` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-client-ui-agent-preset` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-client-ui-cordis` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-cmdline` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-command-compact` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-command-goal` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-compaction-basic` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-compaction-tool-result-pruner` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-cordis-client-runner` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-credentials-local` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-deepseek-llm-api-extensions` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-experimental-agent-team` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.1.5-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-experimental-agent-team-profile` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.5-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-experimental-auto-review` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-experimental-ptc-runtime-python` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-experimental-schedule-bundle` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-experimental-tool-agent-team` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.1.5-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-experimental-voice-input-bundle` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-fs-local` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-fs-observation-policy` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-fs-sandbox` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-goal` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-goal-round-driver` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-headless` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-hmr` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-home-paths` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-hooks-claude-code` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.5（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-hooks-codex` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-host-frontend-static` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-host-webserver` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-http-proxy` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.3-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-jobs-local` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-launch-environment` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-llm` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-llm-deepseek` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-llm-deepseek-account` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-llm-deepseek-api-key` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-llm-mock-server` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-llm-pi-ai` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-llm-replay` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-loader-smoke` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-mcp-client` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-mcp-resources` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-persona` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-plan-mode` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-plugin-manager` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-plugin-package-inventory-deepseek` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-pwsh-local` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-pwsh-sandbox` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-sandbox-local` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-sandbox-policy` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-schedule` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-sdk-app` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-sdk-client` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-sdk-minimal` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-session` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-session-checkpoint-policy` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-session-log-deepseek` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-session-persistence-jsonl` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-session-projection` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-session-query` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-session-reference` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-settings` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-shell-env` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-skill` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-skill-filesystem` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-skill-office` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-subagent` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-subagent-fork-in-process` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-subagent-spawn-in-process` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-subprocess-local` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-system-prompt` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-terminal` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-terminal-bash` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-time-context` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tmux-context` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-token-meter` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-ask-user` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-bash` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-bash-persistent` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-cordis` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-fs` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-fs-search` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-goal` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-jobs` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-present` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.5-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-pwsh` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-pwsh-persistent` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.0-rc.8（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-ralph` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-skill` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-str-replace-editor` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-subagent` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-subagent-control` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-todo` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-web` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-workflow` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-tool-workspace-dependencies` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/dsh-tools` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-user-approval` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-web-app` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-webhook` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-webhook-github` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
-| `@deepseek-ai/dsh-workflow-ptc` | 0.2.0-rc.2（声明） | 0.2.0-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
-| `@deepseek-ai/schemastery` | 3.18.4（声明） | ~3.18.4 | 生产 | vendor/dsh/package.json | 3.18.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/cordis` | 4.0.5（声明） | ~4.0.5 | 生产 | vendor/dsh/package.json | 4.0.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/cordis-plugin-include` | 1.0.10（声明） | ~1.0.10 | 生产 | vendor/dsh/package.json | 1.0.7（历史记录；未核实或已过期） |
+| `@deepseek-ai/cordis-plugin-loader` | 1.0.6（声明） | ~1.0.6 | 生产 | vendor/dsh/package.json | 1.0.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/cordis-plugin-timer` | 1.1.7（声明） | ~1.1.7 | 生产 | vendor/dsh/package.json | 1.1.4（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh` | 0.2.1-rc.2 | 0.2.1-rc.2 | 生产 | .workloom-runtime-deps/package.json、apps/server/package.json、packages/runtime/dsh-gate/package.json | 0.1.5-rc.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-acp` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-acp-app` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-agent` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-agent-instructions` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-agent-loop` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-agent-loop-testkit` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-agent-preset` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-agent-tool-presentation` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-app-boot` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.0-rc.6（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-atomic-write` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-attachment-local` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-base` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-bash-local` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-client-ui-agent-preset` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-client-ui-cordis` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-cmdline` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-command-compact` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-command-goal` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-compaction-basic` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-compaction-tool-result-pruner` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-cordis-client-runner` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-credentials-local` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-deepseek-llm-api-extensions` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-experimental-agent-team` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.1.5-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-experimental-agent-team-profile` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.5-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-experimental-auto-review` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-badge-skill-bundle` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-cot-translation-bundle` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-inspector-profile` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-plugin-market-bundle` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-ptc-runtime-python` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-ralph-bundle` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-session-search` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-session-titles-bundle` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-terminal-bundle` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-tool-agent-team` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.1.5-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-experimental-tool-worktree` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-experimental-voice-input-bundle` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-fs-local` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-fs-observation-policy` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-fs-sandbox` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-goal` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-goal-round-driver` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-headless` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-hmr` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-home-paths` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-hooks-claude-code` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.5（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-hooks-codex` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-host-frontend-static` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-host-webserver` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-http-proxy` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.3-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-jobs-local` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-launch-environment` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-llm` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-llm-deepseek` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-llm-deepseek-account` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-llm-deepseek-api-key` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-llm-mock-server` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-llm-pi-ai` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-llm-replay` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-loader-smoke` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-mcp-client` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-mcp-resources` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-persona` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-plan-mode` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-plugin-manager` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-plugin-package-inventory-deepseek` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-pwsh-local` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-pwsh-sandbox` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-sandbox-local` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-sandbox-policy` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-schedule` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-sdk-app` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-sdk-client` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-sdk-minimal` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-session` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-session-checkpoint-policy` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-session-log-deepseek` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-session-persistence-jsonl` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-session-projection` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-session-query` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-session-reference` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-settings` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-shell-env` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-skill` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-skill-badge` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-skill-filesystem` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-skill-office` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-subagent` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-subagent-fork-in-process` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-subagent-spawn-in-process` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-subprocess-local` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-system-prompt` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-terminal` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-terminal-bash` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-time-context` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tmux-context` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-token-meter` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-ask-user` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-bash` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-bash-persistent` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-cordis` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-fs` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-fs-search` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-goal` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-jobs` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.3（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-present` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.5-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-pwsh` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-pwsh-persistent` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.1.0-rc.8（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-ralph` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-schedule` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-tool-skill` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-str-replace-editor` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-subagent` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-subagent-control` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-todo` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-web` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-workflow` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-tool-workspace-dependencies` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/dsh-tools` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-user-approval` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-web-app` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | 0.0.1-rc.1（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-webhook` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-webhook-github` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 开发 | vendor/dsh/package.json | 0.1.2-alpha.2（历史记录；未核实或已过期） |
+| `@deepseek-ai/dsh-workflow-ptc` | 0.2.1-rc.2（声明） | 0.2.1-rc.2 | 生产 | vendor/dsh/package.json | —（未扫描） |
+| `@deepseek-ai/schemastery` | 3.18.5（声明） | ~3.18.5 | 生产 | vendor/dsh/package.json | 3.18.2（历史记录；未核实或已过期） |
 | `@hono/node-server` | 2.1.1（声明） | 2.1.1 | 生产 | .workloom-runtime-deps/package.json、apps/server/package.json | 2.1.1（历史记录；未核实或已过期） |
 | `@playwright/test` | 1.63.0 | 1.63.0 | 开发 | apps/web/package.json、package.json | 1.63.0（历史记录；未核实或已过期） |
 | `@react-three/drei` | 10.7.8（声明） | ^10.7.8 | 生产 | apps/web/package.json | 10.7.8（历史记录；未核实或已过期） |
@@ -261,7 +271,7 @@
 | `@trpc/client` | 11.19.0（声明） | 11.19.0 | 生产 | apps/web/package.json、apps/webb/package.json | 11.19.0（历史记录；未核实或已过期） |
 | `@trpc/server` | 11.19.0（声明） | 11.19.0 | 生产 | .workloom-runtime-deps/package.json、apps/server/package.json | 11.19.0（历史记录；未核实或已过期） |
 | `@types/js-yaml` | 4.0.9（声明） | ^4.0.9 | 开发 | vendor/dsh/package.json | 4.0.9（历史记录；未核实或已过期） |
-| `@types/node` | 24.0.0 / 24.13.3 | ^24.0.0 | 开发 | apps/server/package.json、package.json | 26.6.2（历史记录；未核实或已过期） |
+| `@types/node` | 24.0.0 / 24.19.2 | ^24.0.0 | 开发 | apps/server/package.json、package.json | 26.6.2（历史记录；未核实或已过期） |
 | `@types/pg` | 8.23.1（声明） | ^8.23.1 | 开发 | apps/server/package.json、packages/base/package.json、packages/db/package.json 等 4 处 | 8.23.1（历史记录；未核实或已过期） |
 | `@types/react` | 19.2.0（声明） | ^19.2.0 | 开发 | apps/web/package.json、apps/webb/package.json、apps/webc/package.json 等 4 处 | 19.3.0（历史记录；未核实或已过期） |
 | `@types/react-dom` | 19.2.0（声明） | ^19.2.0 | 开发 | apps/web/package.json、apps/webb/package.json、apps/webc/package.json 等 4 处 | 19.3.0（历史记录；未核实或已过期） |
@@ -270,16 +280,16 @@
 | `@vitejs/plugin-react` | 6.1.1（声明） | 6.1.1 | 开发/生产 | .workloom-runtime-deps/package.json、apps/web/package.json、apps/webb/package.json 等 4 处 | 6.1.1（历史记录；未核实或已过期） |
 | `ajv` | 8.20.0（声明） | ^8.20.0 | 开发 | vendor/dsh/package.json | —（未扫描） |
 | `commander` | 15.0.0（声明） | ^15.0.0 | 生产 | vendor/dsh/package.json | 15.0.0（历史记录；未核实或已过期） |
-| `concurrently` | 10.0.5 | ^10.0.5 | 开发 | package.json | 10.0.5（历史记录；未核实或已过期） |
-| `drizzle-orm` | 0.45.2（声明） | 0.45.2 / ^0.45.2 | 生产 | .workloom-runtime-deps/package.json、packages/db/package.json | 0.45.2（历史记录；未核实或已过期） |
-| `electron` | 44.4.3 | ^44.4.3 | 开发 | package.json | 44.4.3（历史记录；未核实或已过期） |
-| `electron-builder` | 26.15.3 | ^26.15.3 | 开发 | package.json | 26.15.3（历史记录；未核实或已过期） |
-| `execa` | 10.0.0（声明） | ^10.0.0 | 开发 | vendor/dsh/package.json | 10.0.1（历史记录；未核实或已过期） |
+| `concurrently` | 10.0.6 | ^10.0.5 | 开发 | package.json | 10.0.5（历史记录；未核实或已过期） |
+| `drizzle-orm` | 0.45.2 / 0.45.4（声明） | 0.45.4 / ^0.45.2 | 生产 | .workloom-runtime-deps/package.json、packages/db/package.json | 0.45.2（历史记录；未核实或已过期） |
+| `electron` | 44.10.0 | ^44.4.3 | 开发 | package.json | 44.4.3（历史记录；未核实或已过期） |
+| `electron-builder` | 26.18.0 | ^26.15.3 | 开发 | package.json | 26.15.3（历史记录；未核实或已过期） |
+| `execa` | 10.0.1（声明） | ^10.0.1 | 开发 | vendor/dsh/package.json | 10.0.1（历史记录；未核实或已过期） |
 | `hono` | 4.13.8（声明） | 4.13.8 | 生产 | .workloom-runtime-deps/package.json、apps/server/package.json | 4.13.8（历史记录；未核实或已过期） |
 | `jose` | 6.2.12（声明） | 6.2.12 | 生产 | .workloom-runtime-deps/package.json、apps/server/package.json、packages/base/package.json | 6.2.12（历史记录；未核实或已过期） |
-| `js-yaml` | 4.2.0（声明） | ^4.2.0 | 生产 | vendor/dsh/package.json | 5.4.2（历史记录；未核实或已过期） |
+| `js-yaml` | 4.3.2（声明） | ^4.3.2 | 生产 | vendor/dsh/package.json | 5.4.2（历史记录；未核实或已过期） |
 | `jsdom` | 30.1.0（声明） | ^30.1.0 | 开发 | apps/web/package.json、apps/webc/package.json、packages/ui/package.json | 30.1.0（历史记录；未核实或已过期） |
-| `node-addon-require-builtin` | 0.1.6（声明） | ^0.1.6 | 生产 | vendor/dsh/package.json | 0.1.6（历史记录；未核实或已过期） |
+| `node-addon-require-builtin` | 0.1.9（声明） | ^0.1.9 | 生产 | vendor/dsh/package.json | 0.1.6（历史记录；未核实或已过期） |
 | `pg` | 8.23.0 | 8.23.0 | 生产 | .workloom-runtime-deps/package.json、package.json、packages/base/package.json 等 5 处 | 8.23.0（历史记录；未核实或已过期） |
 | `pixi-live2d-display` | 0.4.0（声明） | ^0.4.0 | 生产 | apps/web/package.json | 0.4.0（历史记录；未核实或已过期） |
 | `pixi.js` | 6.5.10（声明） | ^6.5.10 | 生产 | apps/web/package.json | 8.21.0（历史记录；未核实或已过期） |
@@ -290,25 +300,27 @@
 | `tailwindcss` | 4.3.3（声明） | 4.3.3 | 开发 | apps/web/package.json、apps/webc/package.json | 4.3.3（历史记录；未核实或已过期） |
 | `three` | 0.186.0（声明） | ^0.186.0 | 生产 | apps/web/package.json | 0.186.0（历史记录；未核实或已过期） |
 | `three-stdlib` | 2.36.1（声明） | ^2.36.1 | 生产 | apps/web/package.json | 2.36.1（历史记录；未核实或已过期） |
-| `tsx` | 4.23.13 | 4.23.13 / ^4.23.13 | 开发/生产 | .workloom-runtime-deps/package.json、apps/server/package.json、package.json 等 4 处 | 4.23.13（历史记录；未核实或已过期） |
+| `tsx` | 4.23.13 / 4.23.15 | 4.23.15 / ^4.23.13 | 开发/生产 | .workloom-runtime-deps/package.json、apps/server/package.json、package.json 等 4 处 | 4.23.13（历史记录；未核实或已过期） |
 | `typescript` | 5.9.0 / 7.0.2 | ^5.9.0 / ^7.0.2 | 开发 | apps/server/package.json、apps/web/package.json、apps/webb/package.json 等 11 处 | 7.0.2（历史记录；未核实或已过期） |
 | `typescript-governance → npm:typescript` | 5.9.3 | npm:typescript@5.9.3 | 开发 | package.json | 7.0.2（历史记录；未核实或已过期） |
 | `vite` | 8.3.0（声明） | 8.3.0 | 开发/生产 | .workloom-runtime-deps/package.json、apps/web/package.json、apps/webb/package.json 等 4 处 | 8.3.0（历史记录；未核实或已过期） |
-| `vitest` | 5.0.1 | ^5.0.1 | 开发 | apps/webb/package.json、package.json、packages/base/package.json 等 7 处 | 5.0.1（历史记录；未核实或已过期） |
-| `ws` | 8.21.0（声明） | 8.21.0 | 开发 | vendor/dsh/package.json | 8.21.3（历史记录；未核实或已过期） |
+| `vitest` | 5.0.1 / 5.0.5 | ^5.0.1 | 开发 | apps/webb/package.json、package.json、packages/base/package.json 等 7 处 | 5.0.1（历史记录；未核实或已过期） |
+| `ws` | 8.21.3（声明） | 8.21.3 | 开发 | vendor/dsh/package.json | 8.21.3（历史记录；未核实或已过期） |
 | `yaml` | 2.9.0 | 2.9.0 | 开发/生产 | .workloom-runtime-deps/package.json、package.json、packages/base/package.json 等 4 处 | 2.9.1（历史记录；未核实或已过期） |
 | `yaml-governance → npm:yaml` | 2.9.0 | npm:yaml@2.9.0 | 开发 | package.json | 2.9.1（历史记录；未核实或已过期） |
-| `zod` | 4.6.5（声明） | 4.6.5 / ^4.6.5 | 生产 | .workloom-runtime-deps/package.json、apps/server/package.json、packages/base/package.json 等 6 处 | 4.6.5（历史记录；未核实或已过期） |
+| `zod` | 4.6.5 / 4.6.7（声明） | 4.6.7 / ^4.6.5 | 生产 | .workloom-runtime-deps/package.json、apps/server/package.json、packages/base/package.json 等 6 处 | 4.6.5（历史记录；未核实或已过期） |
 
-### 2.2 Python 依赖（5 个）
+### 2.2 Python 依赖（7 个）
 
 | 包 | 当前版本 | 声明 | 出现位置 | 上游最新 |
 |---|---|---|---|---|
 | `av` | 18.1.0 | ==18.1.0 | scripts/whiteboard/engine/requirements.txt | —（未扫描） |
+| `fastapi` | >=0.115,<1（下限声明） | >=0.115,<1 | work/deepseek-recipe/server-py/requirements.txt | —（未扫描） |
 | `numpy` | 2.5.3 | ==2.5.3 | scripts/whiteboard/engine/requirements.txt | —（未扫描） |
 | `opencv-python` | 5.0.0.93 | ==5.0.0.93 | scripts/whiteboard/engine/requirements.txt | —（未扫描） |
 | `Pillow` | 12.3.0 | ==12.3.0 | scripts/whiteboard/engine/requirements.txt | —（未扫描） |
 | `playwright` | >=1.40.0（下限声明） | >=1.40.0 | packages/base/computer-use/toolkit/requirements.txt | 1.45.1（历史记录；未核实或已过期） |
+| `uvicorn` | >=0.34,<1（下限声明） | >=0.34,<1 | work/deepseek-recipe/server-py/requirements.txt | —（未扫描） |
 
 ### 2.3 容器镜像（2 个）
 

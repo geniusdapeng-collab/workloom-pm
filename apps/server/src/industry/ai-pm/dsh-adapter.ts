@@ -12,7 +12,7 @@ import { PmError, type EmployeeExecutionInput, type EmployeeExecutor, type PmUsa
 import { snapshotPmAssetBinding, withPmAssetBinding } from "./asset-binding.js";
 import { TRUSTED_PM_EVIDENCE_POLICY } from "./skill-contracts.js";
 
-export const PINNED_DSH_VERSION = "0.2.0-rc.2";
+export const PINNED_DSH_VERSION = "0.2.1-rc.2";
 export const DSH_EMPLOYEE_TOOLS = ["list_files", "read_file", "write_file"] as const;
 const MAX_FILE_BYTES = 256 * 1024;
 const MAX_TOTAL_BYTES = 1024 * 1024;

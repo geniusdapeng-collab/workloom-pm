@@ -60,7 +60,7 @@ export function apply(ctx, config = {}) {
     };
     return { value: walk(value), changed };
   };
-  // v0.2.0-rc.2 passes (Session, SessionEvent); hashing Session itself would lose usage.
+  // v0.2.1-rc.2 passes (Session, SessionEvent); hashing Session itself would lose usage.
   ctx.on("session/event", (session, event) => {
     try {
       if (typeof session?.id !== "string" || !session.id || typeof event?.type !== "string" || !number(event.seq)) throw new Error("DSH session/event 缺少 Session/Event 双参数身份");

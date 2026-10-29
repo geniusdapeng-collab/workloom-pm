@@ -65,7 +65,7 @@ node scripts/acceptance/live.mjs --profile acceptance/profile.json --require-liv
 
 以下描述的是低层适配机制及受控 fixture 回归。正式 CLI 当前不会进入外部 DSH/网关请求；只有内部启动本地替身的 `--selftest` 可以验证管道。直接低层适配器要求调用方控制无费用 transport，不能把函数存在、合成运行时测试或计量事后完整当作正式生产 LLM 已通过或具有先验总量保证。
 
-`runDshTask` 只支持锁定的 `0.2.0-rc.2` 事件协议，并回读已安装 package 版本。模型凭据通过 `@deepseek-ai/dsh-llm-deepseek-api-key` 的 `apiKeyEnv` 传给子进程；显式 Messages 端点进 patch，密钥和 `rulesToken` 不得落盘。临时 HOME 必须处在本次输出目录；子进程只接收运行所需环境和显式模型变量。
+`runDshTask` 只支持锁定的 `0.2.1-rc.2` 事件协议，并回读已安装 package 版本。模型凭据通过 `@deepseek-ai/dsh-llm-deepseek-api-key` 的 `apiKeyEnv` 传给子进程；显式 Messages 端点进 patch，密钥和 `rulesToken` 不得落盘。临时 HOME 必须处在本次输出目录；子进程只接收运行所需环境和显式模型变量。
 
 `audit.plugin.mjs` 监听上游双参数 `session/event(Session, SessionEvent)`，按会话 ID 与 seq 哈希、fsync 落盘。事件重放幂等；身份复用、缺号、损坏、尾部截断、凭据脱敏、未知 required event 都不能作为完成证据。`llm/stream` 每次请求/重试分别走共享预算，再取得真实 usage；缺失或不安全 usage、异常 stream 和未结算请求都保守持额并冻结。
 
@@ -73,7 +73,7 @@ node scripts/acceptance/live.mjs --profile acceptance/profile.json --require-liv
 
 `runChatTask` 要求 HTTP 成功、真实调用 ID/模型、非空答案及有效供应商 usage。缺 usage、畸形计量或无法确认请求是否产生用量时，返回 `tokens: null` 和 `usage.complete: false`；CLI 保留预占并冻结下一项任务。已获取计量与任务完成分开：error 终态仍然可计量，但不能通过任务。
 
-固定协议来源：[官方 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.0-rc.2)、[SessionEvent 类型](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.0-rc.2/packages/core/session/src/types.ts)、[token meter](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.0-rc.2/packages/llm/token-meter/src/turn-usage.ts)。协议升级必须先适配并通过实际回归，不能只改版本检查。
+固定协议来源：[官方 release](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.2)、[SessionEvent 类型](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.2/packages/core/session/src/types.ts)、[token meter](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.2/packages/llm/token-meter/src/turn-usage.ts)。协议升级必须先适配并通过实际回归，不能只改版本检查。
 
 ## 产品入口的当前预算边界
 

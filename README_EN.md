@@ -103,7 +103,7 @@ The default real model is **`deepseek-flash`**. DeepSeek's documentation observe
 
 The explicit `deepseek_search` and `deepseek_fetch` function tools call DeepSeek's own Search/Fetch API. **Having search tools does not mean every request automatically searches the web.** A permitted role must invoke retrieval and retain sources. Flash ignores the Responses API's native `web_search` tool; adding that field alone does not prove that retrieval happened. [Search & Fetch](https://api-docs.deepseek.com/guides/search/) · [Responses compatibility](https://api-docs.deepseek.com/guides/responses_api/)
 
-DeepSeek Harness provides a model/tool execution loop and sessions. It is not another product manager. Development nodes operate within an isolated working directory and an explicit file-tool scope. Connecting a model does not open arbitrary host commands, production data, or external publishing. The PM team layer manages the role DAG, artifact ownership, and acceptance.
+DeepSeek Harness provides a model/tool execution loop and sessions. It is not another product manager. Development nodes pin `@deepseek-ai/dsh@0.2.1-rc.2` and operate within an isolated working directory and an explicit file-tool scope. Connecting a model does not open arbitrary host commands, production data, or external publishing. The PM team layer manages the role DAG, artifact ownership, and acceptance.
 
 **The client includes a model adapter and defaults, not a shared plaintext API key.** Inject the real key through the launch environment or controlled local secret management. It must not enter source code, browser assets, documentation, logs, or installer files.
 
@@ -160,6 +160,8 @@ pnpm runtime:deps:verify
 ```
 
 Use `pnpm pm:eval` for real task evaluation. [PM-EVALUATION.md](docs/PM-EVALUATION.md) defines the model, budget gates, isolated directories, task set, and assertions. Distinguish single-employee artifact quality, valid team planning, dependency consumption, real implementation artifacts, executed deterministic checks, and failure/recovery evidence. Routing recall, output production, and end-to-end task success are separate metrics.
+
+Run the 218-case cross-role suite with `pnpm pm:deepseek:218`. It spans 14 role families and four difficulty levels, includes 10 live Search cases and eight implementations checked by the independent code sandbox, and preserves every request, usage record, source, assertion, failure, and repair phase. See [the DeepSeek 218 evaluation report](docs/DEEPSEEK-218-EVALUATION.md) for results and evidence boundaries.
 
 ## Scope
 

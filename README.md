@@ -103,7 +103,7 @@ flowchart TD
 
 搜索与抓取通过显式的 `deepseek_search` / `deepseek_fetch` 函数工具接入 DeepSeek 自营 Search/Fetch API。**支持搜索工具不代表所有请求都自动联网**；岗位需要检索时，必须在允许的工具集合中调用并保留来源。Flash 会忽略 Responses API 原生 `web_search`，因此不能仅添加这个字段就宣称已经检索。[Search & Fetch 文档](https://api-docs.deepseek.com/guides/search/) · [Responses 兼容说明](https://api-docs.deepseek.com/guides/responses_api/)
 
-DeepSeek Harness 是工具执行循环与会话机制，不是第二个产品经理。研发节点在隔离工作目录内使用明确允许的文件工具；宿主机任意命令、生产数据和外部发布不因接入模型而开放。岗位协作、DAG、产物所有权与最终验收由 PM 团队层维护。
+DeepSeek Harness 是工具执行循环与会话机制，不是第二个产品经理。研发节点锁定 `@deepseek-ai/dsh@0.2.1-rc.2`，在隔离工作目录内使用明确允许的文件工具；宿主机任意命令、生产数据和外部发布不因接入模型而开放。岗位协作、DAG、产物所有权与最终验收由 PM 团队层维护。
 
 **客户端内置模型适配与默认配置，不内置共享明文 API Key。** 真实 Key 由启动进程环境或受控本地密钥管理注入，不进入源码、浏览器资源、README、日志或安装包。
 
@@ -147,6 +147,8 @@ pnpm app:dev
 
 独立产品身份为 `workloom-pm`，桌面 appId 为 `com.workloom.pm`，偏移为 `200`。打包默认端口为 server `8987`、web `5373`、PG `5632`、NATS `4422`；源码数据库仍以你配置的连接串为准。源码客户端默认支持目录按系统应用目录下的 `workloom-pm` 隔离；可用 `WORKLOOM_SUPPORT_DIR` 显式覆盖。Electron 名称与快捷方式也使用独立产品身份。
 
+本仓是独立产品副本，`product.manifest.json#clientDelivery.mode=repo-owned` 明确三端应用壳与 `packages/ui` 随同一产品提交发布，不接收上游 `ui-v*` 客户端基座状态。发布门禁仍会验真三端入口、`@workloom/ui` workspace 依赖与必备生产文件；这条声明不是跳过检查。
+
 上游 `setup` / `preview:all` 脚本及其它行业演示完整保留。`preview:all` 是继承的演示预览路径，不能用它的“就绪”横幅证明真实 PM 交付；它与已有 IM 开发实例的端口和数据库关系，应先按本仓现行配置核实。
 
 ### 验证与评测
@@ -160,6 +162,8 @@ pnpm runtime:deps:verify
 ```
 
 真实任务评测使用 `pnpm pm:eval`，具体模型、费用硬闸、隔离路径、任务清单与判定规则见 [PM-EVALUATION.md](docs/PM-EVALUATION.md)。评测至少区分：单员工产物是否合格、跨员工计划是否有效、依赖是否被消费、研发产物是否实际落地、确定性检查是否执行、失败与恢复是否保留证据。输出率、路由召回率和端到端达成率分别计算，不能互相替代。
+
+全岗位 218 题真实任务集使用 `pnpm pm:deepseek:218`。它覆盖 14 个岗位族、四种难度、10 个真实 Search 案例和 8 个经独立代码沙箱执行的实现题；请求、usage、Search 来源、逐题断言、失败与修复阶段均写入独立证据目录。方法、最终结果与费用边界见 [DeepSeek 218 项真实任务评测](docs/DEEPSEEK-218-EVALUATION.md)。
 
 ## 范围与边界
 

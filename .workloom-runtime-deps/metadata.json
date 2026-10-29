@@ -24,7 +24,7 @@
   "inputs": [
     {
       "path": "apps/server/package.json",
-      "sha256": "054528ec29add146c75b41eafbc94ce329349bb0e1d9db5ba5bf1ea45a205a16"
+      "sha256": "f2dd4259119fa485d607cff44dc1c5fcbe2d6024c6a6b36d4179061d0439df6f"
     },
     {
       "path": "apps/web/package.json",
@@ -32,7 +32,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "48ff3e658967984e8977283ae24ec933bcffd83551b417fdde9bbb302a12dc47"
+      "sha256": "7e80db284f3bc658b1708848b1ecd09e5450ac0cd69102ef3c05b2101d22fa12"
     },
     {
       "path": "packages/base/package.json",
@@ -60,11 +60,11 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "5f4ae5e974f35e099a0a12ff9b65181ccf94d198a8621c70f26e5a41d9c3f763"
+      "sha256": "44c22f4f6ab16671a379e60211cd6985b3c8246b96705d0cf8633f1b8989e9de"
     },
     {
       "path": "product.manifest.json",
-      "sha256": "fe501855af419c530414d09c516679fb73b076832bada40059ad6c481c603400"
+      "sha256": "d0980faba3e61d01a2801242e3f65c94b5ce481e9e495cea749d25abf9e97b88"
     },
     {
       "path": "scripts/pack-nm-merge.mjs",
@@ -83,6 +83,6 @@
       "sha256": "3695b53718e65d3a9646cfd9434af94be99c81ffa61b93e890372a6e43637934"
     }
   ],
-  "manifestSha256": "bf5a5f97b9a971ec4034a2c8980e053d99156df1e45b9ac3bfd740fa912ff841",
-  "packageLockSha256": "7dd3fb75b4aae43b0c01339a40316de14ffb40044a750d62381b970e4932c7d7"
+  "manifestSha256": "bdd89d9aa6a58498ec859ecb679ea0389b500b7b94515a7260517fd1e888569e",
+  "packageLockSha256": "f8442b8d0ff7b436f1ab1d2b88c3c249aba2eb8c136f9e8c24a555da11a100b6"
 }

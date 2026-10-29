@@ -110,7 +110,7 @@ goal 上限32000字符、请求体256KiB、八任务、单员工十二文件、�
 
 ## DeepSeek Harness 到底负责什么
 
-当前研发节点真实执行仓库锁定的 `@deepseek-ai/dsh@0.2.0-rc.2`，不是把本地 fixture 门禁成绩当作真实模型成绩。这个版本是本轮复现基线，非“最新版本”声明。官方发布源为 [DeepSeek Harness Releases](https://github.com/deepseek-ai/deepseek-harness/releases)。[A+B]
+当前研发节点真实执行仓库锁定的 `@deepseek-ai/dsh@0.2.1-rc.2`，不是把本地 fixture 门禁成绩当作真实模型成绩。该版本于 2026-10-17 发布，发布说明明确适配 `DeepSeek-V4.1-Flash-1017` 与 Search/Fetch API；它仍是 npm `latest` 指向的预发布版本，不能当作不可变最新版本声明。官方发布源为 [DeepSeek Harness Releases](https://github.com/deepseek-ai/deepseek-harness/releases)。[A+B]
 
 `dsh-adapter.ts` 为每员工创建受限 profile、私有目录与会话，模型请求经父进程 CompletionProvider 发出。子进程只有随机 loopback 哨兵，不收到供应商真实 Key。只允许 list_files/read_file/write_file，写入严格限于该任务 outputRefs；不开放 shell、任意抓网页、插件管理、子代理或生产动作。上下游文件与真实 JSONL 会话、结束状态、进程退出和最终文件一并核对。[A+B]
 

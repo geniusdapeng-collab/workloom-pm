@@ -18,6 +18,7 @@ import { charterSchema } from "@workloom/base/captain";
 import { signDemoToken, type Identity } from "@workloom/base/tenancy";
 // R2-F4/M6-F2：摘要解析器抽为独立模块（scripts/chain-summary.ts），可被断言脚本导入复验
 import { parseChainSummary } from "./chain-summary.js";
+import { verifyRepoOwnedClientDelivery } from "./verify-repo-owned-client.mjs";
 
 const BASE = process.env.SERVER_BASE ?? "http://localhost:8787";
 /**
@@ -178,6 +179,11 @@ await check("G-B0", "三端客户端同版分发契约", async () => {
       assert(foundation.latestStableVersion === taggedVersion, `标签 ${taggedVersion} 与客户端稳定版 ${foundation.latestStableVersion ?? "未登记"} 不一致`);
     }
     return `PC/B移动/C移动候选版 ${foundation.candidateVersion} · 稳定版 ${foundation.latestStableVersion ?? "尚未发布"}`;
+  }
+  if (product.clientDelivery?.mode === "repo-owned") {
+    const repoOwned = verifyRepoOwnedClientDelivery(REPO_ROOT, product);
+    assert(repoOwned.errors.length === 0, repoOwned.errors.join("；"));
+    return `独立产品自持三端 ${repoOwned.version} · PC/B移动/C移动同仓 workspace`;
   }
   const clientState = JSON.parse(readFileSync(join(REPO_ROOT, ".workloom-client-foundation.json"), "utf8"));
   const uiState = JSON.parse(readFileSync(join(REPO_ROOT, ".workloom-ui.json"), "utf8"));
