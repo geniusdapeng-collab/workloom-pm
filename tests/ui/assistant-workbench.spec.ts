@@ -18,6 +18,16 @@ test.beforeEach(async ({ page }) => {
   // The product page may reference Google Fonts. This UI contract tests the
   // local application and must not depend on an external network round-trip.
   await page.route(/https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/, (route) => route.abort());
+  await page.route("**/health", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, service: "assistant-ui-fixture" }),
+  }));
+  await page.route("**/api/voice/status", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ enabled: false, configured: false }),
+  }));
   await page.route("**/api/assistant/auth/me", (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
@@ -89,12 +99,18 @@ test("assistant workbench renders a persisted conversation with evidence", async
   await page.goto(`${assistantUrl}/assistant`, { waitUntil: "domcontentloaded" });
   await expect(page.getByText("客户反馈模块评审").first()).toBeVisible();
   await expect(page.getByText("请补充权限矩阵、失败回执和不可用时的回退路径。")).toBeVisible();
-  await expect(page.getByText("deepseek-flash").last()).toBeVisible();
+  await expect(page.getByText("DeepSeek 极速模型").last()).toBeVisible();
+  await expect(page.getByText("DeepSeek-V4.1-Flash-1017")).toBeVisible();
   await expect(page.getByText("已配置")).toBeVisible();
   await expect(page.getByText("6/6 个员工任务完成")).toBeVisible();
-  await expect(page.getByText("artifacts/prd.md")).toBeVisible();
+  await expect(page.getByText("已验证产物文件")).toBeVisible();
+  await expect(page.getByText("512 字节 · 点击下载")).toBeVisible();
+  for (const technicalText of ["deepseek-flash", "SSE", "token", "DAG", "artifacts/prd.md", "BETA"]) {
+    await expect(page.getByText(technicalText, { exact: false })).toHaveCount(0);
+  }
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow).toBe(false);
+  await page.screenshot({ path: "test-results/assistant-desktop-1440.png", fullPage: false });
 });
 
 test("assistant workbench stays usable at a 390 px mobile viewport", async ({ page }) => {
@@ -105,7 +121,7 @@ test("assistant workbench stays usable at a 390 px mobile viewport", async ({ pa
   await expect(menu).toBeVisible();
   await menu.click();
   await expect(page.getByRole("button", { name: "删除会话" })).toBeVisible();
-  await expect(page.getByPlaceholder("输入问题，Enter 发送，Shift+Enter 换行…")).toBeVisible();
+  await expect(page.getByPlaceholder("输入问题，按回车发送，按住 Shift 再回车换行…")).toBeVisible();
   await page.mouse.click(380, 220);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow).toBe(false);

@@ -769,6 +769,20 @@ test("权威子仓清单的附加排除不会切断公共基座依赖闭包", ()
   }
 });
 
+test("WorkLoom PM 云端助手与产品化服务入口不进入公共 base-sync", () => {
+  const scope = loadScope(REAL_BASE);
+  for (const productOwnedPath of [
+    "apps/server/src/assistant/**",
+    "scripts/assistant-218.mjs",
+    "scripts/assistant-218.test.mjs",
+  ]) {
+    assert.ok(
+      scope.raw.exclude.includes(productOwnedPath),
+      `${productOwnedPath} 是 WorkLoom PM 产品专属资产，必须排除普通 base-sync`,
+    );
+  }
+});
+
 /**
  * 逐仓独立的上游前提（2026-10-06 实测事故）：
  * `fanout` 已经把每个子仓的 base-sync 结论收在本仓报告里，所以一个仓失败不再连坐整轮。

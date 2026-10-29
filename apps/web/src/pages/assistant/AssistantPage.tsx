@@ -18,6 +18,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { Icon, clientChineseText, clientStatusLabel } from "@workloom/ui";
+import { actorText, shortId } from "../../lib/display";
 import {
   AssistantApiError,
   archiveSession,
@@ -148,6 +150,33 @@ function formatTime(value: string | null): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
+}
+
+function modelName(value: string | null | undefined, fallback = "模型待确认"): string {
+  if (!value) return fallback;
+  if (/^deepseek(?:-flash)?$/i.test(value)) return "DeepSeek 极速模型";
+  if (/^DeepSeek-[A-Za-z0-9._-]{1,120}$/.test(value)) return value;
+  return clientChineseText(value, fallback);
+}
+
+function sandboxText(value: string | null | undefined): string {
+  if (!value) return "待检测";
+  return /linux|darwin|macos/i.test(value) ? "隔离代码沙箱" : "沙箱状态已记录";
+}
+
+function eventTypeText(value: string): string {
+  const labels: Record<string, string> = {
+    snapshot: "状态快照",
+    "message.start": "开始生成",
+    "message.delta": "流式回答",
+    "task.updated": "任务状态更新",
+    "artifact.created": "产物已生成",
+    "usage.updated": "用量已更新",
+    error: "运行异常",
+    "message.done": "回答完成",
+    heartbeat: "连接保持",
+  };
+  return labels[value] ?? "运行事件";
 }
 
 function sessionGroup(session: AssistantSession): string {
@@ -316,8 +345,8 @@ function PersistedStructuredParts({ onDownload }: { onDownload: (runId: string, 
           return (
             <div className="assistant-message-card assistant-message-card--task" key={`task-${index}`}>
               <span>任务回执</span>
-              <strong>{part.status}</strong>
-              <small>{part.summary || part.runId}</small>
+              <strong>{clientStatusLabel(part.status ?? "")}</strong>
+              <small>{clientChineseText(part.summary, "任务状态已记录")}</small>
             </div>
           );
         }
@@ -331,15 +360,15 @@ function PersistedStructuredParts({ onDownload }: { onDownload: (runId: string, 
               onClick={() => custom?.runId && onDownload(custom.runId, part.path!)}
             >
               <span>已校验产物</span>
-              <strong>{part.path}</strong>
-              <small>{part.sizeBytes ?? 0} B · SHA-256 {part.sha256.slice(0, 12)}…</small>
+              <strong>已验证产物文件</strong>
+              <small>{part.sizeBytes ?? 0} 字节 · 点击下载</small>
             </button>
           );
         }
         if (part.type === "warning") {
           return (
             <div className="assistant-message-warning" key={`warning-${index}`} role="status">
-              <strong>{part.message}</strong>
+              <strong>{clientChineseText(part.message, "运行提示已记录")}</strong>
             </div>
           );
         }
@@ -361,7 +390,7 @@ function ConversationMessage({ onDownload }: { onDownload: (runId: string, path:
       <MessagePrimitive.If assistant>
         <div className="assistant-message__meta">
           <span className="assistant-agent-dot" aria-hidden="true" />
-          <span>WorkLoom PM</span>
+          <span>织元研发台</span>
         </div>
         <div className="assistant-message__bubble assistant-message__bubble--assistant">
           <MessagePrimitive.Parts
@@ -415,9 +444,9 @@ function Conversation({
           <ThreadPrimitive.If empty>
             <div className="assistant-empty">
               <div className="assistant-empty__orb" aria-hidden="true"><span /></div>
-              <p className="assistant-eyebrow">CLOUD DEVELOPMENT WORKBENCH</p>
+              <p className="assistant-eyebrow">云端研发工作台</p>
               <h1>从一个真实目标开始</h1>
-              <p>普通问答会调用真实 DeepSeek；研发任务会进入 14 岗位团队、依赖 DAG 和独立沙箱验收。</p>
+              <p>普通问答会调用真实 DeepSeek；研发任务会进入 14 岗位团队、依赖任务图和独立沙箱验收。</p>
               <div className="assistant-starters">
                 {[
                   "帮我评审一个产品需求，指出风险并给出验收标准",
@@ -466,17 +495,17 @@ function Conversation({
           <ComposerPrimitive.Root className="assistant-composer">
             <ComposerPrimitive.Input
               className="assistant-composer__input"
-              placeholder={mode === "task" ? "描述一个可验收的研发目标；复杂任务会创建真实 DAG…" : "输入问题，Enter 发送，Shift+Enter 换行…"}
+              placeholder={mode === "task" ? "描述一个可验收的研发目标；复杂任务会创建真实任务图…" : "输入问题，按回车发送，按住 Shift 再回车换行…"}
               rows={2}
               maxRows={8}
               submitMode="enter"
               aria-label="发送研发对话"
             />
             <div className="assistant-composer__actions">
-              <span className="assistant-composer__hint">{mode === "task" ? "真实团队 · 围栏 · 沙箱" : "DeepSeek Flash · 流式"}</span>
+              <span className="assistant-composer__hint">{mode === "task" ? "真实团队 · 围栏 · 沙箱" : "DeepSeek 极速模型 · 流式"}</span>
               <ComposerPrimitive.Cancel className="assistant-button assistant-button--ghost">停止</ComposerPrimitive.Cancel>
               <ComposerPrimitive.Send className="assistant-button assistant-button--send">
-                发送 <span aria-hidden="true">↗</span>
+                发送
               </ComposerPrimitive.Send>
             </div>
           </ComposerPrimitive.Root>
@@ -525,15 +554,15 @@ function SessionList({
   return (
     <aside className="assistant-sidebar" aria-label="历史会话">
       <div className="assistant-brand">
-        <div className="assistant-brand__mark">W</div>
+        <div className="assistant-brand__mark">织</div>
         <div>
-          <strong>WorkLoom PM</strong>
+          <strong>织元研发台</strong>
           <span>AI 研发中心</span>
         </div>
-        <span className="assistant-beta">BETA</span>
+        <span className="assistant-beta">测试版</span>
       </div>
       <button className="assistant-new" type="button" onClick={onCreate}>
-        <span aria-hidden="true">＋</span> 新建对话
+        新建对话
       </button>
       <label className="assistant-search">
         <span aria-hidden="true">⌕</span>
@@ -571,15 +600,15 @@ function SessionList({
                   aria-current={currentId === session.id ? "page" : undefined}
                 >
                   <span className="assistant-session__title">
-                    {session.pinned ? <span className="assistant-pin" aria-label="已置顶">◆</span> : null}
-                    {session.title}
+                    {session.pinned ? <Icon name="pin" size={12} label="已置顶" /> : null}
+                    <span className="wl-text-ellipsis" title={session.title}>{session.title}</span>
                   </span>
                   <span>{formatTime(session.lastMessageAt ?? session.createdAt)}</span>
                 </button>
                 <div className="assistant-session__tools">
-                  <button type="button" onClick={() => onPin(session)} title={session.pinned ? "取消置顶" : "置顶"} aria-label={session.pinned ? "取消置顶" : "置顶"}>◆</button>
-                  <button type="button" onClick={() => onArchive(session)} title={archived ? "恢复会话" : "归档"} aria-label={archived ? "恢复会话" : "归档"}>□</button>
-                  <button type="button" onClick={() => onDelete(session)} title="删除会话" aria-label="删除会话">×</button>
+                  <button type="button" onClick={() => onPin(session)} title={session.pinned ? "取消置顶" : "置顶"} aria-label={session.pinned ? "取消置顶" : "置顶"}><Icon name="pin" size={14} /></button>
+                  <button type="button" onClick={() => onArchive(session)} title={archived ? "恢复会话" : "归档"} aria-label={archived ? "恢复会话" : "归档"}><Icon name="folder" size={14} /></button>
+                  <button type="button" onClick={() => onDelete(session)} title="删除会话" aria-label="删除会话"><Icon name="close" size={14} /></button>
                 </div>
               </div>
             ))}
@@ -594,7 +623,7 @@ function SessionList({
 }
 
 function EvidencePanel({
-  status,
+  status: runtimeStatus,
   identity,
   evidence,
   events,
@@ -619,18 +648,18 @@ function EvidencePanel({
     <aside className={`assistant-evidence ${open ? "is-open" : ""}`} aria-label="运行与证据">
       <header className="assistant-evidence__header">
         <div>
-          <p className="assistant-eyebrow">RUNTIME EVIDENCE</p>
+          <p className="assistant-eyebrow">运行证据</p>
           <h2>运行与证据</h2>
         </div>
-        <button type="button" onClick={onClose} aria-label="关闭证据面板">×</button>
+        <button type="button" onClick={onClose} aria-label="关闭证据面板" title="关闭证据面板"><Icon name="close" size={16} /></button>
       </header>
       <section className="assistant-card">
         <h3>模型与服务</h3>
         <dl>
-          <div><dt>请求模型</dt><dd>{status?.model ?? "deepseek-flash"}</dd></div>
-          <div><dt>凭据</dt><dd className={status?.modelConfigured ? "is-good" : "is-bad"}>{status?.modelConfigured ? "已配置" : "未配置"}</dd></div>
-          <div><dt>流式</dt><dd>SSE</dd></div>
-          <div><dt>沙箱</dt><dd>{status?.codeExecution ?? "待检测"}</dd></div>
+          <div><dt>请求模型</dt><dd>{modelName(runtimeStatus?.model)}</dd></div>
+          <div><dt>凭据</dt><dd className={runtimeStatus?.modelConfigured ? "is-good" : "is-bad"}>{runtimeStatus?.modelConfigured ? "已配置" : "未配置"}</dd></div>
+          <div><dt>流式</dt><dd>流式连接</dd></div>
+          <div><dt>沙箱</dt><dd>{sandboxText(runtimeStatus?.codeExecution)}</dd></div>
           <div><dt>成员</dt><dd>{identity?.name ?? "—"}</dd></div>
         </dl>
       </section>
@@ -639,28 +668,37 @@ function EvidencePanel({
         {run ? (
           <>
             <div className={`assistant-run-state assistant-run-state--${run.status}`}>
-              <span /> {run.status}
+              <span /> {clientStatusLabel(run.status)}
             </div>
             <dl>
-              <div><dt>运行</dt><dd className="assistant-mono">{run.id.slice(0, 18)}…</dd></div>
+              <div><dt>运行</dt><dd className="assistant-mono">{shortId(run.id)}</dd></div>
               <div><dt>模式</dt><dd>{run.mode === "task" ? "研发任务" : "真实问答"}</dd></div>
-              <div><dt>输入 token</dt><dd>{usage?.promptTokens ?? "—"}</dd></div>
-              <div><dt>输出 token</dt><dd>{usage?.completionTokens ?? "—"}</dd></div>
-              <div><dt>响应模型</dt><dd className="assistant-mono">{run.responseModel ?? "—"}</dd></div>
-              <div><dt>response ID</dt><dd className="assistant-mono">{run.responseId ? `${run.responseId.slice(0, 18)}…` : "—"}</dd></div>
+              <div><dt>输入用量</dt><dd>{usage?.promptTokens ?? "—"}</dd></div>
+              <div><dt>输出用量</dt><dd>{usage?.completionTokens ?? "—"}</dd></div>
+              <div><dt>响应模型</dt><dd className="assistant-mono">{modelName(run.responseModel)}</dd></div>
+              <div><dt>响应编号</dt><dd className="assistant-mono">{shortId(run.responseId)}</dd></div>
             </dl>
-            {run.error ? <p className="assistant-inline-error">{run.error}</p> : null}
+            {run.error ? (
+              <p className="assistant-inline-error">
+                {clientChineseText(run.error, "模型运行异常，请查看服务日志")}
+              </p>
+            ) : null}
           </>
         ) : <p className="assistant-card__empty">发送消息后，这里会显示真实的模型与任务状态。</p>}
       </section>
       {task ? (
         <section className="assistant-card">
-          <h3>任务 DAG</h3>
+          <h3>任务图</h3>
           <div className="assistant-dag">
             {task.tasks.map((item, index) => (
               <div key={item.id} className={`assistant-dag__node is-${item.status}`}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                <div><strong>{item.presetKey}</strong><small>{item.status}{item.error ? ` · ${item.error}` : ""}</small></div>
+                <div>
+                  <strong className="wl-text-ellipsis" title={actorText(item.presetKey)}>
+                    {actorText(item.presetKey)}
+                  </strong>
+                  <small>{clientStatusLabel(item.status)}{item.error ? ` · ${clientChineseText(item.error, "任务状态已记录")}` : ""}</small>
+                </div>
               </div>
             ))}
           </div>
@@ -670,7 +708,7 @@ function EvidencePanel({
               {task.artifacts.map((artifact) => (
                 <button key={artifact.path} type="button" onClick={() => onDownload(artifact.path)}>
                   <span>{artifact.path}</span>
-                  <small>{artifact.sizeBytes} B · {artifact.sha256.slice(0, 10)}…</small>
+                  <small>{artifact.sizeBytes} 字节 · 摘要 {artifact.sha256.slice(0, 10)}…</small>
                 </button>
               ))}
             </div>
@@ -684,7 +722,7 @@ function EvidencePanel({
             {events.slice(-10).reverse().map((event, index) => (
               <li key={`${event.at}-${event.type}-${index}`}>
                 <span className="assistant-event-dot" />
-                <div><strong>{event.type}</strong><small>{formatTime(event.at)}</small></div>
+                <div><strong>{eventTypeText(event.type)}</strong><small>{formatTime(event.at)}</small></div>
               </li>
             ))}
           </ol>
@@ -725,7 +763,7 @@ function Topbar({
   }, [session?.id, session?.title]);
   return (
     <header className="assistant-topbar">
-      <button className="assistant-mobile-menu" type="button" onClick={onOpenSidebar} aria-label="打开会话列表">☰</button>
+      <button className="assistant-mobile-menu" type="button" onClick={onOpenSidebar} aria-label="打开会话列表" title="打开会话列表"><Icon name="menu" size={18} /></button>
       <div className="assistant-topbar__title">
         <span className="assistant-topbar__status" />
         {editing ? (
@@ -740,7 +778,14 @@ function Topbar({
             <input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} maxLength={160} aria-label="会话标题" />
           </form>
         ) : (
-          <button type="button" onClick={() => setEditing(true)} title="点击重命名">{session?.title ?? "新对话"}</button>
+          <button
+            type="button"
+            className="wl-text-ellipsis"
+            onClick={() => setEditing(true)}
+            title={session?.title ?? "新对话"}
+          >
+            {session?.title ?? "新对话"}
+          </button>
         )}
         <span>{session?.pinned ? "已置顶" : "云端持久会话"}</span>
       </div>
@@ -758,23 +803,23 @@ function AccessGate({ state, error, onRetry }: { state: BootState; error: string
     <main className="assistant-access">
       <div className="assistant-access__grid" aria-hidden="true" />
       <section>
-        <div className="assistant-brand__mark">W</div>
-        <p className="assistant-eyebrow">WORKLOOM PM · PRIVATE CLOUD</p>
+        <div className="assistant-brand__mark">织</div>
+        <p className="assistant-eyebrow">织元研发中心 · 私有云</p>
         <h1>{state === "loading" ? "正在验证安全入口" : "请从鹏经理后台进入"}</h1>
         <p>
           {state === "loading"
             ? "正在核验一次性登录凭据和工作区成员身份。"
             : state === "error"
-              ? error
+              ? clientChineseText(error, "安全入口验证失败，请联系管理员")
               : "AI 研发中心只接受鹏经理管理员的一次性安全握手，不开放公网注册。"}
         </p>
         {state !== "loading" ? (
           <>
-            <a href="https://pengmanager.com/admin">打开鹏经理管理后台 <span>↗</span></a>
+            <a href="https://pengmanager.com/admin">打开鹏经理管理后台</a>
             {state === "error" ? <button type="button" onClick={onRetry}>重新验证</button> : null}
           </>
         ) : null}
-        <small>DeepSeek Key 仅保存在云端服务进程，不会发送到浏览器。</small>
+        <small>模型密钥仅保存在云端服务进程，不会发送到浏览器。</small>
       </section>
     </main>
   );
@@ -1133,11 +1178,11 @@ export default function AssistantPage() {
         />
         {pageError ? (
           <div className="assistant-errorbar" role="alert">
-            <span>{pageError}</span>
+            <span>{clientChineseText(pageError, "操作未完成，请查看运行证据")}</span>
             {activeRun && ["failed", "cancelled", "interrupted", "blocked"].includes(activeRun.status) ? (
               <button type="button" onClick={() => void handleRetry()}>重试上一条</button>
             ) : null}
-            <button type="button" onClick={() => setPageError("")} aria-label="关闭错误提示">×</button>
+            <button type="button" onClick={() => setPageError("")} aria-label="关闭错误提示" title="关闭错误提示"><Icon name="close" size={15} /></button>
           </div>
         ) : null}
         <ConversationBoundary resetKey={currentSessionId}>
