@@ -154,4 +154,47 @@ runDb("assistant budget ledger in isolated PostgreSQL", () => {
       else process.env.ASSISTANT_DAILY_SEARCH_LIMIT = previous;
     }
   });
+
+  it("persists source-card messages above the removed B-tree expression limit and still finds them", async () => {
+    const largeSession = await store.createSession(scope, "large source-card message");
+    const needle = `needle-${suffix}-outside-btree`;
+    const parts = [
+      { type: "text", text: "联网搜索结果", },
+      ...Array.from({ length: 5 }, (_, index) => ({
+        type: "source",
+        title: `Official source ${index + 1}`,
+        url: `https://example.org/source-${index + 1}`,
+        summary: `${needle} ${"官方资料摘要".repeat(240)}`,
+        siteName: "Official source",
+        publishedAt: null,
+      })),
+    ];
+    const client = await app.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT set_config('app.tenant_id',$1,true)", [scope.tenantId]);
+      await client.query("SELECT set_config('app.workspace_id',$1,true)", [scope.workspaceId]);
+      await client.query(
+        `INSERT INTO assistant_messages(
+           id,session_id,tenant_id,workspace_id,owner_member_no,role,parts,status,finished_at)
+         VALUES($1,$2,$3,$4,$5,'assistant',$6::jsonb,'completed',now())`,
+        [
+          `am-large-${suffix}`,
+          largeSession.id,
+          scope.tenantId,
+          scope.workspaceId,
+          scope.memberNo,
+          JSON.stringify(parts),
+        ],
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+    const matches = await store.listSessions(scope, { query: needle, archived: false, limit: 10 });
+    expect(matches.map((item) => item.id)).toContain(largeSession.id);
+  });
 });
