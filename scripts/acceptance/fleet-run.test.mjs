@@ -25,7 +25,7 @@ function fixture(t, { kind = 'local-preview', target = {}, scripts = { suite: 't
   const stepLog = join(root, 'steps.jsonl');
   for (const name of ['git', 'pnpm', 'lsof']) {
     const file = join(bin, name);
-    writeFileSync(file, `#!${process.execPath}\nimport {appendFileSync} from 'node:fs';\nconst args=process.argv.slice(2);appendFileSync(process.env.COMMAND_LOG,JSON.stringify({name:${JSON.stringify(name)},args})+'\\n');\nif(${JSON.stringify(name)}==='git'){if(args.includes('rev-parse'))console.log(args.includes('--abbrev-ref')?'task/fixture':'a'.repeat(40));}\nif(${JSON.stringify(name)}==='lsof'&&args.includes('-iTCP'))console.log('server :8787\\npc :3000\\nb :3001\\nc :3002');\nif(${JSON.stringify(name)}==='pnpm'){if(args.includes('suite'))process.exit(Number(process.env.SUITE_EXIT??0));if(args.includes('release:gate'))process.exit(Number(process.env.RELEASE_EXIT??0));if(args.includes('preview:all'))setInterval(()=>{},1000);}\n`, { mode: 0o755 });
+    writeFileSync(file, `#!${process.execPath}\nimport {appendFileSync} from 'node:fs';\nconst args=process.argv.slice(2);appendFileSync(process.env.COMMAND_LOG,JSON.stringify({name:${JSON.stringify(name)},args,serverBase:process.env.SERVER_BASE??null})+'\\n');\nif(${JSON.stringify(name)}==='git'){if(args.includes('rev-parse'))console.log(args.includes('--abbrev-ref')?'task/fixture':'a'.repeat(40));}\nif(${JSON.stringify(name)}==='lsof'&&args.includes('-iTCP'))console.log('server :8787\\npc :3000\\nb :3001\\nc :3002');\nif(${JSON.stringify(name)}==='pnpm'){if(args.includes('suite'))process.exit(Number(process.env.SUITE_EXIT??0));if(args.includes('release:gate'))process.exit(Number(process.env.RELEASE_EXIT??0));if(args.includes('preview:all'))setInterval(()=>{},1000);}\n`, { mode: 0o755 });
   }
   writeFileSync(join(repo, 'node_modules', '.bin', 'tsx'), `#!${process.execPath}\nimport {spawnSync} from 'node:child_process';const args=process.argv.slice(2).filter(arg=>!arg.startsWith('--env-file='));const result=spawnSync(process.execPath,args,{stdio:'inherit',env:process.env});process.exit(result.status??1);\n`, { mode: 0o755 });
   const outputNames = { matrix: 'matrix-summary.json', 'ui-probe': 'ui-probe.json', experience: 'experience-report.json', ux: 'ux-report.json', live: 'live-report.json', outcome: 'outcome-report.json', autonomy: 'autonomy-report.json', redteam: 'redteam-report.json', soak: 'soak-report.json', coverage: 'coverage.json', 'report-v3': 'report-summary.json' };
@@ -97,16 +97,23 @@ test('G07: local preview executes the profile startup command and isolated ports
     command: `${process.execPath} ${join(f.repo, 'custom-start.cjs')}`,
     ports: { pc: 3100, bMobile: 3101, cMobile: 3102, server: 3103 },
   };
+  profile.environment.target = {
+    apiUrl: 'http://127.0.0.1:3103',
+    pcUrl: 'http://127.0.0.1:3100',
+    bMobileUrl: 'http://127.0.0.1:3101',
+    cMobileUrl: 'http://127.0.0.1:3102',
+  };
   writeFileSync(profilePath, JSON.stringify(profile));
   writeFileSync(join(f.repo, 'custom-start.cjs'), `require('node:fs').appendFileSync(process.env.START_LOG, 'profile-start\\n'); setInterval(() => {}, 1000);\n`);
   writeFileSync(join(f.bin, 'lsof'), `#!${process.execPath}\nimport {appendFileSync} from 'node:fs';const args=process.argv.slice(2);appendFileSync(process.env.COMMAND_LOG,JSON.stringify({name:'lsof',args})+'\\n');if(!(args.includes('-ti')||args.includes('-t')))console.log('server :3103\\npc :3100\\nb :3101\\nc :3102');\n`, { mode: 0o755 });
   const startLog = join(f.root, 'profile-start.log');
 
-  const result = await run(f, ['--skip-regression'], { START_LOG: startLog });
+  const result = await run(f, [], { START_LOG: startLog });
   assert.equal(result.state.steps.preview.status, 'pass', result.out);
   assert.equal(readFileSync(startLog, 'utf8').trim(), 'profile-start');
   const commands = readLog(f.commandLog);
   assert.equal(commands.some((command) => command.name === 'pnpm' && command.args.includes('preview:all')), false, JSON.stringify(commands));
+  assert.equal(commands.find((command) => command.name === 'pnpm' && command.args.includes('release:gate'))?.serverBase, 'http://127.0.0.1:3103');
   assert.equal(result.state.notes.some((note) => note.includes('startup.command')), true);
 });
 test('G06: report unverified exit 2 is preserved in aggregate result', async (t) => {

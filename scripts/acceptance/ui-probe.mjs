@@ -16,6 +16,7 @@ import pg from "pg";
 import { cliArgs, findRepoRoot, loadProfile, urlsOf } from "./lib/profile.mjs";
 import { loadChromium } from "./lib/playwright.mjs";
 import { loginAsMember, productIdOf } from "./lib/session.mjs";
+import { agentIdentityEvidenceOk } from "./lib/identity-evidence.mjs";
 
 const args = cliArgs();
 const REPO_ROOT = findRepoRoot();
@@ -144,7 +145,7 @@ if (!args.has("--skip-agents")) {
           hasHeader: /成员档案 · \S/.test(text),
         };
       });
-      const identityOk = dom.hasHeader && dom.identity.includes(versionLabel(agent.version)) && dom.identity.includes("来源行业包");
+      const identityOk = dom.hasHeader && agentIdentityEvidenceOk(dom.identity, versionLabel(agent.version));
       const fenceOk = !dom.dangling && (expectedFences === 0 || dom.declared >= expectedFences);
       const skillsOk = expectedSkills.length === 0 ? !dom.uninstalled : dom.equipped >= expectedSkills.length && !dom.uninstalled;
       row.ok = identityOk && fenceOk && skillsOk && !dom.notFound;

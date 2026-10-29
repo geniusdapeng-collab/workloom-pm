@@ -124,7 +124,12 @@ try {
   writeFileSync(join(REPO_DIR, "outputs", "acceptance", "fleet-run-state.json"), JSON.stringify(state, null, 1));
   process.exit(1);
 }
-const childEnv = { ACCEPTANCE_ENV_KIND: ENV_KIND, ACCEPTANCE_ALLOW_PROD_WRITES: environment.allowWrites ? "1" : "0", ACCEPTANCE_PROFILE_PATH: PROFILE_PATH };
+const childEnv = {
+  ACCEPTANCE_ENV_KIND: ENV_KIND,
+  ACCEPTANCE_ALLOW_PROD_WRITES: environment.allowWrites ? "1" : "0",
+  ACCEPTANCE_PROFILE_PATH: PROFILE_PATH,
+  SERVER_BASE: environment.urls.api,
+};
 const ARTIFACT_ROOT = join(REPO_DIR, "outputs", "acceptance");
 const REGRESSION_EXECUTOR = fileURLToPath(new URL("./lib/regression-evidence.mjs", import.meta.url));
 const STAGE_OUTPUTS = {
