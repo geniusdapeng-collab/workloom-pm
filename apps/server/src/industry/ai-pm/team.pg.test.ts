@@ -238,10 +238,9 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
     expect(finished.run.usage).toEqual({ promptTokens: 115, completionTokens: 55 });
     expect(finished.artifacts.map((artifact) => artifact.path).sort()).toEqual(["sum.mjs", "sum.test.mjs"]);
     const checks = finished.run.verification!.checks as Array<{ passed: boolean; message: string }>;
-    if (process.platform !== "darwin" || Number(process.versions.node.split(".")[0]) < 24) {
-      // The actual CLI/file loop is portable; generated-code verification is not.
-      // Keep production fail-closed rather than treating a Linux CI run as a
-      // successful macOS Seatbelt execution or skipping this real PG regression.
+    if (!["darwin", "linux"].includes(process.platform) || Number(process.versions.node.split(".")[0]) < 24) {
+      // Unsupported hosts retain the real fail-closed branch. macOS Seatbelt and
+      // Linux bubblewrap are both production-supported OS sandboxes.
       expect(finished.run.status).toBe("failed");
       expect(finished.run.errorCode).toBe("RUN_CHECK_FAILED");
       expect(checks.some((check) => !check.passed && check.message.startsWith("OS_SANDBOX_UNAVAILABLE:"))).toBe(true);
