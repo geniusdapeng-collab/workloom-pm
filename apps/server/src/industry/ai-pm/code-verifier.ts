@@ -15,12 +15,20 @@ const TEST = /(?:^|\/)\w[\w.-]*\.test\.(?:mjs|cjs|js)$/i;
 const MAX_OUTPUT = 64 * 1024;
 
 export interface CodeReceipt {
-  backend: "macos-seatbelt-node24"; exitCode: number | null; signal: string | null;
+  backend: "macos-seatbelt-node24" | "linux-bubblewrap-node24"; exitCode: number | null; signal: string | null;
   timedOut: boolean; cancelled: boolean; outputLimited: boolean;
   stdout: string; stderr: string; stdoutSha256: string; stderrSha256: string;
   files: Array<{ path: string; sha256: string }>; tests: string[];
   testOrigin: "generated" | "trusted-evaluator";
   testSummary: { success: boolean; counts: Record<string, number>; completedTests: number } | null;
+}
+
+interface SandboxLaunch {
+  backend: CodeReceipt["backend"];
+  command: string;
+  args: string[];
+  cwd: string;
+  env: Record<string, string>;
 }
 
 /** Node permissions are only an extra seat belt; the OS profile is mandatory. */
@@ -44,10 +52,11 @@ export async function executeSandboxNodeTests(input: {
   files: PmFile[]; tests?: string[]; trustedFiles?: PmFile[]; signal: AbortSignal;
   timeoutMs?: number;
 }): Promise<CodeReceipt> {
-  if (process.platform !== "darwin" || Number(process.versions.node.split(".")[0]) < 24) {
-    throw new Error("OS_SANDBOX_UNAVAILABLE: 需要macOS Seatbelt和Node24；未在宿主直接执行代码");
+  if (Number(process.versions.node.split(".")[0]) < 24 || !["darwin", "linux"].includes(process.platform)) {
+    throw new Error("OS_SANDBOX_UNAVAILABLE: 需要macOS Seatbelt/Linux bubblewrap和Node24；未在宿主直接执行代码");
   }
-  await access("/usr/bin/sandbox-exec");
+  if (process.platform === "darwin") await access("/usr/bin/sandbox-exec");
+  else await access(process.env.PM_LINUX_SANDBOX_BIN || "/usr/bin/bwrap");
   const tests = input.tests ?? input.files.filter((file) => TEST.test(file.path)).map((file) => file.path);
   if (!tests.length || tests.length > 16) throw new Error("代码验收需要1至16个明确的Node测试文件");
   const files = [...input.files, ...input.trustedFiles ?? []];
@@ -74,12 +83,11 @@ export async function executeSandboxNodeTests(input: {
     const runner = await realpath(fileURLToPath(new URL("./code-test-runner.mjs", import.meta.url)));
     const preload = await realpath(fileURLToPath(new URL("./code-test-preload.mjs", import.meta.url)));
     const challenge = randomBytes(32).toString("hex");
-    const args = ["-p", profile(root, node, runner, preload), node, "--permission", `--allow-fs-read=${root}`, `--allow-fs-read=${runner}`, `--allow-fs-read=${preload}`,
-      "--disable-sigusr1", "--max-old-space-size=128", "--allow-child-process", runner, ...tests];
+    const launch = sandboxLaunch(root, node, runner, preload, tests);
     const result = await new Promise<Omit<CodeReceipt, "backend" | "files" | "tests" | "testOrigin" | "testSummary">>((yes, no) => {
       // Do not inherit NODE_OPTIONS, credentials, proxy settings, HOME or host PATH.
-      const child = spawn("/usr/bin/sandbox-exec", args, { cwd: root, detached: true,
-        env: { PATH: "/usr/bin:/bin", LANG: "en_US.UTF-8", TZ: "UTC" }, stdio: ["pipe", "pipe", "pipe"] });
+      const child = spawn(launch.command, launch.args, { cwd: launch.cwd, detached: true,
+        env: launch.env, stdio: ["pipe", "pipe", "pipe"] });
       child.stdin.on("error", () => { /* Child may exit before reading; absence of attestation fails closed. */ });
       child.stdin.end(challenge);
       let stdout = "", stderr = "", timedOut = false, cancelled = false, outputLimited = false;
@@ -113,10 +121,70 @@ export async function executeSandboxNodeTests(input: {
       } catch { /* Unparseable test receipts are never accepted. */ }
     }
     const trusted = new Set(input.trustedFiles?.map((file) => file.path) ?? []);
-    return { backend: "macos-seatbelt-node24", ...result, testSummary,
+    return { backend: launch.backend, ...result, testSummary,
       files: files.map(({ path, content }) => ({ path, sha256: sha(content) })),
       tests, testOrigin: tests.every((path) => trusted.has(path)) ? "trusted-evaluator" : "generated" };
   } finally { await rm(root, { recursive: true, force: true }); }
+}
+
+function sandboxLaunch(root: string, node: string, runner: string, preload: string, tests: string[]): SandboxLaunch {
+  const nodeArgs = [
+    "--permission",
+    `--allow-fs-read=${process.platform === "linux" ? "/workspace" : root}`,
+    `--allow-fs-read=${process.platform === "linux" ? "/runner" : runner}`,
+    `--allow-fs-read=${process.platform === "linux" ? "/preload" : preload}`,
+    "--disable-sigusr1",
+    "--max-old-space-size=128",
+    "--allow-child-process",
+    process.platform === "linux" ? "/runner" : runner,
+    ...tests,
+  ];
+  if (process.platform === "darwin") {
+    return {
+      backend: "macos-seatbelt-node24",
+      command: "/usr/bin/sandbox-exec",
+      args: ["-p", profile(root, node, runner, preload), node, ...nodeArgs],
+      cwd: root,
+      env: { PATH: "/usr/bin:/bin", LANG: "en_US.UTF-8", TZ: "UTC" },
+    };
+  }
+
+  const bwrap = process.env.PM_LINUX_SANDBOX_BIN || "/usr/bin/bwrap";
+  const nodeRoot = dirname(dirname(node));
+  const mountedNode = `/node/${node.slice(nodeRoot.length).replace(/^\/+/, "")}`;
+  return {
+    backend: "linux-bubblewrap-node24",
+    command: bwrap,
+    args: [
+      "--die-with-parent",
+      "--new-session",
+      "--unshare-all",
+      "--cap-drop", "ALL",
+      "--ro-bind", "/usr", "/usr",
+      "--ro-bind-try", "/bin", "/bin",
+      "--ro-bind-try", "/sbin", "/sbin",
+      "--ro-bind-try", "/lib", "/lib",
+      "--ro-bind-try", "/lib64", "/lib64",
+      "--ro-bind-try", "/etc/ld.so.cache", "/etc/ld.so.cache",
+      "--ro-bind-try", "/etc/ssl/certs", "/etc/ssl/certs",
+      "--ro-bind", nodeRoot, "/node",
+      "--ro-bind", runner, "/runner",
+      "--ro-bind", preload, "/preload",
+      "--bind", root, "/workspace",
+      "--tmpfs", "/tmp",
+      "--proc", "/proc",
+      "--dev", "/dev",
+      "--chdir", "/workspace",
+      "--clearenv",
+      "--setenv", "PATH", "/usr/bin:/bin",
+      "--setenv", "LANG", "C.UTF-8",
+      "--setenv", "TZ", "UTC",
+      mountedNode,
+      ...nodeArgs,
+    ],
+    cwd: root,
+    env: { PATH: "/usr/bin:/bin", LANG: "C.UTF-8", TZ: "UTC" },
+  };
 }
 
 /** Fixed server policy; HTTP input cannot select commands, arguments or host paths. */

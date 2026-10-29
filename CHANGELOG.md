@@ -2,6 +2,31 @@
 
 本文件记录 WorkLoom IM 底座的变更历史。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)。
 
+## [0.1.3] - 2026-10-29 · 云端研发工作台与鹏经理单点入口
+
+### 新增
+
+- 新增 `/assistant` 三栏研发工作台，采用 `@assistant-ui/react@0.15.32`，支持持久会话、搜索、置顶、归档、软删除、流式回答、停止、重试、任务证据、产物下载和移动端抽屉。
+- 新增 `/api/assistant` 独立会话层、SSE 断线续传、模型预算、运行状态、只增事件和 PM 任务证据接口；不再把聊天消息塞进 Quest `threads`。
+- 新增鹏经理管理员会话保护的 60 秒一次性 Ed25519 登录入口；WorkLoom 使用独立 `__Host-` HttpOnly Cookie 和 CSRF，不共享鹏经理 Cookie。
+- 新增 Linux Node 24 `bubblewrap` 代码执行后端：无网络、只读系统挂载、一次性工作目录、资源和墙钟限制，不可用时失败关闭。
+- 新增 218 条云端工作台端到端真实模型评测器，逐题验证真实模型、SSE、持久消息、response ID、usage 和业务断言。
+- 新增 Ubuntu/Debian 部署脚本、systemd 加固、独立 PostgreSQL、Nginx/HTTPS、备份与隔离恢复检查。
+
+### 修复
+
+- assistant-ui 历史用户消息不再携带 assistant-only 流式状态，避免整页渲染崩溃。
+- 补齐 `assistant_run_events` 序列授权，修复新建消息返回 500。
+- 文档型开发总指挥任务不再误入 DSH；只有代码/测试产物的任务使用工具循环。
+- 依赖较多的最终 PM 摘要和文档任务提升到 8192 token，避免正常长交付被 3072/4096 截断。
+
+### 验证
+
+- PostgreSQL 17 + pgvector 全量 46 个迁移和 AI-PM 种子在全新实例通过。
+- 真实 DeepSeek 流式问答通过；真实 PM 任务完成 6 个岗位、6 个文件（约 46 KiB）和 18 个 SSE 事件。
+- 鹏经理到 WorkLoom 的本地 SSO 成功，重放启动码返回 `409 LAUNCH_CODE_REPLAYED`，管理员 Cookie 未跨域泄露。
+- 新增 assistant 认证、模型协议和 HTTP 路由测试全部通过；全仓最终测试与 218 条发布后实测回执由发布任务单独记录。
+
 ## [0.1.2] - 2026-10-29 · DeepSeek 218 项真实任务质量评测
 
 ### 新增

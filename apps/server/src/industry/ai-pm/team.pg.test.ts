@@ -349,10 +349,9 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
     expect(finished.run.usage).toEqual({ promptTokens: 115, completionTokens: 55 });
     expect(finished.artifacts.map((artifact) => artifact.path).sort()).toEqual(["sum.mjs", "sum.test.mjs"]);
     const checks = finished.run.verification!.checks as Array<{ passed: boolean; message: string }>;
-    if (process.platform !== "darwin" || Number(process.versions.node.split(".")[0]) < 24) {
-      // The actual CLI/file loop is portable; generated-code verification is not.
-      // Keep production fail-closed rather than treating a Linux CI run as a
-      // successful macOS Seatbelt execution or skipping this real PG regression.
+    if (!["darwin", "linux"].includes(process.platform) || Number(process.versions.node.split(".")[0]) < 24) {
+      // Unsupported hosts retain the real fail-closed branch. macOS Seatbelt and
+      // Linux bubblewrap are both production-supported OS sandboxes.
       expect(finished.run.status).toBe("failed");
       expect(finished.run.errorCode).toBe("RUN_CHECK_FAILED");
       expect(checks.some((check) => !check.passed && check.message.startsWith("OS_SANDBOX_UNAVAILABLE:"))).toBe(true);
@@ -372,7 +371,11 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
     } };
     const scripted: CompletionProvider = { modelId: "fixture-deepseek", complete: vi.fn(async () => completion("未写文件，仅返回最终文本。")) };
     const current = service({ employeeExecutor: undefined, catalog: boundCatalog, providerFactory: () => scripted });
-    const detail = await create(current, { employee: "dev-orchestrator", goal: "生成完整实现到result.md" });
+    const detail = await create(current, {
+      employee: "dev-orchestrator",
+      goal: "生成完整实现到sum.mjs",
+      checks: [{ type: "fileExists", path: "sum.mjs" }],
+    });
     await current.start(scopeA, detail.run.id); const failed = await current.waitForRun(scopeA, detail.run.id);
     expect(failed.run.status).toBe("failed"); expect(failed.run.errorCode).toBe("DSH_OUTPUT_MISSING");
     expect(failed.run.usage).toEqual({ promptTokens: 23, completionTokens: 11 });

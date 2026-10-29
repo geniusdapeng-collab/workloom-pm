@@ -17,7 +17,12 @@ const childArgs = process.execArgv.filter((arg) => arg !== "--allow-child-proces
 // Node also inherits process.execArgv in addition to options.execArgv. Remove
 // the supervisor grant from that second path before spawning any test child.
 process.execArgv = childArgs;
-const preload = new URL("./code-test-preload.mjs", import.meta.url).href;
+// Linux mounts this fixed file at /preload. Resolving relative to /runner would
+// incorrectly produce /code-test-preload.mjs and the test child would fail before
+// loading any trusted evaluator code.
+const preload = process.platform === "linux"
+  ? "file:///preload"
+  : new URL("./code-test-preload.mjs", import.meta.url).href;
 for await (const event of run({ files, isolation: "process", execArgv: [...childArgs, "--no-allow-child-process",
   "--frozen-intrinsics", "--import", preload], concurrency: 1 })) {
   if (event.type === "test:stdout" || event.type === "test:stderr") emit(`TEST_LOG:${stringify(event.data)}\n`);

@@ -6,7 +6,7 @@
 
 You supply the goal and boundaries. The product manager coordinates requirements, implementation, quality, and delivery. The system reports not only what it did, but also who did it, which material was consumed, which files were produced, which checks ran, and what remains unverified.
 
-[简体中文](README.md) · [Core capabilities](#core-capabilities-from-a-goal-to-verifiable-delivery) · [Delivery architecture](docs/PM-DELIVERY.md) · [218-task evaluation](docs/DEEPSEEK-218-EVALUATION.md) · [Apache-2.0](LICENSE)
+[简体中文](README.md) · [Core capabilities](#core-capabilities-from-a-goal-to-verifiable-delivery) · [Cloud workbench](docs/ASSISTANT-WORKBENCH.md) · [Delivery architecture](docs/PM-DELIVERY.md) · [218-task evaluation](docs/DEEPSEEK-218-EVALUATION.md) · [Apache-2.0](LICENSE)
 
 </div>
 
@@ -30,6 +30,7 @@ For actual delivery results, use the source revision, model, samples, and eviden
 | **Built-in governance** | Tenant/workspace RLS, append-only five-dimension events, PII masking, `block > review > auto` fences, human review for high-risk actions, and runtime-only credentials | Permission, audit, and data-flow boundaries do not depend on prompt obedience |
 | **Budgets, recovery, and fail-closed behavior** | Calls, tokens, cost, wall clock, paths, and timeouts are bounded. Unknown outcomes freeze later paid calls, and restart preserves the budget ledger | Long-running work has controllable cost, recovery state, and visible failure reasons |
 | **Repeatable quality evaluation** | A fixed 218-task cross-role suite covers ten live Search cases and eight independently executed code tasks, alongside type checks, repository tests, three production builds, and release gates | Capabilities can be measured repeatedly instead of inferred from a demo screenshot |
+| **Cloud development workbench** | `/assistant` provides persisted conversations, real streaming answers, PM task mode, SSE reconnect, usage, task DAG, artifact SHA-256, and an evidence panel. PengManager opens it with a one-time 60-second Ed25519 launch code | One browser entry supports either real Q&A or a PM task with readable receipts, while chat history and PM execution evidence remain separate |
 | **Three clients and desktop** | PC workspace, B-side mobile, C-side service front, and the Electron shell share product identity and server contracts | The same task and data can be inspected across development, mobile, and desktop surfaces |
 
 ### How to read these capabilities
@@ -43,6 +44,8 @@ For actual delivery results, use the source revision, model, samples, and eviden
 The end-to-end boundary remains separate: the original PM evaluation still records both multi-role long goals as 0/2. Successful roles, files, or individual tasks do not turn the complete project workflow into a pass. The retained failures are documented in [PM-EVALUATION.md](docs/PM-EVALUATION.md).
 
 After preserving an initial 126/218 result, the fixed suite reached 218/218 through real reruns, code repairs, and evaluator repairs; Search was 10/10 and the code sandbox was 8/8. This result applies only to the fixed suite and does not establish the same success rate for arbitrary business work. See [the DeepSeek 218 evaluation](docs/DEEPSEEK-218-EVALUATION.md) for methodology and limits.
+
+The deployed workbench has a separate `pnpm assistant:218` end-to-end run. Every case uses a persisted session, the real streaming model API, SSE, stored-message readback, response ID, usage, strict JSON, and domain assertions. See [Cloud assistant workbench](docs/ASSISTANT-WORKBENCH.md) and [Linux deployment](deploy/linux/README.md).
 
 ## Who it helps
 

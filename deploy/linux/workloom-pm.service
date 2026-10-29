@@ -1,0 +1,31 @@
+[Unit]
+Description=WorkLoom PM cloud assistant
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=workloom-pm
+Group=workloom-pm
+WorkingDirectory=/opt/workloom-pm/current
+EnvironmentFile=/etc/workloom-pm/runtime.env
+Environment=HOME=/var/lib/workloom-pm
+ExecStart=/opt/workloom-pm/start.sh
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=120
+TimeoutStopSec=30
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/workloom-pm
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+MemoryMax=768M
+TasksMax=256
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

@@ -34,6 +34,7 @@ import { useEffect, useState } from "react";
 import Observability from "./pages/observability/Observability";
 import { useAskRailPadding } from "./lib/useAskRail";
 import Workspaces from "./pages/accounts/Workspaces";
+import AssistantPage from "./pages/assistant/AssistantPage";
 import {
   NavigationAccessBoundary,
   NavigationAccessProvider,
@@ -86,12 +87,13 @@ function Shell() {
     return () => window.removeEventListener("workloom:welcome", onWelcome);
   }, []);
   // 非产品路由（开发矩阵/落地向导）不带常驻导航；其余全部页面左侧导航常驻
-  const bare = pathname === "/dev" || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/activate" || pathname === "/invite";
+  const bare = pathname === "/dev" || pathname.startsWith("/onboarding") || pathname === "/login"
+    || pathname === "/activate" || pathname === "/invite" || pathname === "/assistant";
   return (
     <div data-workloom-client="b-pc" data-wl-theme="dark" className="flex min-h-screen min-w-0 max-w-full overflow-x-clip">
       {/* 无导航壳页面（/dev、/login、/activate、/invite…）必须有明确出口：
           这类页面此前只能靠浏览器后退，客户会“进得去出不来”。 */}
-      {bare && pathname !== "/" && (
+      {bare && pathname !== "/" && pathname !== "/assistant" && (
         <a
           href="/"
           aria-label="返回经营主页"
@@ -155,6 +157,7 @@ function Shell() {
       <Route path="/assembly" element={<P7 />} />
       <Route path="/agents" element={<P8 />} />
       <Route path="/agents/:agentId" element={<P8 />} />
+      <Route path="/assistant" element={<AssistantPage />} />
       <Route path="/events" element={<Observability view="events" />} />
       <Route path="/event-ledger" element={<Navigate to="/events" replace />} />
       <Route path="/models" element={<Observability view="models" />} />

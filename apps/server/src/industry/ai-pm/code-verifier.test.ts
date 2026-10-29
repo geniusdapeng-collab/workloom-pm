@@ -8,7 +8,8 @@ import { safeArtifactPath, validateEmployeeResult } from "./contract.js";
 
 const signal = () => new AbortController().signal;
 const testFile = (content: string) => ({ path: "acceptance.test.mjs", content });
-const unsupportedOsSandbox = process.platform !== "darwin" || Number(process.versions.node.split(".")[0]) < 24;
+const unsupportedOsSandbox = !["darwin", "linux"].includes(process.platform)
+  || Number(process.versions.node.split(".")[0]) < 24;
 
 describe("platform-independent code verification admission", () => {
   it("does not execute plain documents", async () => {
@@ -55,9 +56,20 @@ describe("platform-independent code verification admission", () => {
   });
 });
 
+describe.skipIf(process.platform !== "linux" || Number(process.versions.node.split(".")[0]) < 24)("Linux bubblewrap Node24 code verification", () => {
+  it("mounts the trusted test preload inside the sandbox", async () => {
+    const receipt = await executeSandboxNodeTests({ signal: signal(), files: [
+      testFile("import{test}from'node:test';import assert from'node:assert/strict';test('sandboxed assertion',()=>assert.equal(42,42))"),
+    ] });
+    expect(receipt.exitCode, receipt.stderr).toBe(0);
+    expect(receipt.testSummary?.success).toBe(true);
+    expect(receipt.testSummary?.counts.passed).toBeGreaterThan(0);
+  });
+});
+
 // These process and isolation assertions require the same OS/Node contract as production.
 // Unsupported hosts still execute the real fail-closed admission case above.
-describe.skipIf(unsupportedOsSandbox)("macOS Seatbelt Node24 code verification", () => {
+describe.skipIf(unsupportedOsSandbox)("OS sandbox Node24 code verification", () => {
   it("runs real normal, empty, unicode and error assertions", async () => {
     const receipt = await executeSandboxNodeTests({ signal: signal(), files: [
       { path: "sum.mjs", content: "export const sum=xs=>{if(!Array.isArray(xs))throw new TypeError('array');return xs.reduce((s,x)=>s+x,0)}" },
