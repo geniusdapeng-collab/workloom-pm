@@ -21,6 +21,12 @@ describe("意图路由（F3.2）", () => {
     expect(ruleBasedRoute("把周五雅致大床房调价 5%").mode).toBe("quest");
   });
 
+  it("礼貌疑问句式里的明确动作仍按交付任务处理，纯查询保持ask", () => {
+    expect(ruleBasedRoute("能帮我发布这版更新吗？").mode).toBe("quest");
+    expect(ruleBasedRoute("可以帮我生成完整PRD吗？").mode).toBe("quest");
+    expect(ruleBasedRoute("能告诉我现在有多少待审批吗？").mode).toBe("ask");
+  });
+
   it("LLM 分类器输出受白名单约束；垃圾输出回落规则", async () => {
     const good: IntentClassifier = { classify: async () => ({ kind: "routed", mode: "ask", rationale: "x", via: "llm" }) };
     expect((await routeIntent("随便问问", good)).via).toBe("llm");

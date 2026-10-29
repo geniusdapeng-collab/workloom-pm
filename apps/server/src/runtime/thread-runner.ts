@@ -18,7 +18,7 @@ import { gatewayAppendOnClient } from "@workloom/base/workdata";
 import { assemblePreset, runQuest, type AssembledPreset, type QuestPlanner, type QuestRunResult } from "@workloom/runtime";
 import { llmCall } from "../service/llm.js";
 import { loadDeploymentToolExecutor, describeToolCoverage } from "./tool-executor.js";
-import { preferredDispatchPresets } from "./dispatch-routing.js";
+import { preferredDispatchPresets, preferredDispatchRulePresets } from "./dispatch-routing.js";
 
 export interface Scope { tenantId: string; workspaceId: string }
 
@@ -110,12 +110,12 @@ export interface DispatchPresetResolution {
 export async function resolveDispatchPreset(scope: Scope, goal = ""): Promise<DispatchPresetResolution> {
   const { industry, ready } = await workspaceContext(scope);
 
-  // 同一次语义匹配分两段取来源：industry=null 时只剩通用能力域规则，行业默认指挥岗单列
-  const semanticOnly = preferredDispatchPresets({ goal, industry: null });
   const candidates: Array<{ key: string; selection: DispatchPresetSelection }> =
     preferredDispatchPresets({ goal, industry }).map((key) => ({
       key,
-      selection: semanticOnly.includes(key) ? "semantic" as const : "industry-default" as const,
+      selection: preferredDispatchRulePresets({ goal, industry }).includes(key)
+        ? "semantic" as const
+        : "industry-default" as const,
     }));
   // Bundle 声明顺序：bundles/<industry>/bundle.json → provides.presets → 文件内 kind: orchestrator
   try {
