@@ -4067,6 +4067,9 @@ z("A-06 ask 输出闸门加载失败必须显式标注，不得按空规则集�
     } as unknown as typeof app;
     const r = await runAsk(broken, gw, zScope, { threadId: tid, goal: "今天经营怎么样？", presetKey: "pricing-agent" });
     assert(/输出闸门暂不可用/.test(r.answer), `闸门失效必须显式标注（实际答案：${r.answer.slice(0, 80)}）`);
+    const { ASK_ANSWER_MAX_CHARS } = await import("@workloom/runtime");
+    assert(r.answer.length <= ASK_ANSWER_MAX_CHARS,
+      `闸门提示也必须计入 ASK 硬闸（实际 ${r.answer.length} 字，上限 ${ASK_ANSWER_MAX_CHARS}）`);
   } finally {
     real.release();
     if (tid) await zQuery(`DELETE FROM threads WHERE id=$1`, [tid]).catch(() => undefined);
