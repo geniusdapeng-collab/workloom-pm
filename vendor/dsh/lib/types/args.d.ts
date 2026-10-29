@@ -18,7 +18,7 @@
 interface ProfileInvocation {
     mode: 'profile';
     profile: string;
-    /** Shipped template used once to initialize a missing profile. */
+    /** Shipped template that replaces the named profile. */
     fromDefaultProfile?: string | undefined;
     /** Extra patch-list overlays applied after the profile's own layer, in argv order. */
     patches: string[];
@@ -29,7 +29,7 @@ interface ProfileInvocation {
 interface DumpConfigInvocation {
     mode: 'dump-config';
     profile: string;
-    /** Shipped template used once to initialize a missing profile. */
+    /** Shipped template that replaces the named profile. */
     fromDefaultProfile?: string | undefined;
     /** Omit the profile's user layer and --patch overlays; print bundle layers only. */
     defaultOnly: boolean;
@@ -39,7 +39,7 @@ interface DumpConfigInvocation {
 interface DumpConfigSchemaInvocation {
     mode: 'dump-config-schema';
     profile: string;
-    /** Shipped template used once to initialize a missing profile. */
+    /** Shipped template that replaces the named profile. */
     fromDefaultProfile?: string | undefined;
     patches: string[];
 }

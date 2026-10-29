@@ -28,6 +28,8 @@ async function fixture(t, options = {}) {
 test("no upstream I/O before a trusted tokenizer and separate credentials exist", async () => {
   await assert.rejects(createPmBudgetProxy({ apiKey: "same", controlToken: "same", outDir: "/tmp/unused" }), /Separate/);
   await assert.rejects(createPmBudgetProxy({ apiKey: "one", controlToken: "two", outDir: "/tmp/unused" }), /trusted official token/);
+  await assert.rejects(createPmBudgetProxy({ apiKey: "one", controlToken: "two", outDir: "/tmp/unused",
+    tokenCounter: { count: async () => 10 }, maxSearchCalls: 0 }), /Search\/Fetch call cap/);
 });
 
 test("one physical request is reserved first, then actual model/usage evidence is persisted without credentials", async (t) => {
@@ -112,13 +114,25 @@ test("tokenizer failure cannot fall back to an estimate or send a paid request",
 
 test("Search/Fetch are individually counted and internal-address fetch is rejected", async (t) => {
   const f = await fixture(t, { upstreamFetch: async () => Response.json({ results: [{ title: "官方文档", url: "https://api-docs.deepseek.com/", content: "fixture" }] }) });
-  assert.equal((await f.post({ query: "DeepSeek official API", count: 3 }, "/v1/tools/search")).status, 200);
+  assert.equal((await f.post({ query: "DeepSeek official API", count: 50 }, "/v1/tools/search")).status, 200);
+  assert.equal((await f.post({ query: "DeepSeek official API", count: 51 }, "/v1/tools/search")).status, 400);
   assert.equal((await f.post({ url: "http://127.0.0.1/private" }, "/v1/tools/fetch")).status, 400);
   const summary = f.proxy.summary();
   assert.equal(summary.searchRequests, 1);
+  assert.equal(summary.maxSearchCalls, 8);
   assert.equal(summary.actualModelTokens, 0);
   assert.equal(summary.budget.used.llmCalls, 1);
   assert.equal(summary.budget.used.llmTokens, 1000);
+});
+
+test("Search/Fetch cap is explicit, configurable and fails before a second upstream call", async (t) => {
+  let upstreamCalls = 0;
+  const f = await fixture(t, { maxSearchCalls: 1,
+    upstreamFetch: async () => { upstreamCalls += 1; return Response.json({ results: [{ title: "官方文档", url: "https://api-docs.deepseek.com/", content: "fixture" }] }); } });
+  assert.equal((await f.post({ query: "first", count: 5 }, "/v1/tools/search")).status, 200);
+  assert.equal((await f.post({ query: "second", count: 5 }, "/v1/tools/search")).status, 429);
+  assert.equal(upstreamCalls, 1);
+  assert.equal(f.proxy.summary().searchRequests, 1);
 });
 
 test("upstream credential cannot be redirected to a different origin", async (t) => {

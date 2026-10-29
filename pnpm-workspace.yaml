@@ -1,6 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+overrides:
+  "@opentelemetry/api": "1.9.0"
 onlyBuiltDependencies:
   - electron-winstaller
   - esbuild

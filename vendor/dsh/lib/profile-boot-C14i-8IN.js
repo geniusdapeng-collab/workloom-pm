@@ -1,7 +1,7 @@
 import { PROFILE_PATCH_FILENAME, PROFILE_TEMPLATES, PluginPackages, boot, createRuntimeResolution, initProfile, installFailLoud, loadOverlayPatches, loadProfile, readProfilePatches, reportSkippedBundles, resolveProfileDir } from "@deepseek-ai/dsh-app-boot";
 import { resolveDshHome } from "@deepseek-ai/dsh-home-paths";
 import { dirname, join, resolve } from "node:path";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { installProxyFromEnvironment } from "@deepseek-ai/dsh-http-proxy";
 import { DSH_LAUNCH_ENVIRONMENT_KEY } from "@deepseek-ai/dsh-launch-environment";
@@ -126,15 +126,22 @@ const PROFILE_ROOT_CONFIG = `# dsh profile root — an empty entry list. The tre
 /** Root config filename inside a profile directory. */
 const PROFILE_ROOT_FILENAME = "cordis.yml";
 /**
-* Initialize a missing profile from one shipped template. This copies only
-* the template's bundle list; local state from the
+* Replace the named custom profile with a fresh copy of one shipped template.
+* This copies only the template's bundle list; local state from the
 * same-named shipped profile is not read, and no inheritance metadata is
-* persisted. Shipped profile names are reserved, and the target directory is
-* claimed exclusively so existing or concurrent state is never reused.
-* @param name - the new profile name.
+* persisted. The new profile is assembled in a `.<name>.staging-*` directory
+* under the profiles directory and moved into place; only then is any previous
+* target directory, including its dependencies and user patch, deleted. A
+* failed move restores the previous directory; when restoring also fails, it
+* stays in the staging directory. Shipped profile names, compared without
+* case, are reserved. Concurrent replacements leave one complete copy; each
+* one either succeeds or reports the concurrent recreation.
+* @param name - the profile name to create or replace.
 * @param fromDefaultProfile - shipped profile template to copy.
 * @param home - Harness home containing the profile directory.
-* @throws when the template is unknown, the target name is shipped, or the target directory exists.
+* @throws when the template is unknown, the target name is shipped, another process recreates the target
+*   between the two renames, or a file-system operation fails; a restore failure is an `AggregateError`
+*   that names the staging path holding the previous profile.
 */
 function initializeProfileFromDefault(name, fromDefaultProfile, home = resolveDshHome()) {
 	const dir = resolveProfileDir(name, home);
@@ -143,28 +150,52 @@ function initializeProfileFromDefault(name, fromDefaultProfile, home = resolveDs
 		const expected = Object.keys(PROFILE_TEMPLATES).sort().map((value) => JSON.stringify(value)).join(", ");
 		throw new Error(`${NAME}: unknown default profile ${JSON.stringify(fromDefaultProfile)}; expected one of ${expected}`);
 	}
-	if (Object.hasOwn(PROFILE_TEMPLATES, name)) throw new Error(`${NAME}: profile ${JSON.stringify(name)} is shipped and cannot be a custom profile target; omit --from-default-profile to use it`);
+	const shipped = Object.keys(PROFILE_TEMPLATES).find((shippedName) => shippedName.toLowerCase() === name.toLowerCase());
+	if (shipped !== void 0) throw new Error(`${NAME}: profile ${JSON.stringify(name)} names shipped profile ${JSON.stringify(shipped)} and cannot be a custom profile target; omit --from-default-profile to use it`);
 	mkdirSync(dirname(dir), { recursive: true });
+	const staging = mkdtempSync(join(dirname(dir), `.${name}.staging-`));
+	const previous = join(staging, "previous");
 	try {
-		mkdirSync(dir);
+		const fresh = join(staging, "new", name);
+		initProfile(fresh, template.bundles);
+		let moved = false;
+		try {
+			renameSync(dir, previous);
+			moved = true;
+		} catch (error) {
+			if (error.code !== "ENOENT") throw error;
+		}
+		try {
+			renameSync(fresh, dir);
+		} catch (error) {
+			if (existsSync(dir)) {
+				rmSync(previous, {
+					recursive: true,
+					force: true
+				});
+				throw new Error(`${NAME}: profile ${JSON.stringify(name)} was recreated concurrently at ${dir}`, { cause: error });
+			}
+			if (moved) try {
+				renameSync(previous, dir);
+			} catch (restoreError) {
+				throw new AggregateError([error, restoreError], `${NAME}: profile replacement failed and ${dir} could not be restored from ${previous}`);
+			}
+			throw error;
+		}
 	} catch (error) {
-		if (error.code !== "EEXIST") throw error;
-		const manifestPath = join(dir, "package.json");
-		if (existsSync(manifestPath)) throw new Error(`${NAME}: profile ${JSON.stringify(name)} already exists at ${manifestPath}; omit --from-default-profile to use it`);
-		throw new Error(`${NAME}: profile directory ${dir} already exists; choose an unused profile name`);
+		if (!existsSync(previous)) rmSync(staging, {
+			recursive: true,
+			force: true
+		});
+		throw error;
 	}
 	try {
-		initProfile(dir, template.bundles);
+		rmSync(staging, {
+			recursive: true,
+			force: true
+		});
 	} catch (error) {
-		try {
-			rmSync(dir, {
-				recursive: true,
-				force: true
-			});
-		} catch (cleanupError) {
-			throw new AggregateError([error, cleanupError], `${NAME}: profile initialization failed and ${dir} could not be removed`);
-		}
-		throw error;
+		process.stderr.write(`${NAME}: replaced profile ${JSON.stringify(name)} but could not remove ${staging}: ${String(error)}\n`);
 	}
 }
 /**
@@ -178,9 +209,9 @@ function initializeProfileFromDefault(name, fromDefaultProfile, home = resolveDs
 * the identical base).
 * @param name - the profile name.
 * @param userLayer - `false` skips parsing `cordis.patch.yml` (the default dump).
-* @param fromDefaultProfile - shipped template used once to initialize a missing profile.
+* @param fromDefaultProfile - shipped template that replaces the profile before loading it.
 * @returns the loaded profile.
-* @throws when explicit initialization names an unknown template or an existing profile.
+* @throws when explicit initialization names an unknown template or a shipped target.
 */
 function prepareProfile(name, userLayer = true, fromDefaultProfile) {
 	if (fromDefaultProfile !== void 0) initializeProfileFromDefault(name, fromDefaultProfile);
@@ -198,7 +229,7 @@ function prepareProfile(name, userLayer = true, fromDefaultProfile) {
 * then the telemetry switch.
 * @param name - the profile name.
 * @param patchFiles - `--patch` overlay paths, in argv order.
-* @param fromDefaultProfile - shipped template for a missing named profile.
+* @param fromDefaultProfile - shipped template that replaces the named profile.
 * @param resolvedProfile - application-owned profile and installation.
 * @returns the profile and its patch layers.
 */

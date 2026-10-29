@@ -23,5 +23,9 @@
     "bPc": { "enabled": true, "entry": "apps/web", "secretaryAutoScan": false },
     "bMobile": { "enabled": true, "entry": "apps/webb" },
     "cMobile": { "enabled": true, "entry": "apps/webc" }
+  },
+  "clientDelivery": {
+    "mode": "repo-owned",
+    "note": "独立产品副本的三端应用壳与 packages/ui 随本仓同一提交发布，不接收 WorkLoom IM 的外部客户端基座升级状态。"
   }
 }

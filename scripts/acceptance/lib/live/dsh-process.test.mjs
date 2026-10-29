@@ -57,7 +57,7 @@ function fixture(t, mode = "complete", caps = {}) {
   const gate = join(repoRoot, "packages/runtime/dsh-gate"); const bin = join(gate, "node_modules/.bin/dsh");
   mkdirSync(dirname(bin), { recursive: true }); mkdirSync(join(gate, "node_modules/@deepseek-ai/dsh"), { recursive: true });
   writeFileSync(bin, `#!/usr/bin/env node\n(${fakeDshMain.toString()})().catch((error) => { console.error(error.message); process.exitCode = 1; });\n`, { mode: 0o700 });
-  writeFileSync(join(gate, "node_modules/@deepseek-ai/dsh/package.json"), JSON.stringify({ version: "0.2.0-rc.2", fixture: true }));
+  writeFileSync(join(gate, "node_modules/@deepseek-ai/dsh/package.json"), JSON.stringify({ version: "0.2.1-rc.2", fixture: true }));
   writeFileSync(join(gate, "profile.cordis.patch.yml"), "# synthetic gate template\n");
   for (const file of ["audit.plugin.mjs", "budget.mjs", "usage.mjs"]) {
     const target = join(repoRoot, "scripts/acceptance/lib/live", file); mkdirSync(dirname(target), { recursive: true }); copyFileSync(fileURLToPath(new URL(file, import.meta.url)), target);

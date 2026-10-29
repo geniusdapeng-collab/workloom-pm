@@ -5,6 +5,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { resolveDesktopWorkflowPath } from "./desktop-workflow-path.mjs";
 import { validateProductStartPath } from "./product-runtime.mjs";
+import { verifyRepoOwnedClientDelivery } from "./verify-repo-owned-client.mjs";
 
 const root = process.cwd();
 let repositoryRoot = root;
@@ -54,6 +55,11 @@ if (product) {
   }
   for (const requiredClient of ["bPc", "bMobile", "cMobile"]) {
     if (!product.clients?.[requiredClient]) errors.push(`产品清单缺少三端入口：${requiredClient}`);
+  }
+  if (product.clientDelivery?.mode === "repo-owned") {
+    errors.push(...verifyRepoOwnedClientDelivery(repositoryRoot, product).errors);
+  } else if (product.clientDelivery !== undefined) {
+    errors.push("clientDelivery.mode 仅支持 repo-owned；其它值不得静默放宽客户端门禁");
   }
   const packageJson = requiredJson(path.join(root, "package.json"), "根 package.json");
   if (packageJson && packageJson.name !== product.packageName) errors.push("产品清单 packageName 与根 package.json 不一致");

@@ -1,4 +1,4 @@
-/** DSH v0.2.0-rc.2 durable lifecycles; no credentials or provider I/O. */
+/** DSH v0.2.1-rc.2 durable lifecycles; no credentials or provider I/O. */
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { foldDshUsage, normalizeDshUsage, normalizeOpenAiUsage } from "./usage.mjs";

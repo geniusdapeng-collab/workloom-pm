@@ -1,5 +1,5 @@
-import { a as prepareProfile, t as INSTALL_ANCHOR } from "./profile-boot-BZ2ZjNWi.js";
-import { t as collectConfigDumpLayers } from "./dump-config-BEDI-dNY.js";
+import { a as prepareProfile, t as INSTALL_ANCHOR } from "./profile-boot-C14i-8IN.js";
+import { t as collectConfigDumpLayers } from "./dump-config-CWs_HdOc.js";
 import { generateConfigSchema } from "@deepseek-ai/dsh-app-boot";
 //#region lib/types/dump-config-schema.js
 /**
@@ -16,7 +16,7 @@ const NAME = "dsh";
 * During schema generation, ordinary stdout writes are redirected to stderr.
 * @param profile - the profile name.
 * @param patches - overlay paths, in argv order.
-* @param fromDefaultProfile - shipped template used once to initialize a missing profile.
+* @param fromDefaultProfile - shipped template that replaces the profile before loading it.
 * @returns after collection and output, with diagnostics also written to stderr.
 */
 async function runDumpConfigSchema(profile, patches, fromDefaultProfile) {

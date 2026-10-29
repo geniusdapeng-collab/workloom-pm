@@ -107,7 +107,7 @@ function validateChat(body) {
 function validateSearch(kind, body) {
   if (!object(body)) throw new Error("Invalid tool request");
   if (kind === "search") {
-    if (!text(body.query) || [...body.query].length > 128 || (body.count !== undefined && (!Number.isInteger(body.count) || body.count < 1 || body.count > 10))) throw new Error("Invalid search query or result count");
+    if (!text(body.query) || [...body.query].length > 128 || (body.count !== undefined && (!Number.isInteger(body.count) || body.count < 1 || body.count > 50))) throw new Error("Invalid search query or result count");
   } else {
     const url = new URL(body.url);
     if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.href.length > 8192) throw new Error("Invalid fetch URL");
@@ -132,11 +132,13 @@ async function readBody(request) {
 }
 
 export async function createPmBudgetProxy({ apiKey, controlToken, tokenCounter, outDir, port = 0, runId = randomUUID(),
-  budgets = {}, upstreamFetch = fetch, upstreamOrigin = "https://api.deepseek.com", protocolMarginTokens = 1024 } = {}) {
+  budgets = {}, upstreamFetch = fetch, upstreamOrigin = "https://api.deepseek.com", protocolMarginTokens = 1024,
+  maxSearchCalls = 8 } = {}) {
   if (!text(apiKey) || !text(controlToken) || controlToken === apiKey) throw new Error("Separate upstream and loopback credentials are required");
   if (!tokenCounter || typeof tokenCounter.count !== "function") throw new Error("A trusted official token counter is required before paid I/O");
   if (!text(outDir)) throw new Error("A dedicated evidence directory is required");
   if (!Number.isSafeInteger(protocolMarginTokens) || protocolMarginTokens < 1024) throw new Error("Protocol token reserve cannot be reduced below 1024");
+  if (!Number.isSafeInteger(maxSearchCalls) || maxSearchCalls < 1 || maxSearchCalls > 100) throw new Error("Search/Fetch call cap must be an integer in 1..100");
   const origin = new URL(upstreamOrigin);
   if (origin.href !== "https://api.deepseek.com/") throw new Error("The upstream credential may only be sent to the official DeepSeek origin");
   mkdirSync(outDir, { recursive: true });
@@ -163,7 +165,7 @@ export async function createPmBudgetProxy({ apiKey, controlToken, tokenCounter, 
   const active = new Set();
   const safe = (value) => JSON.parse(JSON.stringify(value).replaceAll(apiKey, "[REDACTED]").replaceAll(controlToken, "[REDACTED]"));
   const record = (row) => { const sanitized = safe(row); requests.push(sanitized); appendFileSync(evidencePath, `${JSON.stringify(sanitized)}\n`, { mode: 0o600 }); };
-  const summary = () => ({ runId, budget: budget.summary(), physicalRequests: requests.length,
+  const summary = () => ({ runId, budget: budget.summary(), physicalRequests: requests.length, maxSearchCalls,
     modelRequests: requests.filter((item) => item.kind === "chat").length,
     searchRequests: requests.filter((item) => item.kind !== "chat").length,
     actualModelTokens: requests.reduce((sum, item) => sum + (item.kind === "chat" ? item.usage?.totalTokens ?? 0 : 0), 0),
@@ -194,7 +196,7 @@ export async function createPmBudgetProxy({ apiKey, controlToken, tokenCounter, 
         reservedTokens = countedPromptTokens + body.max_tokens + protocolMarginTokens;
       } else {
         validateSearch(kind, body);
-        if (searchRequests >= 8) return send(response, 429, { error: { message: "Search/Fetch request cap reached" } });
+        if (searchRequests >= maxSearchCalls) return send(response, 429, { error: { message: "Search/Fetch request cap reached" } });
         reservedTokens = 1000;
       }
       taskId = `${kind}-${randomUUID()}`;

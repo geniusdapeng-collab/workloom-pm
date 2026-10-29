@@ -3,18 +3,18 @@
 | 项 | 值 |
 |---|---|
 | 包 | `@deepseek-ai/dsh`（CLI 聚合包；运行时依赖 `@deepseek-ai/dsh-*` / `cordis-plugin-*` 全家桶） |
-| 锁定版本 | `0.2.0-rc.2`（npm 发布时间 2026-09-29T09:56:27Z；rc.6→rc.8→0.1.1-rc.1→0.1.2-rc.1→0.1.5-rc.2→0.1.6-alpha.2→0.2.0-rc.2 六次升级） |
-| 来源 | `https://registry.npmjs.org/@deepseek-ai/dsh/-/dsh-0.2.0-rc.2.tgz`（npmmirror 同源分发） |
-| integrity（入库时实测） | `sha512-EAJ3gPNcVt/uv8X19PMm9NkVhWgT7xXNMk0UKCVm+IQ5rpSQOcsMUa0HWlnYYVybKMsccjcRB21vVVsaXQ6IdA==`（与 registry 元数据逐字符一致 ✅；sha1 `dfc8f7e09cfa96b854d6f0cf3a973ce7f2948925` 同步核对） |
+| 锁定版本 | `0.2.1-rc.2`（npm 发布时间 2026-10-17T08:36:31.655Z；rc.6→rc.8→0.1.1-rc.1→0.1.2-rc.1→0.1.5-rc.2→0.1.6-alpha.2→0.2.0-rc.2→0.2.1-rc.2 七次升级） |
+| 来源 | `https://registry.npmjs.org/@deepseek-ai/dsh/-/dsh-0.2.1-rc.2.tgz`（官方 npm registry） |
+| integrity（入库时实测） | `sha512-tvY+yhfKRifthbqPe/OK0AYxM5ZkvqfYq/jMYgJcEUxiRRL1Vwra3Ti5TB6AXgSWQdiPHYh/Vp6SJa9yHwMNuw==`（与 registry 元数据逐字符一致 ✅；sha1 `a502d1551aabc881020e3cb7961c38901565731a` 同步核对） |
 | License | MIT |
 | 上游仓库 | `github.com/deepseek-ai/deepseek-harness`（`apps/cli` 目录） |
-| 入库日期 | 2026-08-16（rc.6）；2026-08-20 升级 rc.8；2026-08-21 升级 0.1.1-rc.1；2026-09-05 升级 0.1.2-rc.1；2026-09-19 升级 0.1.5-rc.2；2026-09-20 升级 0.1.6-alpha.2；**2026-09-30 升级 0.2.0-rc.2（本轮；npm `latest`/`next` 同指，首次跨 minor 线）** |
+| 入库日期 | 2026-08-16（rc.6）；2026-08-20 升级 rc.8；2026-08-21 升级 0.1.1-rc.1；2026-09-05 升级 0.1.2-rc.1；2026-09-19 升级 0.1.5-rc.2；2026-09-20 升级 0.1.6-alpha.2；2026-09-30 升级 0.2.0-rc.2；**2026-10-29 升级 0.2.1-rc.2（本轮；npm `latest` 指向，适配 V4.1-Flash-1017）** |
 | 入库方式 | npm tarball 解压至本目录（`--strip-components=1`），未做任何源码修改 |
 
 ## 纪律
 
-- 本目录**只读**：任何修改必须先复制出去再改，保持与上游 0.2.0-rc.2 字节一致，可审计。
-- 运行时依赖解析仍走 pnpm（`pnpm add @deepseek-ai/dsh@0.2.0-rc.2` 于使用方包）；本目录是**审计基线 + 文档事实源**，升级前对照 diff。
+- 本目录**只读**：任何修改必须先复制出去再改，保持与上游 0.2.1-rc.2 字节一致，可审计。
+- 运行时依赖解析仍走 pnpm（`pnpm add @deepseek-ai/dsh@0.2.1-rc.2` 于使用方包）；本目录是**审计基线 + 文档事实源**，升级前对照 diff。
 - **升级触发条件（2026-08-20 项目所有者新决策，取代原「稳定 1.x 才升级」旧口径）**：官方仓库任何新版本（**包括 rc/beta/alpha 预发布**）即触发升级，不得等待稳定版、不得以任何理由跳过；升级前跑契约测试/门禁全绿。
 - **0.1.2-rc.1 变更面（0.1.1-rc.1→0.1.2-rc.1 实测 diff）**：
   - **新增嵌入式 profile 形态**：`sdk` / `sdk-minimal`（JSON-RPC stdio 为 SDK client 服务）、`acp`（Agent Client Protocol stdio）——dsh 可作为 agent 服务嵌入外部客户端（编辑器等）；
@@ -67,6 +67,23 @@
 - **desktop profile 收紧**：npm CLI 拒绝 `--profile desktop` 的插件管理请求，改由 Desktop 内置命令运行时接管。
 - **原生依赖新增**：`koffi`（经 `dsh-subprocess-local` 引入）。pnpm 默认阻断其 install 脚本**不影响运行**——平台预编译包 `@koromix/koffi-<platform>` 随 optional deps 安装（本机实测 `darwin_arm64/koffi.node` 就位）；本次未把它加入 `onlyBuiltDependencies`。
 - **配置样例面变化**：`config/examples/` 不再随包提供「会话内 Schedule」（迁至 `dsh-experimental-schedule-bundle`）。
+
+## 0.2.1-rc.2 变更面（0.2.0-rc.2→0.2.1-rc.2 实测 diff；2026-10-29 登记）
+
+- **发布兼容性**：官方 `dsh-v0.2.1-rc.2` 发布说明明确适配 `DeepSeek-V4.1-Flash-1017` 与 DeepSeek Search/Fetch API；这是官方 1017 发布页要求的 `0.2.1-rc.1+` 兼容线。
+- **版本线**：npm `latest` 为 `0.2.1-rc.2`，`next` 为 `0.2.1-rc.4`。本仓按“模型兼容所需 latest”锁定 rc.2，不把 next 预发布误称为稳定版。
+- **依赖面**：新增 `dsh-experimental-inspector-profile`、`dsh-experimental-session-search`、`dsh-experimental-terminal-bundle`、`dsh-experimental-tool-worktree`、`dsh-experimental-plugin-market-bundle`、`dsh-tool-schedule` 等；移除 `dsh-experimental-schedule-bundle`。
+- **安全面**：本仓 PM 适配器继续按 `SAFE_BASE_IDS` 白名单只启用 `list_files/read_file/write_file` 所需基础组件；新增终端、插件市场、会话搜索、worktree 等默认禁用，未因升级扩大模型权限。
+- **依赖收敛**：本仓 root workspace 与独立 `dsh-gate` 均使用 0.2.1 同版家族；`@opentelemetry/api` 固定 1.9.0 以满足 `dsh-otel` 的 peer 范围。未使用禁用 peer 校验来掩盖混版。
+- **产物**：tarball 仅 25,130 字节、20 个文件；入库目录 `120K`。`integrity` 与 `sha1` 见上表。
+
+## 升级验证（2026-10-29 · 0.2.1-rc.2）
+
+- 安装纪律：root workspace 与 `packages/runtime/dsh-gate` 均先移走旧 lock/node_modules，再从 registry 干净解析；最终依赖树不再含 DSH `0.2.0-rc.2` 与 `0.2.1-rc.2` 混装。
+- peer 收敛：`@opentelemetry/api` 固定 `1.9.0`，满足 `dsh-otel` 及其 SDK 的 `<1.10.0` peer 范围；安装门禁无 DSH family peer mismatch。
+- PM 真实 DSH 子进程回归：8/8 通过，覆盖 read→write→final、Unicode 大输出、模型调用预算、配额拒绝、路径/工具越权、缺 usage 冻结、取消/超时。
+- 真实 DeepSeek 兼容冒烟：DSH `0.2.1-rc.2` 经 loopback 预算代理实际请求 `deepseek-flash`，3 次物理模型请求、5,461 token、3 次工具调用，成功读取、写入并保留 `DSH-0.2.1-MUST-WRITE`；终态 `turnEnd=completed`，usage 完整，最终 response ID `f2d17971-a036-4035-932e-43287badc5ce`。
+- E6 dsh-gate：用例一全链通过（哈希链 24 条）；用例二 H-5 `kill -9` 后链完整 17 条，43 条会话事件重放新增 0。
 
 ## 升级验证（2026-09-30 · 0.2.0-rc.2）
 

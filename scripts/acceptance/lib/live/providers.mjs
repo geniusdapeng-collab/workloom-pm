@@ -34,7 +34,7 @@ import { evaluateEventAssertion, freshReceipt, realExecution } from "./assertion
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const modelIdentity = (value) => typeof value === "string" && value.trim() ? value.trim() : null;
 
-/** Pinned dsh-v0.2.0-rc.2 API-key plugin and Messages transport configuration. */
+/** Pinned dsh-v0.2.1-rc.2 API-key plugin and Messages transport configuration. */
 export const DSH_DEEPSEEK_DEFAULTS = {
   route: "deepseek-official",
   model: "deepseek-flash",
@@ -221,7 +221,7 @@ export async function runDshTask({
   const installedPackage = join(gate, "node_modules", "@deepseek-ai", "dsh", "package.json");
   let version;
   try { version = JSON.parse(readFileSync(installedPackage, "utf8")).version; } catch { return { status: "blocked", called: false, reason: "DSH 已安装运行时版本不可回读，尚未调用模型" }; }
-  if (version !== "0.2.0-rc.2") return { status: "blocked", called: false, reason: "DSH live adapter 只验证固定 0.2.0-rc.2 事件协议，当前安装版本未验证" };
+  if (version !== "0.2.1-rc.2") return { status: "blocked", called: false, reason: "DSH live adapter 只验证固定 0.2.1-rc.2 事件协议，当前安装版本未验证" };
   const endpoint = baseUrl ?? env.DEEPSEEK_BASE_URL ?? DSH_DEEPSEEK_DEFAULTS.baseURL;
   try {
     const target = new URL(endpoint);
