@@ -1,8 +1,8 @@
 {
  "schema": "workloom.capabilities/v2",
- "repo": "workloom-im",
- "description": "WorkLoom IM · 企业级 Agent IM 底座（智能班组 + 围栏 + 人审 + 夜班）",
- "generatedAt": "2026-10-05T04:09:22.956Z",
+ "repo": "workloom-pm",
+ "description": "WorkLoom PM · AI 产品经理带领 AI 研发团队，从用户意图到真实产物、验证与交付回执",
+ "generatedAt": "2026-10-29T03:33:36.498Z",
  "demoPages": [
   "service-front-b-mobile.html",
   "service-front-b-pc.html",

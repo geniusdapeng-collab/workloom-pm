@@ -2,19 +2,47 @@
 
 # WorkLoom PM
 
-**An AI product manager leads an AI development team from user intent to real artifacts, verification, and delivery receipts.**
+**An AI product manager leads an AI development team from a goal to an executable task graph, real artifacts, independent verification, and traceable delivery receipts.**
 
-You supply the goal and boundaries. The product manager coordinates requirements, implementation, quality, and delivery, with evidence for what actually happened.
+You supply the goal and boundaries. The product manager coordinates requirements, implementation, quality, and delivery. The system reports not only what it did, but also who did it, which material was consumed, which files were produced, which checks ran, and what remains unverified.
 
-[简体中文](README.md) · [Delivery architecture](docs/PM-DELIVERY.md) · [Live evaluation and limits](docs/PM-EVALUATION.md) · [Apache-2.0](LICENSE)
+[简体中文](README.md) · [Core capabilities](#core-capabilities-from-a-goal-to-verifiable-delivery) · [Delivery architecture](docs/PM-DELIVERY.md) · [218-task evaluation](docs/DEEPSEEK-218-EVALUATION.md) · [Apache-2.0](LICENSE)
 
 </div>
 
-WorkLoom PM is for product owners, founders, and small development teams. It inherits the complete WorkLoom IM source tree, employee presets, skills, desktop shell, three client applications, and governance mechanisms. Its product focus is **making an AI product manager responsible for coordinating a requirement through to a verifiable deliverable**.
+WorkLoom PM is for product owners, founders, and small development teams. It is not a single-purpose writing or coding assistant. It connects **goal clarification, role coordination, restricted execution, quality verification, and release gates** into one AI product-development workflow.
 
 The PC workspace entry is **Development, `/development`**. The PM team view presents goals, task dependencies, execution, and artifacts. The original DevFabric development workspace remains available as another view. Desktop and browser development clients use the same server.
 
 For actual delivery results, use the source revision, model, samples, and evidence recorded in [PM-EVALUATION.md](docs/PM-EVALUATION.md). Employee definitions, skill files, seeded examples, and historical test badges do not establish a live success rate. This README does not advertise a signed WorkLoom PM installer.
+
+> **Core promise: progress is visible, but completion cannot be fabricated.** Completion must map to real files, deterministic checks, actual model usage, and a readable receipt. Missing evidence, timeouts, cancellation, artifact drift, and failed checks remain incomplete.
+
+## Core capabilities: from a goal to verifiable delivery
+
+| Capability | What the system actually does | What the user gets |
+|---|---|---|
+| **Product-manager ownership** | The product director accepts a complete goal, asks for clarification when needed, creates a role/dependency DAG, and validates roles, dependencies, acceptance, artifact ownership, and stop conditions | Less manual copying of context between AI roles |
+| **Real role and skill assembly** | Fourteen employees cover decisions, requirements, competitors, data, users, documents, development, evaluation, release, models, prompts, red teaming, and knowledge governance. Every task is assembled with its own prompt and matching SOP from twenty skills | Work is assigned to the corresponding responsibility instead of renaming one assistant |
+| **Real model and attributable sources** | The default is `deepseek-flash`, with requested model, returned model, response ID, usage, finish state, and latency stored per request. Online facts require explicit Search/Fetch calls with retained sources | You can verify whether the model was called, how much it used, and whether retrieval really happened |
+| **Restricted development execution** | Development roles use a pinned DeepSeek Harness with explicit tools such as `list_files`, `read_file`, and `write_file`, constrained to the task directory. Host shell, production data, and external publishing remain closed | Models can land code without receiving unrestricted control of the computer |
+| **Artifact-first receipts** | Files, SHA-256, size, ownership, run state, dependency artifacts, model usage, and every check are persisted. Resume revalidates files instead of trusting an old status | Clear separation between generated text and a checkable deliverable |
+| **Built-in governance** | Tenant/workspace RLS, append-only five-dimension events, PII masking, `block > review > auto` fences, human review for high-risk actions, and runtime-only credentials | Permission, audit, and data-flow boundaries do not depend on prompt obedience |
+| **Budgets, recovery, and fail-closed behavior** | Calls, tokens, cost, wall clock, paths, and timeouts are bounded. Unknown outcomes freeze later paid calls, and restart preserves the budget ledger | Long-running work has controllable cost, recovery state, and visible failure reasons |
+| **Repeatable quality evaluation** | A fixed 218-task cross-role suite covers ten live Search cases and eight independently executed code tasks, alongside type checks, repository tests, three production builds, and release gates | Capabilities can be measured repeatedly instead of inferred from a demo screenshot |
+| **Three clients and desktop** | PC workspace, B-side mobile, C-side service front, and the Electron shell share product identity and server contracts | The same task and data can be inspected across development, mobile, and desktop surfaces |
+
+### How to read these capabilities
+
+| Status | Meaning |
+|---|---|
+| **Verified in this repository** | Team planning, role assembly, restricted DSH, artifact receipts, the budget gate, repository tests, three production builds, the release gate, and the fixed 218-task suite have current execution or deterministic gate evidence |
+| **Requires additional configuration or authorization** | Customer databases, production connectors, external publishing, and signed/notarized installers require deployment credentials, permissions, and separate acceptance. An available code entry does not mean the integration is already enabled |
+| **Not claimed** | Fully autonomous end-to-end delivery of arbitrary complex projects, one-shot success on Internet-scale projects, unapproved production releases, cross-company data aggregation, financial actions, or a first-pass 100% result on the 218 tasks |
+
+The end-to-end boundary remains separate: the original PM evaluation still records both multi-role long goals as 0/2. Successful roles, files, or individual tasks do not turn the complete project workflow into a pass. The retained failures are documented in [PM-EVALUATION.md](docs/PM-EVALUATION.md).
+
+After preserving an initial 126/218 result, the fixed suite reached 218/218 through real reruns, code repairs, and evaluator repairs; Search was 10/10 and the code sandbox was 8/8. This result applies only to the fixed suite and does not establish the same success rate for arbitrary business work. See [the DeepSeek 218 evaluation](docs/DEEPSEEK-218-EVALUATION.md) for methodology and limits.
 
 ## Who it helps
 
