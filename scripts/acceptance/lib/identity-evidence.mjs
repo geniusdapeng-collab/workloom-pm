@@ -8,3 +8,7 @@ export function agentIdentityEvidenceOk(identity, expectedVersion) {
   return text.includes("来源行业包")
     && compactIdentityText(text).includes(compactIdentityText(expectedVersion));
 }
+
+export function agentProfileHeaderOk(text) {
+  return /(?:员工|成员)档案 · \S/.test(String(text ?? ""));
+}
