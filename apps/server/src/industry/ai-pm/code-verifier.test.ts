@@ -55,6 +55,17 @@ describe("platform-independent code verification admission", () => {
   });
 });
 
+describe.skipIf(process.platform !== "linux" || Number(process.versions.node.split(".")[0]) < 24)("Linux bubblewrap Node24 code verification", () => {
+  it("mounts the trusted test preload inside the sandbox", async () => {
+    const receipt = await executeSandboxNodeTests({ signal: signal(), files: [
+      testFile("import{test}from'node:test';import assert from'node:assert/strict';test('sandboxed assertion',()=>assert.equal(42,42))"),
+    ] });
+    expect(receipt.exitCode, receipt.stderr).toBe(0);
+    expect(receipt.testSummary?.success).toBe(true);
+    expect(receipt.testSummary?.counts.passed).toBeGreaterThan(0);
+  });
+});
+
 // These process and isolation assertions require the same OS/Node contract as production.
 // Unsupported hosts still execute the real fail-closed admission case above.
 describe.skipIf(unsupportedOsSandbox)("macOS Seatbelt Node24 code verification", () => {
