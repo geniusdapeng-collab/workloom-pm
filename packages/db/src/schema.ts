@@ -7,6 +7,7 @@ import {
   bigint,
   bigserial,
   boolean,
+  date,
   index,
   integer,
   jsonb,
@@ -365,4 +366,96 @@ export const credentials = pgTable("credentials", {
   health: text("health").notNull().default("unknown"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   rotatedAt: timestamp("rotated_at", { withTimezone: true }),
+});
+
+/* ---------- 云端研发工作台（0055） ---------- */
+
+export const assistantLaunchNonces = pgTable("assistant_launch_nonces", {
+  jtiHash: text("jti_hash").primaryKey(),
+  tenantId: text("tenant_id").notNull(),
+  workspaceId: text("workspace_id").notNull(),
+  memberNo: text("member_no").notNull(),
+  issuedAt: timestamp("issued_at", { withTimezone: true }).notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  consumedAt: timestamp("consumed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const assistantSessions = pgTable("assistant_sessions", {
+  id: text("id").primaryKey(),
+  tenantId: text("tenant_id").notNull(),
+  workspaceId: text("workspace_id").notNull(),
+  ownerMemberNo: text("owner_member_no").notNull(),
+  title: text("title").notNull(),
+  status: text("status").notNull().default("active"),
+  pinned: boolean("pinned").notNull().default(false),
+  lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
+  lastRunId: text("last_run_id"),
+  metadata: jsonb("metadata").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const assistantMessages = pgTable("assistant_messages", {
+  id: text("id").primaryKey(),
+  seq: bigserial("seq", { mode: "bigint" }).notNull().unique(),
+  sessionId: text("session_id").notNull(),
+  tenantId: text("tenant_id").notNull(),
+  workspaceId: text("workspace_id").notNull(),
+  ownerMemberNo: text("owner_member_no").notNull(),
+  role: text("role").notNull(),
+  parts: jsonb("parts").notNull().default([]),
+  parentMessageId: text("parent_message_id"),
+  clientMessageId: text("client_message_id"),
+  runId: text("run_id"),
+  status: text("status").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  finishedAt: timestamp("finished_at", { withTimezone: true }),
+});
+
+export const assistantRuns = pgTable("assistant_runs", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").notNull(),
+  tenantId: text("tenant_id").notNull(),
+  workspaceId: text("workspace_id").notNull(),
+  ownerMemberNo: text("owner_member_no").notNull(),
+  userMessageId: text("user_message_id").notNull(),
+  assistantMessageId: text("assistant_message_id").notNull(),
+  mode: text("mode").notNull(),
+  model: text("model").notNull(),
+  responseModel: text("response_model"),
+  status: text("status").notNull().default("queued"),
+  threadId: text("thread_id"),
+  responseId: text("response_id"),
+  usage: jsonb("usage").notNull().default({}),
+  errorCode: text("error_code"),
+  error: text("error"),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  finishedAt: timestamp("finished_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const assistantRunEvents = pgTable("assistant_run_events", {
+  id: bigserial("id", { mode: "bigint" }).primaryKey(),
+  runId: text("run_id").notNull(),
+  sessionId: text("session_id").notNull(),
+  tenantId: text("tenant_id").notNull(),
+  workspaceId: text("workspace_id").notNull(),
+  type: text("type").notNull(),
+  payload: jsonb("payload").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const assistantBudgets = pgTable("assistant_budgets", {
+  budgetDate: date("budget_date", { mode: "string" }).notNull(),
+  tenantId: text("tenant_id").notNull(),
+  workspaceId: text("workspace_id").notNull(),
+  callsReserved: integer("calls_reserved").notNull().default(0),
+  callsUsed: integer("calls_used").notNull().default(0),
+  promptTokensUsed: bigint("prompt_tokens_used", { mode: "number" }).notNull().default(0),
+  completionTokensUsed: bigint("completion_tokens_used", { mode: "number" }).notNull().default(0),
+  blocked: boolean("blocked").notNull().default(false),
+  blockedReason: text("blocked_reason"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

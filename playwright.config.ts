@@ -1,6 +1,9 @@
 import { defineConfig } from "@playwright/test";
 
-const reuseExistingServer = !process.env.CI;
+const assistantOnly = process.env.PLAYWRIGHT_ASSISTANT_ONLY === "1";
+const reuseExistingServer = !assistantOnly && !process.env.CI;
+const apiPort = Number(process.env.PLAYWRIGHT_API_PORT ?? 8877);
+const pcPort = Number(process.env.WEB_PORT ?? 3100);
 
 // 浏览器及应用请求仍可能遵循 HTTP(S)_PROXY：合并而非覆盖 runner 既有白名单，
 // 并同时写入大小写键以兼容不同代理实现。webServer 自身使用 port（原始 TCP）
@@ -40,9 +43,10 @@ export default defineConfig({
   use: {
     locale: "zh-CN",
     colorScheme: "dark",
+    ...(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {}),
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    video: assistantOnly ? "off" : "retain-on-failure",
   },
   webServer: [
     {
@@ -50,11 +54,11 @@ export default defineConfig({
       command: "pnpm -C apps/server start",
       env: {
         SERVER_HOST: "127.0.0.1",
-        SERVER_PORT: "8877",
+        SERVER_PORT: String(apiPort),
         SERVICE_C_WORKSPACE_ID: "ws-aipm-demo",
         SERVICE_C_DEMO_AUTH: "true",
       },
-      port: 8877,
+      port: apiPort,
       stdout: "pipe",
       reuseExistingServer,
       timeout: 120_000,
@@ -63,37 +67,36 @@ export default defineConfig({
       name: "b-pc",
       command: "VITE_ENABLE_UI_DIAGNOSTICS=true node scripts/ui-e2e-preview.mjs web",
       env: {
-        WEB_PORT: "3100",
-        SERVER_PORT: "8877",
+        WEB_PORT: String(pcPort),
+        SERVER_PORT: String(apiPort),
       },
-      port: 3100,
+      port: pcPort,
       stdout: "pipe",
       reuseExistingServer,
       timeout: 120_000,
     },
-    {
+    ...(assistantOnly ? [] : [{
       name: "b-mobile",
       command: "node scripts/ui-e2e-preview.mjs webb",
       env: {
         WEBB_PORT: "3101",
-        SERVER_PORT: "8877",
+        SERVER_PORT: String(apiPort),
       },
       port: 3101,
       stdout: "pipe",
       reuseExistingServer,
       timeout: 120_000,
-    },
-    {
+    }, {
       name: "c-mobile",
       command: "node scripts/ui-e2e-preview.mjs webc",
       env: {
         WEBC_PORT: "3102",
-        SERVER_PORT: "8877",
+        SERVER_PORT: String(apiPort),
       },
       port: 3102,
       stdout: "pipe",
       reuseExistingServer,
       timeout: 120_000,
-    },
+    }]),
   ],
 });

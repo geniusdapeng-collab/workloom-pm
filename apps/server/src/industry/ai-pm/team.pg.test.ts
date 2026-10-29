@@ -261,7 +261,11 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
     } };
     const scripted: CompletionProvider = { modelId: "fixture-deepseek", complete: vi.fn(async () => completion("未写文件，仅返回最终文本。")) };
     const current = service({ employeeExecutor: undefined, catalog: boundCatalog, providerFactory: () => scripted });
-    const detail = await create(current, { employee: "dev-orchestrator", goal: "生成完整实现到result.md" });
+    const detail = await create(current, {
+      employee: "dev-orchestrator",
+      goal: "生成完整实现到sum.mjs",
+      checks: [{ type: "fileExists", path: "sum.mjs" }],
+    });
     await current.start(scopeA, detail.run.id); const failed = await current.waitForRun(scopeA, detail.run.id);
     expect(failed.run.status).toBe("failed"); expect(failed.run.errorCode).toBe("DSH_OUTPUT_MISSING");
     expect(failed.run.usage).toEqual({ promptTokens: 23, completionTokens: 11 });
