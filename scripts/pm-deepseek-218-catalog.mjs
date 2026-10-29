@@ -34,6 +34,7 @@ const ROLE_LABELS = {
 
 const ROLE_ORDER = Object.keys(ROLE_LABELS);
 const DIFFICULTIES = ["基础", "标准", "进阶", "专家"];
+const SOLUTION_MODULE = "./solution.mjs";
 
 function scenario(title, prompt, opts = {}) {
   if (!title?.trim() || !prompt?.trim()) throw new Error("Every catalog scenario needs title and prompt");
@@ -462,7 +463,7 @@ const raw = {
     codeScenario("安全整数夹取", "实现 clamp(value,min,max)：三者必须是有限数或 BigInt 且类型一致，min>max 抛 RangeError，返回不修改参数。", `
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp } from './solution.mjs';
+import { clamp } from '${SOLUTION_MODULE}';
 test('clamp works for numbers and bigint', () => {
   assert.equal(clamp(-1, 0, 10), 0);
   assert.equal(clamp(11, 0, 10), 10);
@@ -476,7 +477,7 @@ test('clamp works for numbers and bigint', () => {
     codeScenario("Unicode 截断", "实现 truncate(text, max)：text 必须为字符串，max 为 0..1000 整数；按 Unicode 码点而不是 UTF-16 单元截断，不拆分 emoji；超出部分不加省略号。", `
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { truncate } from './solution.mjs';
+import { truncate } from '${SOLUTION_MODULE}';
 test('truncate by code point', () => {
   assert.equal(truncate('中文🙂abcd', 4), '中文🙂a');
   assert.equal(truncate('🙂🙂', 1), '🙂');
@@ -489,7 +490,7 @@ test('truncate by code point', () => {
     codeScenario("无原型字典", "实现 countWords(items)：items 为非数组则 TypeError；返回无原型对象统计非空 trim 后字符串，忽略非字符串；键 '__proto__' 和 'constructor' 必须安全。", `
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { countWords } from './solution.mjs';
+import { countWords } from '${SOLUTION_MODULE}';
 test('countWords handles odd keys', () => {
   const out = countWords([' A ', 'A', '__proto__', '__proto__', 1, '', null]);
   assert.equal(Object.getPrototypeOf(out), null);
@@ -502,7 +503,7 @@ test('countWords handles odd keys', () => {
     codeScenario("游标分页", "实现 pageBy(items, limit, cursor)：limit 1..100；cursor 是上一页返回的非负十进制字符串，无效则 RangeError；返回 {items,nextCursor}，nextCursor 无下一页时为 null，不修改输入。", `
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { pageBy } from './solution.mjs';
+import { pageBy } from '${SOLUTION_MODULE}';
 test('cursor pagination is stable', () => {
   const input = [0,1,2,3,4,5];
   assert.deepEqual(pageBy(input, 2, null), {items:[0,1], nextCursor:'2'});
@@ -516,7 +517,7 @@ test('cursor pagination is stable', () => {
     codeScenario("价格分单位", "实现 addCents(...values)：每个值必须是非负整数分，参数至多 100 个且总和不超过 Number.MAX_SAFE_INTEGER，返回安全整数；非 number 或非整数抛 TypeError，负数、超过 100 个参数或总和溢出抛 RangeError；不得用浮点元金额。", `
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addCents } from './solution.mjs';
+import { addCents } from '${SOLUTION_MODULE}';
 test('addCents is exact', () => {
   assert.equal(addCents(1, 2, 3), 6);
   assert.equal(addCents(0, 9007199254740990, 1), 9007199254740991);
@@ -529,7 +530,7 @@ test('addCents is exact', () => {
     codeScenario("拓扑排序", "实现 topoSort(nodes, edges)：nodes 是唯一字符串数组；edges 是 [from,to] 数组；未知节点或自环抛 RangeError；有环抛 Error；结果满足依赖且不修改输入。", `
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { topoSort } from './solution.mjs';
+import { topoSort } from '${SOLUTION_MODULE}';
 test('topoSort validates and orders', () => {
   const nodes = ['a','b','c'];
   assert.deepEqual(topoSort(nodes, [['a','b'],['a','c'],['b','c']]), ['a','b','c']);
@@ -542,7 +543,7 @@ test('topoSort validates and orders', () => {
     codeScenario("安全 HTML 转义", "实现 escapeHtml(text)：仅接受字符串；转义 & < > \" ' 五个字符；结果不得允许标签或属性注入；不修改输入。", `
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { escapeHtml } from './solution.mjs';
+import { escapeHtml } from '${SOLUTION_MODULE}';
 test('escapeHtml covers dangerous delimiters', () => {
   const value = '<a title="x">&\\'';
   const out = escapeHtml(value);
@@ -554,7 +555,7 @@ test('escapeHtml covers dangerous delimiters', () => {
     codeScenario("令牌桶", "实现 createTokenBucket(capacity, refillPerSecond, now)：capacity 为 1..10000 整数，refillPerSecond 为正有限数；返回 consume(amount, timestampMs) 与 tokens(timestampMs)；consume 成功返回 true、额度不足返回 false，tokens 返回当前可用数，时间倒退抛 RangeError，最多补到 capacity。", `
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createTokenBucket } from './solution.mjs';
+import { createTokenBucket } from '${SOLUTION_MODULE}';
 test('token bucket refills and rejects time travel', () => {
   const b = createTokenBucket(2, 1, 1000);
   assert.equal(b.consume(2, 1000), true);
