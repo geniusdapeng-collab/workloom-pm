@@ -2,9 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 import type { Identity } from "@workloom/base/tenancy";
 import { AssistantModelError, type AssistantModelClient } from "./model.js";
 import type { AssistantSearchClient } from "./search.js";
-import { AssistantService, systemPrompt } from "./service.js";
+import { AssistantService, systemPrompt, type AssistantTaskFacade } from "./service.js";
 import type { AssistantStore } from "./store.js";
 import type { AssistantIdentity, AssistantRun, AssistantSearchReceipt } from "./types.js";
+import type { PmRunDetail } from "../industry/ai-pm/types.js";
 
 const identity: Identity = {
   kind: "member",
@@ -59,32 +60,73 @@ const searchReceipt: AssistantSearchReceipt = {
   }],
 };
 
-function fakeStore() {
+function fakeStore(runOverrides: Partial<AssistantRun> = {}) {
+  const turnRun = { ...structuredClone(run), ...runOverrides };
   const value = {
     createTurn: vi.fn(async () => ({
-      run: structuredClone(run),
+      run: turnRun,
       userMessage: {
-        id: "am-user", seq: "1", sessionId: run.sessionId, role: "user", parts: [{ type: "text", text: "搜索官方计费" }],
-        parentMessageId: null, clientMessageId: "client-1", runId: run.id, status: "completed",
+        id: "am-user", seq: "1", sessionId: turnRun.sessionId, role: "user", parts: [{ type: "text", text: "搜索官方计费" }],
+        parentMessageId: null, clientMessageId: "client-1", runId: turnRun.id, status: "completed",
         createdAt: new Date(0).toISOString(), finishedAt: new Date(0).toISOString(),
       },
       assistantMessage: {
-        id: "am-assistant", seq: "2", sessionId: run.sessionId, role: "assistant", parts: [{ type: "text", text: "" }],
-        parentMessageId: "am-user", clientMessageId: null, runId: run.id, status: "pending",
+        id: "am-assistant", seq: "2", sessionId: turnRun.sessionId, role: "assistant", parts: [{ type: "text", text: "" }],
+        parentMessageId: "am-user", clientMessageId: null, runId: turnRun.id, status: "pending",
         createdAt: new Date(0).toISOString(), finishedAt: null,
       },
       replayed: false,
     })),
     startRun: vi.fn(),
     reserveBudget: vi.fn(async () => ({ budgetDate: "2026-10-30" })),
+    setRunThread: vi.fn(async () => undefined),
     updateSearchState: vi.fn(async () => undefined),
-    appendEvent: vi.fn(),
+    appendEvent: vi.fn(async () => undefined),
     historyForRun: vi.fn(async () => []),
-    finishRun: vi.fn(),
+    finishRun: vi.fn(async () => undefined),
     failRun: vi.fn(async () => undefined),
-    settleBudget: vi.fn(),
+    settleBudget: vi.fn(async () => undefined),
   };
   return value;
+}
+
+const completedTaskDetail = {
+  run: {
+    id: "pm-run-1",
+    status: "completed",
+    modelId: "deepseek-flash",
+    usage: { promptTokens: 88, completionTokens: 44 },
+    error: null,
+    verification: { verifiedAt: "2026-10-30T02:30:00.000Z" },
+    planningReceipts: [],
+  },
+  tasks: [{
+    id: "task-1",
+    status: "completed",
+    presetKey: "chief-pm",
+    adapterReceipt: { modelCalls: 2 },
+    attemptReceipts: [],
+  }],
+  artifacts: [{
+    id: "artifact-1",
+    runId: "pm-run-1",
+    taskId: "task-1",
+    path: "outputs/report.md",
+    sha256: "a".repeat(64),
+    sizeBytes: 42,
+    mediaType: "text/markdown",
+    verifiedAt: "2026-10-30T02:30:00.000Z",
+  }],
+} as unknown as PmRunDetail;
+
+function completedTaskFacade(detail = completedTaskDetail): AssistantTaskFacade {
+  return {
+    create: vi.fn(async () => detail),
+    start: vi.fn(async () => detail),
+    detail: vi.fn(async () => detail),
+    cancel: vi.fn(async () => detail),
+    artifact: vi.fn(),
+  };
 }
 
 describe("assistant web search orchestration", () => {
@@ -192,11 +234,53 @@ describe("assistant web search orchestration", () => {
       webSearch: true,
     });
     await vi.waitFor(() => expect(store.failRun).toHaveBeenCalledOnce());
+    expect(store.settleBudget.mock.invocationCallOrder[0]).toBeLessThan(
+      store.finishRun.mock.invocationCallOrder[0]!,
+    );
     expect(store.settleBudget).toHaveBeenCalledWith(assistantIdentity.assistantScope, expect.objectContaining({
       usage,
       reservedCalls: 1,
       reservedSearchCalls: 1,
       searchCallsUsed: 1,
+    }));
+    expect(store.settleBudget).not.toHaveBeenCalledWith(
+      assistantIdentity.assistantScope,
+      expect.objectContaining({ blockedReason: expect.any(String) }),
+    );
+  });
+
+  it("settles completed task usage before task message persistence", async () => {
+    const store = fakeStore({ mode: "task", webSearchRequested: false });
+    store.finishRun.mockRejectedValueOnce(new Error("task message persistence failed"));
+    const service = new AssistantService({
+      store: store as unknown as AssistantStore,
+      model: {
+        model: "deepseek-flash",
+        stream: vi.fn(async () => {
+          throw new Error("ask model must not run in task mode");
+        }),
+      },
+      search: { configured: false, search: vi.fn() },
+      events: { append: vi.fn() },
+      taskFacade: completedTaskFacade(),
+    });
+    await service.send(assistantIdentity, run.sessionId, {
+      text: "生成并验证研发产物",
+      mode: "task",
+      clientMessageId: "client-4",
+      webSearch: false,
+    });
+    await vi.waitFor(() => expect(store.failRun).toHaveBeenCalledOnce());
+    expect(store.settleBudget).toHaveBeenCalledOnce();
+    expect(store.settleBudget.mock.invocationCallOrder[0]).toBeLessThan(
+      store.finishRun.mock.invocationCallOrder[0]!,
+    );
+    expect(store.settleBudget).toHaveBeenCalledWith(assistantIdentity.assistantScope, expect.objectContaining({
+      usage: { promptTokens: 88, completionTokens: 44, totalTokens: 132 },
+      reservedCalls: 65,
+      callsUsed: 2,
+      reservedSearchCalls: 0,
+      searchCallsUsed: 0,
     }));
     expect(store.settleBudget).not.toHaveBeenCalledWith(
       assistantIdentity.assistantScope,

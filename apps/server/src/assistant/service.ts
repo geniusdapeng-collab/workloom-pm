@@ -495,16 +495,22 @@ export class AssistantService {
         });
       }
       if (run.mode === "task") {
-        const accounting = await this.executeTask(identity, run, text, controller, searchReceipt);
-        settled = true;
+        const latest = await this.executeTask(identity, run, text, controller, searchReceipt);
+        const usage = {
+          promptTokens: latest.run.usage.promptTokens,
+          completionTokens: latest.run.usage.completionTokens,
+          totalTokens: latest.run.usage.promptTokens + latest.run.usage.completionTokens,
+        };
         await this.store.settleBudget(scope, {
           budgetDate,
-          usage: accounting.usage,
+          usage,
           reservedCalls: MAX_TASK_MODEL_CALLS,
-          callsUsed: accounting.callsUsed,
+          callsUsed: taskCallCount(latest),
           reservedSearchCalls,
           searchCallsUsed,
         });
+        settled = true;
+        await this.finishTaskRun(scope, run, latest, searchReceipt);
         return;
       }
 
@@ -634,7 +640,7 @@ export class AssistantService {
     text: string,
     controller: AbortController,
     searchReceipt: AssistantSearchReceipt | null,
-  ): Promise<{ usage: AssistantUsage; callsUsed: number }> {
+  ): Promise<PmRunDetail> {
     const scope = identity.assistantScope;
     const created = await this.taskFacade.create(
       scope,
@@ -686,6 +692,15 @@ export class AssistantService {
         taskId: artifact.taskId,
       });
     }
+    return latest;
+  }
+
+  private async finishTaskRun(
+    scope: AssistantScope,
+    run: AssistantRun,
+    latest: PmRunDetail,
+    searchReceipt: AssistantSearchReceipt | null,
+  ): Promise<void> {
     const narrative = taskNarrative(latest);
     await this.store.finishRun(scope, run.id, {
       text: narrative,
@@ -735,14 +750,6 @@ export class AssistantService {
           : new Date().toISOString(),
       },
     });
-    return {
-      usage: {
-        promptTokens: latest.run.usage.promptTokens,
-        completionTokens: latest.run.usage.completionTokens,
-        totalTokens: latest.run.usage.promptTokens + latest.run.usage.completionTokens,
-      },
-      callsUsed: taskCallCount(latest),
-    };
   }
 
   private async safeEvent(scope: AssistantScope, input: Parameters<AssistantEventSink["append"]>[1]): Promise<void> {
