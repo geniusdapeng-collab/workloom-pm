@@ -33,6 +33,8 @@ const OUT_DIR = resolve(process.env.ASSISTANT_EVAL_OUT ?? join(ROOT, "outputs/as
 const MAX_CASES = numberEnv("ASSISTANT_EVAL_MAX_CASES", 218, 1, 218);
 const REQUEST_TIMEOUT_MS = numberEnv("ASSISTANT_EVAL_REQUEST_TIMEOUT_MS", 150_000, 30_000, 300_000);
 const TARGET_CASES = 218;
+const RETRY_TASK_IDS = (process.env.ASSISTANT_EVAL_RETRY_TASK_IDS ?? "")
+  .split(",").map((value) => value.trim()).filter(Boolean);
 
 if (!/^[A-Za-z0-9_.:-]{1,160}$/.test(SUITE_ID)) throw new Error("ASSISTANT_EVAL_SUITE_ID 含非法字符");
 
@@ -80,6 +82,7 @@ function outputSchema(requiredFacts, webSearch = false) {
     "只返回一个严格 JSON 对象，不要 Markdown 代码围栏，不要对象外文字。",
     "对象必须恰好包含以下键：",
     keys,
+    "禁止新增任何额外键；额外键即使值是空字符串、空数组或 null 也不允许。",
     "answer 请控制在 800 字以内。不得声称已执行未提供的工具、测试、部署、发布或外部动作。",
     ...(webSearch ? ["sources 中的 URL 必须来自服务端真实搜索回执，不得自行补造。"] : []),
   ].join("\n");
@@ -251,6 +254,19 @@ function buildCases() {
   return cases;
 }
 
+function selectScheduledCases(cases, retryTaskIds = []) {
+  if (!retryTaskIds.length) return cases;
+  const byId = new Map(cases.map((task) => [task.id, task]));
+  const selected = [];
+  for (const id of retryTaskIds) {
+    if (!/^AS218-\d{3}$/.test(id)) throw new Error(`重跑任务号无效：${id}`);
+    const task = byId.get(id);
+    if (!task) throw new Error(`重跑任务不存在：${id}`);
+    if (!selected.includes(task)) selected.push(task);
+  }
+  return selected;
+}
+
 async function loadIdentity() {
   const pool = new pg.Pool({ connectionString: DATABASE_URL, max: 2 });
   try {
@@ -404,6 +420,7 @@ async function main() {
   ensurePrivate(OUT_DIR);
   const cases = buildCases();
   const selected = cases.slice(0, MAX_CASES);
+  const scheduled = selectScheduledCases(selected, RETRY_TASK_IDS);
   const identity = await loadIdentity();
   const token = await signDemoToken(identity);
   const csrf = randomBytes(32).toString("hex");
@@ -419,13 +436,22 @@ async function main() {
     memberNo: identity.memberNo,
     targetCases: TARGET_CASES,
     selectedCases: selected.length,
+    scheduledCases: scheduled.length,
+    retryTaskIds: RETRY_TASK_IDS,
     startedAt: prior[0]?.startedAt ?? now(),
     databaseIdentitySha256: digest(`${identity.tenantId}\0${identity.workspaceId}\0${identity.memberNo}`),
   });
-  appendJson(eventsPath, { at: now(), event: "suite_start", suiteId: SUITE_ID, cases: selected.length });
+  appendJson(eventsPath, {
+    at: now(),
+    event: "suite_start",
+    suiteId: SUITE_ID,
+    cases: selected.length,
+    scheduledCases: scheduled.length,
+    retryTaskIds: RETRY_TASK_IDS,
+  });
 
-  for (const [index, task] of selected.entries()) {
-    if (passed.has(task.id)) continue;
+  for (const [index, task] of scheduled.entries()) {
+    if (!RETRY_TASK_IDS.length && passed.has(task.id)) continue;
     const startedAt = now();
     const startedMs = performance.now();
     let session;
@@ -435,7 +461,7 @@ async function main() {
         method: "POST",
         body: JSON.stringify({ title: `${task.id} ${task.title}`.slice(0, 160) }),
       });
-      appendJson(eventsPath, { at: now(), event: "case_start", taskId: task.id, category: task.category, index: index + 1, total: selected.length });
+      appendJson(eventsPath, { at: now(), event: "case_start", taskId: task.id, category: task.category, index: index + 1, total: scheduled.length });
       const turn = await request(`/sessions/${encodeURIComponent(session.id)}/messages`, token, csrf, {
         method: "POST",
         body: JSON.stringify({ clientMessageId: randomUUID(), mode: "ask", webSearch: task.webSearch, text: task.prompt }),
@@ -471,7 +497,7 @@ async function main() {
       appendJson(eventsPath, { at: now(), event: "case_finish", taskId: task.id, passed: result.passed,
         latencyMs, responseId: result.responseId, usage: result.usage });
       console.log(JSON.stringify({ event: "case_finish", taskId: task.id, passed: result.passed,
-        latencyMs, progress: `${index + 1}/${selected.length}` }));
+        latencyMs, progress: `${index + 1}/${scheduled.length}` }));
       await request(`/sessions/${encodeURIComponent(session.id)}/archive`, token, csrf, {
         method: "POST", body: JSON.stringify({ archived: true }),
       }).catch(() => undefined);
@@ -495,7 +521,7 @@ async function main() {
       appendJson(eventsPath, { at: now(), event: "case_error", taskId: task.id,
         failureCode: result.errorCode, error: result.error });
       console.log(JSON.stringify({ event: "case_error", taskId: task.id,
-        failureCode: result.errorCode, progress: `${index + 1}/${selected.length}` }));
+        failureCode: result.errorCode, progress: `${index + 1}/${scheduled.length}` }));
       if (/401|403|BUDGET|RATE_LIMIT|NETWORK/.test(`${result.errorCode} ${result.error}`)) break;
     }
   }
@@ -523,6 +549,8 @@ async function main() {
     suiteId: SUITE_ID,
     targetCases: TARGET_CASES,
     selectedCases: selected.length,
+    scheduledCases: scheduled.length,
+    retryTaskIds: RETRY_TASK_IDS,
     executed: completed.length,
     passed: completed.filter((row) => row.passed).length,
     failed: completed.filter((row) => !row.passed).length,
@@ -547,7 +575,7 @@ async function main() {
   else if (summary.failed) process.exitCode = 2;
 }
 
-export { buildCases, evaluateCase, parseJson, secretShape };
+export { buildCases, evaluateCase, parseJson, secretShape, selectScheduledCases };
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   main().catch((error) => {

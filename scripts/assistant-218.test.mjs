@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildCases, evaluateCase } from "./assistant-218.mjs";
+import { buildCases, evaluateCase, selectScheduledCases } from "./assistant-218.mjs";
 
 test("assistant live evaluation generates exactly 218 varied, uniquely identified cases", () => {
   const cases = buildCases();
@@ -15,6 +15,7 @@ test("assistant live evaluation generates exactly 218 varied, uniquely identifie
     assert.ok(item.prompt.length > 80);
     assert.ok(item.required.length >= 1);
     assert.match(item.prompt, /严格 JSON/);
+    assert.match(item.prompt, /禁止新增任何额外键/);
   }
 });
 
@@ -57,4 +58,12 @@ test("assistant evaluation rejects malformed JSON and incomplete model receipts"
   ], { eventCount: 1, errors: [] });
   assert.equal(malformed.passed, false);
   assert.equal(malformed.checks.find((check) => check.id === "strict_json")?.passed, false);
+});
+
+test("assistant evaluation retries an explicit failed-task subset without changing the denominator", () => {
+  const cases = buildCases();
+  const selected = selectScheduledCases(cases, ["AS218-096", "AS218-195", "AS218-008", "AS218-096"]);
+  assert.deepEqual(selected.map((item) => item.id), ["AS218-096", "AS218-195", "AS218-008"]);
+  assert.throws(() => selectScheduledCases(cases, ["AS218-999"]), /不存在/);
+  assert.throws(() => selectScheduledCases(cases, ["bad-id"]), /无效/);
 });

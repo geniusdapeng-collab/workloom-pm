@@ -65,6 +65,11 @@ function safeErrorMessage(value: string, apiKey: string): string {
   return value.replaceAll(apiKey, "[REDACTED]").slice(0, 1000);
 }
 
+function requestsJsonOutput(messages: AssistantModelMessage[]): boolean {
+  const latestUser = [...messages].reverse().find((message) => message.role === "user");
+  return Boolean(latestUser && /(?:strict\s+json|严格\s*(?:的\s*)?json|json\s*对象|json_object)/iu.test(latestUser.content));
+}
+
 export function createDeepSeekAssistantModel(options: {
   apiKey?: string;
   baseUrl?: string;
@@ -93,6 +98,7 @@ export function createDeepSeekAssistantModel(options: {
         throw new AssistantModelError("MODEL_INPUT_INVALID", "模型消息为空或超过单条长度上限", 400);
       }
       assertNoSecrets(input.messages);
+      const jsonOutput = requestsJsonOutput(input.messages);
       const timeout = AbortSignal.timeout(timeoutMs);
       const signal = AbortSignal.any([input.signal, timeout]);
       let response: Response;
@@ -109,6 +115,7 @@ export function createDeepSeekAssistantModel(options: {
             stream: true,
             stream_options: { include_usage: true },
             thinking: { type: "disabled" },
+            ...(jsonOutput ? { response_format: { type: "json_object" } } : {}),
             max_tokens: Math.max(1, Math.min(input.maxTokens, 8192)),
             temperature: 0.2,
           }),

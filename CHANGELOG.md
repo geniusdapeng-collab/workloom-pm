@@ -6,6 +6,9 @@
   source cards, untrusted-web-content handling, and a separate daily search
   budget.
 - Use the `Asia/Shanghai` business date in assistant prompts.
+- Enable DeepSeek JSON Output only when the latest user turn explicitly
+  requests strict JSON, reducing otherwise valid answers with one missing
+  closing bracket.
 - Keep the composer visible during long conversations at desktop and mobile
   widths.
 - Scope run evidence and mutations to the owning member, and enforce the
