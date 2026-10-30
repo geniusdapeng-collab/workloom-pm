@@ -519,7 +519,7 @@ function Conversation({
               onClick={onToggleWebSearch}
               disabled={isRunning || !webSearchConfigured}
               aria-pressed={webSearch}
-              title={webSearchConfigured ? "本轮先调用 DeepSeek Search，再结合真实来源回答" : "服务端未配置 DeepSeek 搜索凭据"}
+              title={webSearchConfigured ? "本轮先调用 DeepSeek 网页搜索，再结合真实来源回答" : "服务端未配置 DeepSeek 搜索凭据"}
             >
               <span>联</span> 联网搜索
             </button>
