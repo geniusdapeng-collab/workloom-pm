@@ -8,7 +8,7 @@ import type { AssembledPreset } from "@workloom/runtime";
 import { bundlesRoot, loadVerifiedBundleManifest, loadVerifiedBundleWorkforcePresets } from "@workloom/base/bundles";
 import type { CompletionProvider, CompletionResult } from "@workloom/base/model-router";
 import { ArtifactStore } from "./artifacts.js";
-import { PmTeamService } from "./service.js";
+import { PmTeamService, createOneShotEmployeeExecutor } from "./service.js";
 import { PgPmStore } from "./store.js";
 import { PmError, type EmployeeExecutionInput, type EmployeeExecutionResult, type PmAssetBinding, type PmTaskPlan, type PmScope } from "./types.js";
 import { createPmEmployeeCatalog, type PmEmployeeCatalog } from "./employees.js";
@@ -133,6 +133,59 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
     }
   }, 30_000);
 
+  it("all14 employees execute representative real tasks through the actual one-shot file and receipt pipeline", async () => {
+    const matrix = [
+      ["chief-pm", "支付故障、配色和文案错别字只有一个开发人日，请排P0/P1/P2、执行顺序、停止条件和验收证据", "P0/P1/P2"],
+      ["requirement-analyst", "设计反馈收集功能，包含三个场景、字段约束、状态流转和边界验收", "字段约束"],
+      ["competitor-scout", "扫描竞品新版本功能变化，做来源核实与威胁评级", "威胁评级"],
+      ["data-insight", "计算访问到付费漏斗转化率并输出本周指标异动日报", "转化率"],
+      ["user-listener", "聚类本周用户差评、情绪和代表原声，并起草回复建议", "代表原声"],
+      ["doc-writer", "根据已经确认的需求材料撰写完整PRD和用户可读版本说明", "完整PRD"],
+      ["industry-radar", "汇总本周AI行业政策、模型发布和投融资动态，附来源", "投融资"],
+      ["release-guardian", "为明天版本制作发布检查单、回滚预案和变更日志", "回滚预案"],
+      ["dev-orchestrator", "实现一个可通过测试的JavaScript模块并交付完整测试文件", "JavaScript模块"],
+      ["model-scout", "比较候选模型的质量、时延、成本和换型风险", "换型风险"],
+      ["eval-master", "设计正常边界和对抗评测集，并回归badcase", "badcase"],
+      ["prompt-curator", "版本化生产prompt，比较新旧版回归差异并给出回滚评估", "回归差异"],
+      ["red-teamer", "对上线候选做提示注入、越权、路径穿越和SSRF红队扫描", "SSRF"],
+      ["knowledge-curator", "盘点知识库过期与冲突条目，并生成团队学习周刊", "学习周刊"],
+    ] as const;
+    const provider = {
+      modelId: "fixture-deepseek",
+      complete: vi.fn(async (messages: Parameters<CompletionProvider["complete"]>[0]) => {
+        const input = JSON.parse(String(messages.at(-1)?.content)) as { employee: string; task: { goal: string } };
+        const row = matrix.find(([employee]) => employee === input.employee);
+        if (!row) throw new Error(`unexpected employee ${input.employee}`);
+        return completion(`# ${row[0]} 完整交付\n任务：${input.task.goal}\n关键结论：${row[2]}\n已完成隔离文件产物，未执行外部动作。`);
+      }),
+    };
+    const current = service({
+      providerFactory: () => provider,
+      employeeExecutor: undefined,
+      codingExecutor: createOneShotEmployeeExecutor(provider),
+    });
+
+    for (const [employee, goal, expected] of matrix) {
+      const detail = (await current.create(scopeA, {
+        goal,
+        idempotencyKey: randomUUID(),
+        employee,
+      }, "MEM-PM-FIXTURE")).detail;
+      await current.start(scopeA, detail.run.id);
+      const finished = await current.waitForRun(scopeA, detail.run.id);
+      expect(finished.run.status, `${employee}: ${finished.run.error ?? ""}`).toBe("completed");
+      expect(finished.tasks).toHaveLength(1);
+      expect(finished.tasks[0]?.presetKey).toBe(employee);
+      expect(finished.tasks[0]?.executionBackend).toBe("deepseek-completion");
+      expect(finished.tasks[0]?.adapterReceipt?.adapter).toBe("deepseek-completion");
+      expect(finished.artifacts).toHaveLength(1);
+      const artifact = await artifactStore.read(scopeA, finished.run.id, finished.artifacts[0]!);
+      expect(artifact, employee).toContain(expected);
+      expect(finished.run.usage.promptTokens).toBeGreaterThan(0);
+      expect(finished.run.usage.completionTokens).toBeGreaterThan(0);
+    }
+  }, 45_000);
+
   it("a self-consistently re-sealed unsafe skill still fails the semantic asset contract before employee dispatch", async () => {
     const previousRoot = process.env.BUNDLES_ROOT;
     const sourceRoot = bundlesRoot(); const isolatedRoot = await mkdtemp(join(tmpdir(), "pm-unsafe-bundle-"));
@@ -191,6 +244,64 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
     expect(events.rows.map((row) => row.action)).toContain("pm.run.completed");
     const receipts = await owner.query<{ synced: boolean }>("SELECT (payload->'receipt'->>'synced')::boolean AS synced FROM biz_events WHERE session_id=$1 AND payload->'decision'->>'action'='pm.sandbox.artifact.write'", [detail.run.id]);
     expect(receipts.rows).toHaveLength(2); expect(receipts.rows.every((row) => row.synced)).toBe(true);
+  });
+
+  it("repairs a misassigned code owner before dispatch and keeps the correction in the planning receipt", async () => {
+    const employeeCalls: string[] = [];
+    const badPlan = [{
+      id: "implementation",
+      presetKey: "doc-writer",
+      goal: "实现一个完整可测试的 JavaScript 模块",
+      dependsOn: [],
+      acceptance: ["导出可运行模块", "文件非空"],
+      outputRefs: ["src/calculator.mjs"],
+    }];
+    const current = service({
+      providerFactory: () => provider(badPlan),
+      employeeExecutor: async (input) => {
+        employeeCalls.push(input.preset.presetKey);
+        return fixtureResult(input);
+      },
+      verifyRun: async () => [],
+    });
+    const detail = await create(current, { goal: "实现一个完整可测试的 JavaScript 模块" });
+    await current.start(scopeA, detail.run.id);
+    const finished = await current.waitForRun(scopeA, detail.run.id);
+
+    expect(finished.run.status).toBe("completed");
+    expect(finished.tasks[0]?.presetKey).toBe("dev-orchestrator");
+    expect(finished.run.planningReceipt).toMatchObject({
+      ownerCorrections: [{
+        taskId: "implementation",
+        from: "doc-writer",
+        to: "dev-orchestrator",
+      }],
+    });
+    expect(employeeCalls).toEqual(["dev-orchestrator"]);
+  });
+
+  it("rejects a mixed code/evaluation task before any employee model call or artifact write", async () => {
+    const employeeCalls = vi.fn();
+    const badPlan = [{
+      id: "mixed",
+      presetKey: "dev-orchestrator",
+      goal: "同时实现代码并生成独立评测报告",
+      dependsOn: [],
+      acceptance: ["代码可运行", "评测报告完整"],
+      outputRefs: ["src/calculator.mjs", "eval/report.md"],
+    }];
+    const current = service({
+      providerFactory: () => provider(badPlan),
+      employeeExecutor: employeeCalls,
+    });
+    const detail = await create(current, { goal: "同时实现代码并生成独立评测报告" });
+    await current.start(scopeA, detail.run.id);
+    const failed = await current.waitForRun(scopeA, detail.run.id);
+
+    expect(failed.run.status).toBe("failed");
+    expect(failed.run.errorCode).toBe("PLAN_OWNER_CONFLICT");
+    expect(employeeCalls).not.toHaveBeenCalled();
+    expect(failed.artifacts).toEqual([]);
   });
 
   it("the default coding executor produces real DSH files beyond four calls and respects OS verification availability", async () => {
@@ -294,6 +405,27 @@ run("MC-PM-002 isolated PostgreSQL + real artifact state machine (model fixtures
     expect(completed.run.usage).toEqual({ promptTokens: 94, completionTokens: 49 });
     expect(completed.tasks[0]!.attemptReceipts).toHaveLength(2);
     expect(completed.tasks[0]!.usage).toEqual({ promptTokens: 40, completionTokens: 21 });
+  });
+
+  it("removes only an unregistered artifact and resumes after a database completion failure", async () => {
+    const recoveryStore = new PgPmStore(app);
+    const complete = vi.spyOn(recoveryStore, "completeTask").mockRejectedValueOnce(new Error("fixture completion commit unavailable"));
+    const current = service({ store: recoveryStore });
+    const detail = await create(current, { employee: "doc-writer", goal: "生成可核验的恢复测试文档" });
+    await current.start(scopeA, detail.run.id);
+    const failed = await current.waitForRun(scopeA, detail.run.id);
+
+    expect(failed.run.status).toBe("failed");
+    expect(failed.artifacts).toEqual([]);
+    const artifactPath = await artifactStore.resolveFile(scopeA, detail.run.id, "result.md");
+    await expect(readFile(artifactPath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+
+    await current.start(scopeA, detail.run.id, true);
+    const recovered = await current.waitForRun(scopeA, detail.run.id);
+    expect(recovered.run.status).toBe("completed");
+    expect(recovered.artifacts).toHaveLength(1);
+    expect(await artifactStore.read(scopeA, detail.run.id, recovered.artifacts[0]!)).toContain("生成可核验的恢复测试文档");
+    expect(complete).toHaveBeenCalledTimes(2);
   });
 
   it("server-owned catalog provenance survives worker forgery, mutation, paid failure and a later asset version on resume", async () => {

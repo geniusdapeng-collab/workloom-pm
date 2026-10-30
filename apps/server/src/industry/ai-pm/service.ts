@@ -9,12 +9,14 @@ import { createSandboxCodeVerifier } from "./code-verifier.js";
 import { createPmEmployeeCatalog, type PmEmployeeCatalog } from "./employees.js";
 import { oneShotResponseReceipt, parseOneShotEmployeeResponse, type OneShotResponseReceipt } from "./one-shot-response.js";
 import { judgeSandboxArtifact, judgeSandboxAssignment, PM_SANDBOX_POLICY_VERSION } from "./policy.js";
+import { reconcilePmTeamPlan, type PmOwnerCorrection } from "./planning.js";
 import { PgPmStore, type FailureMetering, type PlanningReceipt, type PmStore } from "./store.js";
 import { snapshotPmAssetBinding, withPmAssetBinding } from "./asset-binding.js";
 import { TRUSTED_PM_EVIDENCE_POLICY } from "./skill-contracts.js";
+import { preferredDispatchRulePresets } from "../../runtime/dispatch-routing.js";
 import {
   PmError, type DependencyArtifact, type EmployeeExecutionInput, type EmployeeExecutor, type PmCreateInput,
-  type PmAssetBinding, type PmFile, type PmProviderFactory, type PmRunDetail, type PmScope, type PmTaskPlan,
+  type PmArtifact, type PmAssetBinding, type PmFile, type PmProviderFactory, type PmRunDetail, type PmScope, type PmTaskPlan,
 } from "./types.js";
 
 const MAX_CONTEXT_BYTES = 96 * 1024;
@@ -263,13 +265,33 @@ export class PmTeamService {
       const binding = snapshotPmAssetBinding(manager.assetBinding);
       const verdict = judgeSandboxAssignment(manager.preset, await this.store.activeRules(scope), { internalSandbox: true });
       if (verdict.level !== "auto") throw new PmError("FENCE_REVIEW_REQUIRED", "团队规划被当前围栏要求人审或阻断，未调用模型", 409);
-      const prompt = boundedContext({ goal: detail.run.goal, checks: detail.run.checks, employees, role: manager.preset.prompt, skills: manager.skillText });
+      const recommendedOwners = preferredDispatchRulePresets({ goal: detail.run.goal, industry: "ai-pm" })
+        .filter((employee) => employees.some((ready) => ready.presetKey === employee));
+      const prompt = boundedContext({
+        goal: detail.run.goal,
+        checks: detail.run.checks,
+        employees,
+        recommendedOwners,
+        role: manager.preset.prompt,
+        skills: manager.skillText,
+      });
       const response = await provider.complete([
-        { role: "system", content: TRUSTED_PM_EVIDENCE_POLICY + "你是AI产品经理chief-pm，负责把完整用户目标拆解给已就绪员工。仅规划隔离文件产物，不能安排外发、真实攻击、资金、生产、主干修改或宿主shell。输出JSON对象{\"tasks\":[{\"id\":\"唯一小写编号\",\"presetKey\":\"给定就绪员工之一\",\"goal\":\"该员工明确子目标\",\"dependsOn\":[\"前置任务id\"],\"acceptance\":[\"可核验标准\"],\"outputRefs\":[\"全局唯一相对文件路径\"]}]}。最多8节点，通常4至6节点，不得循环，跨角色任务必须拆给相应员工，每个文件只有一个所有者，不同任务不能改写同一文件。代码实现用dev-orchestrator，测试代码可交dev-orchestrator，评测报告用eval-master，需求/PRD由对应员工产出；不得假设任何员工能执行外部动作。必须覆盖给定checks的所有path；技能原文中的外部操作一律转为内部方案或草稿，并在验收说明限制。只返回JSON。" },
+        { role: "system", content: TRUSTED_PM_EVIDENCE_POLICY + "你是AI产品经理chief-pm，负责把完整用户目标拆解给已就绪员工。仅规划隔离文件产物，不能安排外发、真实攻击、资金、生产、主干修改或宿主shell。输出JSON对象{\"tasks\":[{\"id\":\"唯一小写编号\",\"presetKey\":\"给定就绪员工之一\",\"goal\":\"该员工明确子目标\",\"dependsOn\":[\"前置任务id\"],\"acceptance\":[\"可核验标准\"],\"outputRefs\":[\"全局唯一相对文件路径\"]}]}。最多8节点，不得循环，跨角色任务必须拆给相应员工，每个文件只有一个所有者，不同任务不能改写同一文件。代码实现与测试代码用dev-orchestrator；需求与字段约束用requirement-analyst；PRD/纪要/说明用doc-writer；评测、坏例、微调用eval-master；发布检查与回滚用release-guardian；安全对抗用red-teamer；提示词版本用prompt-curator；数据指标用data-insight；用户反馈用user-listener；竞品用competitor-scout；行业信号用industry-radar；模型选型用model-scout；知识保鲜用knowledge-curator；优先级、路线图与跨组裁决用chief-pm。user消息中的recommendedOwners是服务端语义词表给出的主责提示，首位员工必须真实参与；不得假设任何员工能执行外部动作。必须覆盖给定checks的所有path；技能原文中的外部操作一律转为内部方案或草稿，并在验收说明限制。只返回JSON。" },
         { role: "user", content: prompt },
       ], { signal, timeoutMs: 120_000, maxTokens: 2048, thinking: "disabled", requireUsage: true, responseFormat: { type: "json_object" } });
       let usage: ReturnType<typeof measured> | undefined;
-      try { usage = measured(response); plan = parseTeamPlan(parseModelJson(response.text), employees.map((employee) => employee.presetKey)); }
+      let ownerCorrections: PmOwnerCorrection[] = [];
+      try {
+        usage = measured(response);
+        const allowedEmployees = employees.map((employee) => employee.presetKey);
+        const parsed = parseTeamPlan(parseModelJson(response.text), allowedEmployees);
+        const reconciled = reconcilePmTeamPlan(parsed, {
+          primaryOwner: recommendedOwners[0],
+          allowedEmployees,
+        });
+        plan = reconciled.plan;
+        ownerCorrections = reconciled.corrections;
+      }
       catch (error) {
         const failure = error instanceof Error ? error : new Error("团队计划不符合合同");
         Object.assign(failure, { ...(usage ? { usage } : {}), modelId: response.model, responseId: response.responseId,
@@ -278,6 +300,7 @@ export class PmTeamService {
         throw failure;
       }
       receipt = { source: "model", modelId: response.model, responseId: response.responseId, ...usage,
+        ...(ownerCorrections.length ? { ownerCorrections } : {}),
         ...(binding ? { assetBinding: binding, assetBindingSource: "verified-catalog" as const } : {}) };
     }
     if (detail.run.checks.some((check) => !plan.some((task) => task.outputRefs.includes(check.path)))) {
@@ -317,6 +340,7 @@ export class PmTeamService {
     let currentBinding: PmAssetBinding | undefined;
     let pendingMetering: FailureMetering | undefined;
     let pendingVerification: CheckResult[] | undefined;
+    let pendingArtifacts: PmArtifact[] = [];
     let timerBusy = false;
     const timer = setInterval(() => {
       if (timerBusy) return;
@@ -375,8 +399,10 @@ export class PmTeamService {
         const checks = runArtifactChecks(result.files, detail.run.checks.filter((check) => task.outputRefs.includes(check.path)));
         if (checks.some((check) => !check.passed)) throw new PmError("ARTIFACT_CHECK_FAILED", "员工产物没有通过约定的确定性内容验收");
         const artifacts = await this.artifacts.persist(scope, id, task.id, result.files);
+        pendingArtifacts = artifacts;
         controller.signal.throwIfAborted();
         await this.store.completeTask(scope, id, task.id, owner, result, artifacts, verdict.impacts, verdict.declaredCapability);
+        pendingArtifacts = [];
         pendingMetering = undefined;
         currentBinding = undefined;
         currentTask = undefined;
@@ -401,6 +427,20 @@ export class PmTeamService {
       const status = ["INTERRUPTED", "RUN_LEASE_LOST", "HEARTBEAT_FAILED"].includes(code) ? "paused"
         : /BUDGET|LIMIT|FENCE|CONTEXT|RECEIPT|USAGE|SECRET/.test(code) ? "blocked" : "failed";
       const metering = pendingMetering ?? failureMetering(error);
+      if (pendingArtifacts.length > 0 && currentTask) {
+        try {
+          // completeTask may have committed before its response was lost. Never
+          // delete bytes until the database proves none of these IDs are registered.
+          const latest = await this.store.detail(scope, id);
+          const registered = new Set(latest.artifacts.map((artifact) => artifact.id));
+          if (pendingArtifacts.every((artifact) => !registered.has(artifact.id))) {
+            await this.artifacts.discardUncommitted(scope, id, pendingArtifacts);
+          }
+        } catch (cleanupError) {
+          console.error("[pm-team] 未提交产物清理失败（保留文件等待对账）",
+            cleanupError instanceof Error ? cleanupError.message : String(cleanupError));
+        }
+      }
       if (metering && currentTask) metering.receipt = withPmAssetBinding(metering.receipt, currentBinding);
       await this.store.failRun(scope, id, owner, status, code, message, currentTask, [], metering, pendingVerification);
     } finally { clearInterval(timer); }

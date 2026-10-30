@@ -135,6 +135,38 @@ export class ArtifactStore {
       const text = bytes.toString("utf8"); assertNoSecrets(text); return text;
     } finally { await handle.close(); }
   }
+
+  /**
+   * Roll back files from a completed filesystem write whose database receipt
+   * transaction did not commit. The caller must first re-read pm_artifacts and
+   * prove every id is absent. Every file hash/size is verified before any
+   * unlink, so a changed or substituted file is retained for reconciliation.
+   */
+  async discardUncommitted(scope: PmScope, runId: string, artifacts: PmArtifact[]): Promise<number> {
+    const paths = new Set<string>();
+    for (const artifact of artifacts) {
+      if (artifact.runId !== runId) throw new PmError("ARTIFACT_SCOPE_MISMATCH", "待清理产物不属于当前任务");
+      const path = await this.resolveFile(scope, runId, artifact.path);
+      try {
+        await this.read(scope, runId, artifact);
+        paths.add(path);
+      } catch (error) {
+        // Already absent is the desired end state. Any other mismatch aborts
+        // before unlink so remaining evidence stays available for reconciliation.
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      }
+    }
+    let removed = 0;
+    for (const path of paths) {
+      try {
+        await unlink(path);
+        removed += 1;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      }
+    }
+    return removed;
+  }
 }
 
 function mediaType(path: string): string {

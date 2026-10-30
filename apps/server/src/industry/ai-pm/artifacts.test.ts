@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { mkdtemp, rm, symlink, writeFile, mkdir } from "node:fs/promises";
+import { mkdtemp, readFile, rm, symlink, writeFile, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ArtifactStore, runArtifactChecks } from "./artifacts.js";
@@ -26,6 +26,19 @@ describe("MC-PM-002 真实文件回执和安全纯读检查", () => {
     const file = await store.resolveFile(scope, "run-a", row!.path);
     await writeFile(file, "tampered");
     await expect(store.read(scope, "run-a", row!)).rejects.toThrow(/hash|摘要|校验/);
+  });
+  it("只回滚哈希仍匹配的未提交文件；被替换的字节保留等待对账", async () => {
+    const { store } = await setup();
+    const [row] = await store.persist(scope, "run-a", "task-a", [{ path: "result.md", content: "uncommitted" }]);
+    expect(await store.discardUncommitted(scope, "run-a", [row!])).toBe(1);
+    const path = await store.resolveFile(scope, "run-a", "result.md");
+    await expect(readFile(path, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+
+    const [changed] = await store.persist(scope, "run-a", "task-b", [{ path: "changed.md", content: "original" }]);
+    const changedPath = await store.resolveFile(scope, "run-a", "changed.md");
+    await writeFile(changedPath, "replacement");
+    await expect(store.discardUncommitted(scope, "run-a", [changed!])).rejects.toThrow(/hash|摘要|校验/);
+    expect(await readFile(changedPath, "utf8")).toBe("replacement");
   });
   it("拒符号链接与跨租户产物读取", async () => {
     const { root, store } = await setup();

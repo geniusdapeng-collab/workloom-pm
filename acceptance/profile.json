@@ -329,10 +329,10 @@
     "allowWrites": false,
     "supportDir": null,
     "target": {
-      "apiUrl": "http://127.0.0.1:8987",
-      "pcUrl": "http://127.0.0.1:5373",
-      "bMobileUrl": "http://127.0.0.1:5375",
-      "cMobileUrl": "http://127.0.0.1:5376"
+      "apiUrl": "http://localhost:8987",
+      "pcUrl": "http://localhost:5373",
+      "bMobileUrl": "http://localhost:5375",
+      "cMobileUrl": "http://localhost:5376"
     },
     "notes": "默认仅声明本产品本地源码预览档位，数据为 simulated、allowWrites=false；不得将其当作已安装客户端或生产验收。本轮只执行只读配置校验，未连接这些目标；真实受控模型评测由独立 PM driver 与逐请求预算证据约束。"
   },

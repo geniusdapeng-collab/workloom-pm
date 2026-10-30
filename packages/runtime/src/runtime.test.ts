@@ -21,6 +21,12 @@ describe("意图路由（F3.2）", () => {
     expect(ruleBasedRoute("把周五雅致大床房调价 5%").mode).toBe("quest");
   });
 
+  it("礼貌疑问句式里的明确动作仍按交付任务处理，纯查询保持ask", () => {
+    expect(ruleBasedRoute("能帮我发布这版更新吗？").mode).toBe("quest");
+    expect(ruleBasedRoute("可以帮我生成完整PRD吗？").mode).toBe("quest");
+    expect(ruleBasedRoute("能告诉我现在有多少待审批吗？").mode).toBe("ask");
+  });
+
   it("LLM 分类器输出受白名单约束；垃圾输出回落规则", async () => {
     const good: IntentClassifier = { classify: async () => ({ kind: "routed", mode: "ask", rationale: "x", via: "llm" }) };
     expect((await routeIntent("随便问问", good)).via).toBe("llm");
@@ -94,6 +100,38 @@ describe("ask 事实面排序与落款（MC-111）", () => {
     expect(askedAskDomains("昨晚夜班完成了哪些工作？")).toContain("night");
     expect(askedAskDomains("现在有多少进行中的任务？")).toContain("threads");
     expect(askedAskDomains("房间里的毛巾多久更换一次？")).toEqual(["kb"]);
+  });
+
+  it("截断标记也计入 120 字硬闸，不能先截 120 字再追加标记", async () => {
+    const { enforceAnswerLimits, ASK_ANSWER_MAX_CHARS } = await import("./ask.js");
+    const answer = enforceAnswerLimits("长".repeat(ASK_ANSWER_MAX_CHARS * 2));
+    expect(answer).toContain("已截断");
+    expect(answer.length).toBeLessThanOrEqual(ASK_ANSWER_MAX_CHARS);
+  });
+
+  it("工单事实查询失败必须标未核实，不能伪报为 0 条", async () => {
+    const { defaultAskFactProvider } = await import("./ask.js");
+    const client = {
+      async query(sql: string) {
+        if (/FROM c_tickets/i.test(sql)) throw new Error("injected ticket fact failure");
+        if (/FROM biz_events WHERE workspace_id=\$1 AND created_at/i.test(sql)) return { rows: [] };
+        if (/FROM night_runs/i.test(sql)) return { rows: [] };
+        if (/count\(\*\)::text AS n FROM biz_events WHERE workspace_id=\$1/i.test(sql)) {
+          return { rows: [{ n: "1" }] };
+        }
+        return { rows: [{ n: "0" }] };
+      },
+      release() {},
+    };
+    const pool = { connect: async () => client };
+    const result = await defaultAskFactProvider(
+      pool as never,
+      { tenantId: "tenant-fixture", workspaceId: "workspace-fixture" },
+      "今天服务台有多少工单？",
+    );
+    const ticket = result.facts.find((fact) => fact.domain === "tickets");
+    expect(ticket?.value).not.toContain("0 条未办结");
+    expect(ticket?.value).toMatch(/未核实|不可用|失败/);
   });
 });
 
