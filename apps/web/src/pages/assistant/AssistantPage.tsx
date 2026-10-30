@@ -168,6 +168,8 @@ function eventTypeText(value: string): string {
   const labels: Record<string, string> = {
     snapshot: "状态快照",
     "message.start": "开始生成",
+    "search.started": "开始搜索网页",
+    "search.completed": "网页搜索完成",
     "message.delta": "流式回答",
     "task.updated": "任务状态更新",
     "artifact.created": "产物已生成",
@@ -317,13 +319,21 @@ function MarkdownText({ text, status }: TextMessagePartProps) {
   );
 }
 
-function SourcePart({ url, title }: { url: string; title?: string }) {
+function SourcePart({ url, title, summary, siteName, publishedAt }: {
+  url: string;
+  title?: string;
+  summary?: string;
+  siteName?: string | null;
+  publishedAt?: string | null;
+}) {
   const safe = safeUrl(url);
   if (!safe) return null;
   return (
     <a className="assistant-source" href={safe} target="_blank" rel="noreferrer">
-      <span>来源</span>
+      <span>{siteName || "来源"}</span>
       <strong>{title || new URL(safe).hostname}</strong>
+      {summary ? <small>{summary}</small> : null}
+      {publishedAt ? <time dateTime={publishedAt}>{publishedAt.slice(0, 10)}</time> : null}
     </a>
   );
 }
@@ -339,7 +349,16 @@ function PersistedStructuredParts({ onDownload }: { onDownload: (runId: string, 
     <div className="assistant-structured-parts">
       {parts.map((part, index) => {
         if (part.type === "source") {
-          return <SourcePart key={`source-${index}`} url={part.url ?? ""} title={part.title} />;
+          return (
+            <SourcePart
+              key={`source-${index}`}
+              url={part.url ?? ""}
+              title={part.title}
+              summary={part.summary}
+              siteName={part.siteName}
+              publishedAt={part.publishedAt}
+            />
+          );
         }
         if (part.type === "task") {
           return (
@@ -410,7 +429,10 @@ function Conversation({
   messages,
   isRunning,
   mode,
+  webSearch,
+  webSearchConfigured,
   onModeChange,
+  onToggleWebSearch,
   onSend,
   onStop,
   onOpenEvidence,
@@ -419,7 +441,10 @@ function Conversation({
   messages: AssistantMessage[];
   isRunning: boolean;
   mode: AssistantMode;
+  webSearch: boolean;
+  webSearchConfigured: boolean;
   onModeChange: (mode: AssistantMode) => void;
+  onToggleWebSearch: () => void;
   onSend: (text: string) => Promise<void>;
   onStop: () => Promise<void>;
   onOpenEvidence: () => void;
@@ -488,6 +513,16 @@ function Conversation({
             >
               <span>派</span> 研发任务
             </button>
+            <button
+              type="button"
+              className={webSearch ? "is-active" : ""}
+              onClick={onToggleWebSearch}
+              disabled={isRunning || !webSearchConfigured}
+              aria-pressed={webSearch}
+              title={webSearchConfigured ? "本轮先调用 DeepSeek 网页搜索，再结合真实来源回答" : "服务端未配置 DeepSeek 搜索凭据"}
+            >
+              <span>联</span> 联网搜索
+            </button>
             <button type="button" className="assistant-evidence-toggle" onClick={onOpenEvidence}>
               运行证据
             </button>
@@ -502,7 +537,10 @@ function Conversation({
               aria-label="发送研发对话"
             />
             <div className="assistant-composer__actions">
-              <span className="assistant-composer__hint">{mode === "task" ? "真实团队 · 围栏 · 沙箱" : "DeepSeek 极速模型 · 流式"}</span>
+              <span className="assistant-composer__hint">
+                {mode === "task" ? "真实团队 · 围栏 · 沙箱" : "DeepSeek 极速模型 · 流式"}
+                {webSearch ? " · 先搜索后回答" : ""}
+              </span>
               <ComposerPrimitive.Cancel className="assistant-button assistant-button--ghost">停止</ComposerPrimitive.Cancel>
               <ComposerPrimitive.Send className="assistant-button assistant-button--send">
                 发送
@@ -658,6 +696,7 @@ function EvidencePanel({
         <dl>
           <div><dt>请求模型</dt><dd>{modelName(runtimeStatus?.model)}</dd></div>
           <div><dt>凭据</dt><dd className={runtimeStatus?.modelConfigured ? "is-good" : "is-bad"}>{runtimeStatus?.modelConfigured ? "已配置" : "未配置"}</dd></div>
+          <div><dt>联网搜索</dt><dd className={runtimeStatus?.webSearchConfigured ? "is-good" : "is-bad"}>{runtimeStatus?.webSearchConfigured ? `可用 · 每日 ${runtimeStatus.webSearchDailyLimit} 次` : "未配置"}</dd></div>
           <div><dt>流式</dt><dd>流式连接</dd></div>
           <div><dt>沙箱</dt><dd>{sandboxText(runtimeStatus?.codeExecution)}</dd></div>
           <div><dt>成员</dt><dd>{identity?.name ?? "—"}</dd></div>
@@ -673,6 +712,12 @@ function EvidencePanel({
             <dl>
               <div><dt>运行</dt><dd className="assistant-mono">{shortId(run.id)}</dd></div>
               <div><dt>模式</dt><dd>{run.mode === "task" ? "研发任务" : "真实问答"}</dd></div>
+              {run.webSearchRequested ? (
+                <div>
+                  <dt>联网搜索</dt>
+                  <dd>{run.searchStatus === "completed" ? `已返回 ${run.searchResultCount} 个来源` : run.searchStatus === "empty" ? "已搜索 · 无匹配来源" : clientStatusLabel(run.searchStatus)}</dd>
+                </div>
+              ) : null}
               <div><dt>输入用量</dt><dd>{usage?.promptTokens ?? "—"}</dd></div>
               <div><dt>输出用量</dt><dd>{usage?.completionTokens ?? "—"}</dd></div>
               <div><dt>响应模型</dt><dd className="assistant-mono">{modelName(run.responseModel)}</dd></div>
@@ -837,6 +882,7 @@ export default function AssistantPage() {
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [mode, setMode] = useState<AssistantMode>("ask");
+  const [webSearch, setWebSearch] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [activeRun, setActiveRun] = useState<AssistantRun | null>(null);
   const [evidence, setEvidence] = useState<RunEvidence | null>(null);
@@ -1044,10 +1090,11 @@ export default function AssistantPage() {
     const result = await sendMessage(sessionId, {
       text,
       mode,
+      webSearch,
       clientMessageId: crypto.randomUUID(),
     });
     await consumeRun(result);
-  }, [consumeRun, currentSessionId, mode]);
+  }, [consumeRun, currentSessionId, mode, webSearch]);
 
   const handleStop = useCallback(async () => {
     if (!activeRun) return;
@@ -1190,7 +1237,10 @@ export default function AssistantPage() {
             messages={messages}
             isRunning={isRunning}
             mode={mode}
+            webSearch={webSearch}
+            webSearchConfigured={status?.webSearchConfigured === true}
             onModeChange={setMode}
+            onToggleWebSearch={() => setWebSearch((value) => !value)}
             onSend={handleSend}
             onStop={handleStop}
             onOpenEvidence={() => setEvidenceOpen(true)}

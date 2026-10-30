@@ -49,6 +49,26 @@ describe("DeepSeek assistant stream parser", () => {
     expect(init).toMatchObject({ method: "POST", redirect: "error" });
     expect(String(init.body)).toContain('"stream":true');
     expect(String(init.body)).toContain('"include_usage":true');
+    expect(String(init.body)).not.toContain('"response_format"');
+  });
+
+  it("enables DeepSeek JSON Output only for an explicit strict JSON request", async () => {
+    const request = vi.fn(async (_input: string | URL | Request, _init?: RequestInit) => sseResponse([
+      "data: {\"id\":\"resp-json\",\"choices\":[{\"delta\":{\"content\":\"{\\\"answer\\\":\\\"ok\\\"}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":2,\"total_tokens\":5}}\n\n",
+      "data: [DONE]\n\n",
+    ]));
+    const client = createDeepSeekAssistantModel({
+      apiKey: testApiKey,
+      fetch: request as typeof fetch,
+    });
+    await client.stream({
+      messages: [{ role: "user", content: "只返回一个严格 JSON 对象。" }],
+      signal: AbortSignal.timeout(2_000),
+      maxTokens: 32,
+      onDelta: () => undefined,
+    });
+    const body = JSON.parse(String((request.mock.calls[0]?.[1] as RequestInit).body));
+    expect(body.response_format).toEqual({ type: "json_object" });
   });
 
   it("fails closed on upstream authentication and truncated generation", async () => {

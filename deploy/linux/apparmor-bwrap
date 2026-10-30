@@ -1,0 +1,12 @@
+# Ubuntu 24.04 sends unconfined programs into unprivileged_userns when they
+# create a user namespace. Bubblewrap needs its own narrowly matched profile so
+# it can construct the sandbox while the workload remains namespace-confined.
+
+abi <abi/4.0>,
+include <tunables/global>
+
+profile bwrap /usr/bin/bwrap flags=(unconfined) {
+  userns,
+
+  include if exists <local/bwrap>
+}

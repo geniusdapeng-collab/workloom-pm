@@ -15,6 +15,7 @@
   position: relative;
   display: grid;
   grid-template-columns: 286px minmax(0, 1fr) 318px;
+  grid-template-rows: minmax(0, 1fr);
   height: 100dvh;
   min-width: 0;
   overflow: hidden;
@@ -335,9 +336,11 @@
 .assistant-main {
   position: relative;
   display: flex;
+  min-height: 0;
   min-width: 0;
   height: 100%;
   flex-direction: column;
+  overflow: hidden;
   background:
     linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
@@ -527,6 +530,7 @@
   min-height: 0;
   flex: 1;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .assistant-thread__viewport {
@@ -793,11 +797,13 @@
 }
 
 .assistant-source {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  width: min(100%, 360px);
+  flex-direction: column;
+  align-items: flex-start;
   gap: 7px;
   margin: 7px 7px 0 0;
-  padding: 5px 8px;
+  padding: 8px 10px;
   border: 1px solid var(--as-line);
   border-radius: 6px;
   color: var(--as-text);
@@ -808,6 +814,28 @@
 
 .assistant-source span {
   color: var(--as-cyan);
+  font-size: var(--wl-text-body);
+  font-weight: 700;
+}
+
+.assistant-source strong {
+  color: var(--as-text);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.assistant-source small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--as-muted);
+  font-size: var(--wl-text-body);
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.assistant-source time {
+  color: var(--as-faint);
   font-size: var(--wl-text-body);
 }
 
@@ -890,6 +918,7 @@ button.assistant-message-card:disabled {
 .assistant-composer-shell {
   position: relative;
   z-index: 3;
+  flex: 0 0 auto;
   padding: 10px clamp(16px, 6vw, 82px) 13px;
   background: linear-gradient(180deg, transparent, rgba(9, 13, 19, 0.93) 22%, rgba(9, 13, 19, 0.98));
 }

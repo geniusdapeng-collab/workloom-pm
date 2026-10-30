@@ -19,6 +19,8 @@ export interface AssistantPart {
   runId?: string;
   status?: string;
   summary?: string;
+  siteName?: string | null;
+  publishedAt?: string | null;
   path?: string;
   sha256?: string;
   sizeBytes?: number;
@@ -55,6 +57,11 @@ export interface AssistantRun {
     completionTokens?: number;
     totalTokens?: number;
   };
+  webSearchRequested: boolean;
+  searchStatus: "not_requested" | "searching" | "completed" | "empty" | "failed" | "blocked";
+  searchQuery: string | null;
+  searchResultCount: number;
+  searchCompletedAt: string | null;
   errorCode: string | null;
   error: string | null;
   userMessageId: string;
@@ -76,6 +83,8 @@ export interface AssistantStatus {
   ok: boolean;
   model: string;
   modelConfigured: boolean;
+  webSearchConfigured: boolean;
+  webSearchDailyLimit: number;
   mode: string;
   persistence: string;
   streaming: string;
@@ -259,6 +268,7 @@ export function listMessages(sessionId: string): Promise<{ messages: AssistantMe
 export function sendMessage(sessionId: string, input: {
   text: string;
   mode: AssistantMode;
+  webSearch: boolean;
   clientMessageId: string;
 }): Promise<{
   run: AssistantRun;
@@ -302,6 +312,8 @@ export function getArtifact(runId: string, path: string): Promise<{
 const EVENT_TYPES = [
   "snapshot",
   "message.start",
+  "search.started",
+  "search.completed",
   "message.delta",
   "task.updated",
   "artifact.created",

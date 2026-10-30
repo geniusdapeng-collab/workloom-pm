@@ -47,6 +47,7 @@ function fakeStore(): AssistantStore {
     historyForRun: vi.fn(async () => []),
     getRun: vi.fn(),
     setRunThread: vi.fn(),
+    updateSearchState: vi.fn(),
     startRun: vi.fn(),
     appendEvent: vi.fn(),
     updateAssistantText: vi.fn(),

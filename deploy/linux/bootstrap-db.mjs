@@ -1,4 +1,7 @@
-import pg from "pg";
+import { createRequire } from "node:module";
+
+const requireFromRelease = createRequire(new URL("../../package.json", import.meta.url));
+const pg = requireFromRelease("pg");
 
 function required(name) {
   const value = process.env[name]?.trim();

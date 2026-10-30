@@ -19,10 +19,35 @@ export type AssistantRunStatus =
 
 export type AssistantPart =
   | { type: "text"; text: string }
-  | { type: "source"; title?: string; url: string }
+  | { type: "source"; title?: string; url: string; summary?: string; siteName?: string | null; publishedAt?: string | null }
   | { type: "task"; runId: string; status: string; summary?: string }
   | { type: "artifact"; path: string; sha256: string; sizeBytes: number; taskId: string }
   | { type: "warning"; code: string; message: string };
+
+export type AssistantSearchStatus =
+  | "not_requested"
+  | "searching"
+  | "completed"
+  | "empty"
+  | "failed"
+  | "blocked";
+
+export interface AssistantSearchSource {
+  title: string;
+  url: string;
+  snippet: string;
+  summary: string;
+  siteName: string | null;
+  publishedAt: string | null;
+  authority: number;
+  rerankScore: number | null;
+}
+
+export interface AssistantSearchReceipt {
+  query: string;
+  searchedAt: string;
+  results: AssistantSearchSource[];
+}
 
 export interface AssistantSession {
   id: string;
@@ -65,6 +90,11 @@ export interface AssistantRun {
   threadId: string | null;
   responseId: string | null;
   usage: AssistantUsage;
+  webSearchRequested: boolean;
+  searchStatus: AssistantSearchStatus;
+  searchQuery: string | null;
+  searchResultCount: number;
+  searchCompletedAt: string | null;
   errorCode: string | null;
   error: string | null;
   userMessageId: string;

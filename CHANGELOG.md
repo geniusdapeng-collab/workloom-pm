@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-10-30
+
+- Add explicit DeepSeek Search support to the cloud assistant, with persisted
+  source cards, untrusted-web-content handling, and a separate daily search
+  budget.
+- Use the `Asia/Shanghai` business date in assistant prompts.
+- Enable DeepSeek JSON Output only when the latest user turn explicitly
+  requests strict JSON, reducing otherwise valid answers with one missing
+  closing bracket.
+- On task-mode failure, settle the actual persisted PM calls instead of
+  recording the full 65-call reservation as consumed.
+- Keep the composer visible during long conversations at desktop and mobile
+  widths.
+- Scope run evidence and mutations to the owning member, and enforce the
+  concurrency cap independently for each workspace.
+- Make Ubuntu 24.04 code execution usable under AppArmor by installing a
+  path-specific Bubblewrap user-namespace profile and a real service-user
+  preflight.
+- Make Linux reinstalls reuse database credentials from `runtime.env`, restore
+  dependency/build readability and include `/usr/sbin` and `/sbin` in PATH.
+
 本文件记录 WorkLoom IM 底座的变更历史。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)。
 
 ## [0.1.3] - 2026-10-29 · 云端研发工作台与鹏经理单点入口
