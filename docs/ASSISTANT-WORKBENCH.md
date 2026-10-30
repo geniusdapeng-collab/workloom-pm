@@ -101,6 +101,7 @@ pnpm --filter @workloom/server test
 pnpm -C apps/web typecheck
 pnpm -C apps/web build
 pnpm test:assistant-218
+pnpm assistant:task-acceptance
 ```
 
 The live suite runs on the application host:
@@ -116,6 +117,10 @@ Each of the 218 cases creates a persisted session, calls the real model through
 the public assistant API, consumes SSE, reads back the stored messages and run
 receipt, validates strict JSON and domain-specific facts, and archives the test
 session. Evidence is written under `outputs/assistant-218/<suite-id>/`.
+
+The task acceptance creates one real PM DAG, requires at least two completed
+employee tasks, reads every artifact back by exact path, verifies SHA-256 and
+size, and records the task graph plus SSE event types.
 
 ## Deployment
 

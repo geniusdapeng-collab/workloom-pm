@@ -37,6 +37,7 @@
     "pm:deepseek:218:catalog:write": "node scripts/pm-deepseek-218-catalog.mjs --write",
     "test:pm-deepseek-218": "node --test scripts/pm-deepseek-218.test.mjs",
     "assistant:218": "node --import tsx scripts/assistant-218.mjs",
+    "assistant:task-acceptance": "node --import tsx scripts/assistant-task-acceptance.mjs",
     "test:assistant-218": "node --import tsx --test scripts/assistant-218.test.mjs",
     "test:pm-dsh": "node --import tsx --test apps/server/src/industry/ai-pm/acceptance/dsh-integration.mts",
     "test:release-assets": "node --test scripts/release-assets.test.mjs",

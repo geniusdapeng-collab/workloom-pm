@@ -577,6 +577,7 @@
     "scripts/pm-deepseek-218*.mjs",
     "scripts/assistant-218.mjs",
     "scripts/assistant-218.test.mjs",
+    "scripts/assistant-task-acceptance.mjs",
     "scripts/verify-repo-owned-client.test.mjs",
     "scripts/bundle-governance.test.ts",
     "scripts/hotel-seed-preflight.ts",

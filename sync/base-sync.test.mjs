@@ -775,6 +775,7 @@ test("WorkLoom PM 云端助手与产品化服务入口不进入公共 base-sync"
     "apps/server/src/assistant/**",
     "scripts/assistant-218.mjs",
     "scripts/assistant-218.test.mjs",
+    "scripts/assistant-task-acceptance.mjs",
   ]) {
     assert.ok(
       scope.raw.exclude.includes(productOwnedPath),
