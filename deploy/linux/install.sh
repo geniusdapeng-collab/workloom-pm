@@ -72,7 +72,7 @@ if (( mem_kb < 1500000 )); then printf 'At least 1.5 GiB RAM is required for pre
 if (( disk_kb < 6000000 )); then printf 'At least 6 GiB free under /opt is required; current %s KiB.\n' "$disk_kb" >&2; exit 1; fi
 
 apt-get update
-apt-get install -y ca-certificates curl xz-utils jq git bubblewrap nginx certbot python3-certbot-nginx postgresql-common
+apt-get install -y ca-certificates curl xz-utils jq git apparmor bubblewrap nginx certbot python3-certbot-nginx postgresql-common
 
 if ! command -v psql >/dev/null || [[ "$(psql --version | awk '{print $3}' | cut -d. -f1)" != 17 ]]; then
   codename="${VERSION_CODENAME:-}"
@@ -85,6 +85,12 @@ if ! command -v psql >/dev/null || [[ "$(psql --version | awk '{print $3}' | cut
 fi
 apt-get install -y postgresql-17-pgvector
 systemctl enable --now postgresql
+
+if [[ -d /etc/apparmor.d && "$(cat /sys/module/apparmor/parameters/enabled 2>/dev/null || true)" == Y ]]; then
+  install -d -m 0755 /etc/apparmor.d/local
+  install -m 0644 "$(dirname "$0")/apparmor-bwrap" /etc/apparmor.d/bwrap
+  apparmor_parser -r /etc/apparmor.d/bwrap
+fi
 
 runtime_json="$(dirname "$0")/runtime.json"
 node_version="$(jq -r .nodeVersion "$runtime_json")"
@@ -173,6 +179,9 @@ find "$release" -type f -perm /111 -exec chmod 0755 {} +
 find "$release" -type f ! -perm /111 -exec chmod 0644 {} +
 
 export PATH="$root/runtime/current/bin:$root/tooling/bin:/usr/sbin:/sbin:/usr/bin:/bin"
+if command -v bwrap >/dev/null 2>&1; then
+  runuser -u workloom-pm -- bwrap --unshare-all --ro-bind / / true >/dev/null
+fi
 runuser -u workloom-pm -- env HOME="$data_root" PATH="$PATH" \
   "$root/tooling/bin/pnpm" -C "$release" install --frozen-lockfile --prod=false
 find "$release/node_modules" -type d -exec chmod 0755 {} +

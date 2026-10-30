@@ -8,6 +8,13 @@
 - Use the `Asia/Shanghai` business date in assistant prompts.
 - Keep the composer visible during long conversations at desktop and mobile
   widths.
+- Scope run evidence and mutations to the owning member, and enforce the
+  concurrency cap independently for each workspace.
+- Make Ubuntu 24.04 code execution usable under AppArmor by installing a
+  path-specific Bubblewrap user-namespace profile and a real service-user
+  preflight.
+- Make Linux reinstalls reuse database credentials from `runtime.env`, restore
+  dependency/build readability and include `/usr/sbin` and `/sbin` in PATH.
 
 本文件记录 WorkLoom IM 底座的变更历史。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)。
 

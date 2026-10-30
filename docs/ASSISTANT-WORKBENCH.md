@@ -88,6 +88,9 @@ On Linux, generated Node tests execute through `bubblewrap`:
 
 Missing `bubblewrap`, unsupported Node or an unsafe launch configuration returns
 `OS_SANDBOX_UNAVAILABLE`; the code is not run on the host.
+On Ubuntu 24.04 with AppArmor user-namespace restrictions, the Linux installer
+also installs a path-specific `/usr/bin/bwrap` profile and requires a real
+namespace isolation preflight before activating a release.
 
 ## Verification
 

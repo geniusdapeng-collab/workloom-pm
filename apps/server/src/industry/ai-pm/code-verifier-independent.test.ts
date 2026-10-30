@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 import { createSandboxCodeVerifier, executeSandboxNodeTests } from "./code-verifier.js";
 
 const signal = () => new AbortController().signal;
-const unsupportedOsSandbox = process.platform !== "darwin" || Number(process.versions.node.split(".")[0]) < 24;
+const unsupportedOsSandbox = !["darwin", "linux"].includes(process.platform)
+  || Number(process.versions.node.split(".")[0]) < 24;
 
 // Actual evaluator attacks run only where production has a mandatory OS sandbox.
 // The other suite independently exercises real fail-closed admission elsewhere.
-describe.skipIf(unsupportedOsSandbox)("macOS Seatbelt Node24 independent code verification adversarial receipts", () => {
+describe.skipIf(unsupportedOsSandbox)("OS sandbox Node24 independent code verification adversarial receipts", () => {
   it.each([
     ["ESM assertion exports", "import assert from 'node:assert/strict';", "assert.equal=()=>{}; assert.deepEqual=()=>{};"],
     ["CJS assertion exports", "import {createRequire} from 'node:module';", "const require=createRequire(import.meta.url); const a=require('node:assert'); a.strict.equal=()=>{}; a.strictEqual=()=>{};"],

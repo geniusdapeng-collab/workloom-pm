@@ -12,6 +12,8 @@ This deployment keeps WorkLoom PM independent from PengManager:
   `ASSISTANT_DAILY_SEARCH_LIMIT` hard budget (default 100 calls/day).
 - Linux code tests run under `bubblewrap` with a private network namespace,
   read-only system mounts, a disposable workspace, and a 30-second wall clock.
+- On AppArmor-enabled Ubuntu hosts, the installer loads a narrowly matched
+  `/usr/bin/bwrap` user-namespace profile before the sandbox preflight.
 
 ## Install
 
@@ -28,6 +30,8 @@ bash deploy/linux/install.sh --sha <full-main-sha> --domain pm.pengmanager.com
 The install script downloads the exact GitHub commit archive, Node 24.22.1 from
 the official Node distribution after SHA-256 verification, and pnpm 10.14.0.
 It does not replace the host Node installation.
+It installs the reviewed Bubblewrap profile and fails before activation if a
+namespace isolation preflight cannot run.
 
 ## TLS and Nginx
 
