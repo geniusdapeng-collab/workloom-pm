@@ -599,7 +599,17 @@ export class AssistantService {
       const known = error instanceof AssistantModelError || error instanceof AssistantStoreError;
       const code = cancelled ? "MODEL_CANCELLED" : known ? error.code : "ASSISTANT_RUN_FAILED";
       const message = redactError(error);
-      const usage = error instanceof AssistantModelError ? error.usage : undefined;
+      const taskDetail = run.mode === "task" && run.threadId
+        ? await this.taskFacade.detail(scope, run.threadId).catch(() => null)
+        : null;
+      const taskUsage = taskDetail && (taskDetail.run.usage.promptTokens > 0 || taskDetail.run.usage.completionTokens > 0)
+        ? {
+            promptTokens: taskDetail.run.usage.promptTokens,
+            completionTokens: taskDetail.run.usage.completionTokens,
+            totalTokens: taskDetail.run.usage.promptTokens + taskDetail.run.usage.completionTokens,
+          }
+        : undefined;
+      const usage = error instanceof AssistantModelError ? error.usage : taskUsage;
       const responseId = error instanceof AssistantModelError ? error.responseId : undefined;
       if (run.webSearchRequested && !searchReceipt) {
         await this.store.updateSearchState(scope, run.id, {
@@ -621,7 +631,7 @@ export class AssistantService {
           budgetDate,
           usage,
           reservedCalls: run.mode === "task" ? MAX_TASK_MODEL_CALLS : 1,
-          callsUsed: run.mode === "task" ? MAX_TASK_MODEL_CALLS : 1,
+          callsUsed: run.mode === "task" ? (taskDetail ? taskCallCount(taskDetail) : MAX_TASK_MODEL_CALLS) : 1,
           reservedSearchCalls,
           searchCallsUsed,
           blockedReason: usage ? undefined : cancelled ? undefined : "模型请求未取得完整用量，预算账本已冻结",
@@ -660,6 +670,7 @@ export class AssistantService {
       identity.memberNo,
     );
     await this.store.setRunThread(scope, run.id, created.run.id);
+    run.threadId = created.run.id;
     await this.store.appendEvent(scope, run.id, run.sessionId, "task.updated", {
       taskRunId: created.run.id,
       status: created.run.status,

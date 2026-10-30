@@ -9,6 +9,8 @@
 - Enable DeepSeek JSON Output only when the latest user turn explicitly
   requests strict JSON, reducing otherwise valid answers with one missing
   closing bracket.
+- On task-mode failure, settle the actual persisted PM calls instead of
+  recording the full 65-call reservation as consumed.
 - Keep the composer visible during long conversations at desktop and mobile
   widths.
 - Scope run evidence and mutations to the owning member, and enforce the

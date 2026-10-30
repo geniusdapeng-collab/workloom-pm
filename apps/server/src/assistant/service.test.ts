@@ -129,6 +129,27 @@ function completedTaskFacade(detail = completedTaskDetail): AssistantTaskFacade 
   };
 }
 
+const failedTaskDetail = {
+  ...completedTaskDetail,
+  run: {
+    ...completedTaskDetail.run,
+    status: "failed",
+    usage: { promptTokens: 70, completionTokens: 30 },
+    error: "upstream transient failure",
+    errorCode: "EMPLOYEE_EXECUTION_FAILED",
+  },
+  tasks: [
+    completedTaskDetail.tasks[0],
+    {
+      ...completedTaskDetail.tasks[0],
+      id: "task-2",
+      status: "failed",
+      adapterReceipt: { modelCalls: 2 },
+    },
+  ],
+  artifacts: completedTaskDetail.artifacts,
+} as unknown as PmRunDetail;
+
 describe("assistant web search orchestration", () => {
   it("searches before the model, persists real sources, and settles both budgets", async () => {
     const store = fakeStore();
@@ -286,6 +307,35 @@ describe("assistant web search orchestration", () => {
       assistantIdentity.assistantScope,
       expect.objectContaining({ blockedReason: expect.any(String) }),
     );
+  });
+
+  it("settles actual task calls instead of the full reservation when a task node fails", async () => {
+    const store = fakeStore({ mode: "task", webSearchRequested: false });
+    const facade = completedTaskFacade(failedTaskDetail);
+    const service = new AssistantService({
+      store: store as unknown as AssistantStore,
+      model: {
+        model: "deepseek-flash",
+        stream: vi.fn(),
+      },
+      search: { configured: false, search: vi.fn() },
+      events: { append: vi.fn() },
+      taskFacade: facade,
+    });
+    await service.send(assistantIdentity, run.sessionId, {
+      text: "执行一个最终节点失败的任务",
+      mode: "task",
+      clientMessageId: "client-failed-task",
+      webSearch: false,
+    });
+    await vi.waitFor(() => expect(store.failRun).toHaveBeenCalledOnce());
+    expect(store.settleBudget).toHaveBeenCalledWith(assistantIdentity.assistantScope, expect.objectContaining({
+      usage: { promptTokens: 70, completionTokens: 30, totalTokens: 100 },
+      reservedCalls: 65,
+      callsUsed: 4,
+      reservedSearchCalls: 0,
+      searchCallsUsed: 0,
+    }));
   });
 
   it("limits concurrent runs per workspace instead of across all tenants", async () => {
