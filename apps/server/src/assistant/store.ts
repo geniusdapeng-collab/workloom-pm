@@ -426,19 +426,27 @@ export class PgAssistantStore implements AssistantStore {
     return this.tx(scope, async (client) => {
       const run = await client.query<{ session_id: string; user_message_id: string }>(
         `SELECT session_id,user_message_id FROM assistant_runs
-          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3`,
-        [runId, scope.tenantId, scope.workspaceId],
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND owner_member_no=$4`,
+        [runId, scope.tenantId, scope.workspaceId, scope.memberNo],
       );
       if (!run.rows[0]) throw new AssistantStoreError("RUN_NOT_FOUND", "运行不存在或无权访问", 404);
       const result = await client.query<Row>(
         `SELECT * FROM (
            SELECT * FROM assistant_messages
             WHERE session_id=$1 AND tenant_id=$2 AND workspace_id=$3
+              AND owner_member_no=$4
               AND role IN ('user','assistant') AND status='completed'
-              AND id<>$4
-            ORDER BY seq DESC LIMIT $5
+              AND id<>$5
+            ORDER BY seq DESC LIMIT $6
          ) recent ORDER BY seq ASC`,
-        [run.rows[0].session_id, scope.tenantId, scope.workspaceId, run.rows[0].user_message_id, limit],
+        [
+          run.rows[0].session_id,
+          scope.tenantId,
+          scope.workspaceId,
+          scope.memberNo,
+          run.rows[0].user_message_id,
+          limit,
+        ],
       );
       return result.rows.map(messageRow);
     });
@@ -447,8 +455,9 @@ export class PgAssistantStore implements AssistantStore {
   async getRun(scope: AssistantScope, id: string): Promise<AssistantRun> {
     return this.tx(scope, async (client) => {
       const result = await client.query<Row>(
-        `SELECT * FROM assistant_runs WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3`,
-        [id, scope.tenantId, scope.workspaceId],
+        `SELECT * FROM assistant_runs
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND owner_member_no=$4`,
+        [id, scope.tenantId, scope.workspaceId, scope.memberNo],
       );
       if (!result.rows[0]) throw new AssistantStoreError("RUN_NOT_FOUND", "运行不存在或无权访问", 404);
       return runRow(result.rows[0]);
@@ -458,9 +467,9 @@ export class PgAssistantStore implements AssistantStore {
   async setRunThread(scope: AssistantScope, runId: string, threadId: string): Promise<void> {
     await this.tx(scope, async (client) => {
       const result = await client.query(
-        `UPDATE assistant_runs SET thread_id=$4,updated_at=now()
-          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3`,
-        [runId, scope.tenantId, scope.workspaceId, threadId],
+        `UPDATE assistant_runs SET thread_id=$5,updated_at=now()
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND owner_member_no=$4`,
+        [runId, scope.tenantId, scope.workspaceId, scope.memberNo, threadId],
       );
       if (!result.rowCount) throw new AssistantStoreError("RUN_NOT_FOUND", "运行不存在或无权修改", 404);
     });
@@ -475,16 +484,18 @@ export class PgAssistantStore implements AssistantStore {
     await this.tx(scope, async (client) => {
       const result = await client.query(
         `UPDATE assistant_runs
-            SET search_status=$4,
-                search_query=COALESCE($5,search_query),
-                search_result_count=COALESCE($6,search_result_count),
-                search_completed_at=$7,
+            SET search_status=$5,
+                search_query=COALESCE($6,search_query),
+                search_result_count=COALESCE($7,search_result_count),
+                search_completed_at=$8,
                 updated_at=now()
-          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND web_search_requested=true`,
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND owner_member_no=$4
+            AND web_search_requested=true`,
         [
           runId,
           scope.tenantId,
           scope.workspaceId,
+          scope.memberNo,
           input.status,
           input.query ?? null,
           input.resultCount ?? null,
@@ -500,9 +511,9 @@ export class PgAssistantStore implements AssistantStore {
       const result = await client.query<{ assistant_message_id: string }>(
         `UPDATE assistant_runs
             SET status='running',started_at=COALESCE(started_at,now()),updated_at=now()
-          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND status='queued'
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND owner_member_no=$4 AND status='queued'
           RETURNING assistant_message_id`,
-        [runId, scope.tenantId, scope.workspaceId],
+        [runId, scope.tenantId, scope.workspaceId, scope.memberNo],
       );
       if (!result.rows[0]) throw new AssistantStoreError("RUN_STATE_CONFLICT", "运行已开始、取消或状态不匹配", 409);
       await client.query(
@@ -515,11 +526,23 @@ export class PgAssistantStore implements AssistantStore {
 
   async appendEvent(scope: AssistantScope, runId: string, sessionId: string, type: string, payload: Record<string, unknown> = {}): Promise<void> {
     await this.tx(scope, async (client) => {
-      await client.query(
+      const result = await client.query(
         `INSERT INTO assistant_run_events(run_id,session_id,tenant_id,workspace_id,type,payload)
-         VALUES($1,$2,$3,$4,$5,$6::jsonb)`,
-        [runId, sessionId, scope.tenantId, scope.workspaceId, type, JSON.stringify(payload)],
+         SELECT id,session_id,tenant_id,workspace_id,$5,$6::jsonb
+           FROM assistant_runs
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND owner_member_no=$4
+            AND session_id=$7`,
+        [
+          runId,
+          scope.tenantId,
+          scope.workspaceId,
+          scope.memberNo,
+          type,
+          JSON.stringify(payload),
+          sessionId,
+        ],
       );
+      if (!result.rowCount) throw new AssistantStoreError("RUN_NOT_FOUND", "运行不存在或无权写入", 404);
     });
   }
 
@@ -530,6 +553,7 @@ export class PgAssistantStore implements AssistantStore {
             SET parts=$5::jsonb
            FROM assistant_runs r
           WHERE r.id=$1 AND r.tenant_id=$2 AND r.workspace_id=$3
+            AND r.owner_member_no=$4
             AND m.id=r.assistant_message_id AND m.tenant_id=r.tenant_id AND m.workspace_id=r.workspace_id
             AND m.status IN ('pending','streaming')
           RETURNING m.id AS assistant_message_id`,
@@ -552,10 +576,10 @@ export class PgAssistantStore implements AssistantStore {
         `UPDATE assistant_runs
             SET status='completed',response_id=$4,response_model=$5,usage=$6::jsonb,thread_id=COALESCE($7,thread_id),
                 error=NULL,error_code=NULL,finished_at=now(),updated_at=now()
-          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND status='running'
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND owner_member_no=$8 AND status='running'
           RETURNING assistant_message_id,session_id`,
         [runId, scope.tenantId, scope.workspaceId, input.responseId ?? null,
-          input.responseModel ?? null, JSON.stringify(input.usage ?? {}), input.threadId ?? null],
+          input.responseModel ?? null, JSON.stringify(input.usage ?? {}), input.threadId ?? null, scope.memberNo],
       );
       if (!result.rows[0]) throw new AssistantStoreError("RUN_STATE_CONFLICT", "运行已结束或状态不匹配", 409);
       await client.query(
@@ -598,10 +622,11 @@ export class PgAssistantStore implements AssistantStore {
         `UPDATE assistant_runs
             SET status=$4,error_code=$5,error=$6,usage=COALESCE($7::jsonb,usage),
                 response_id=COALESCE($8,response_id),finished_at=now(),updated_at=now()
-          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND status IN ('queued','running')
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND owner_member_no=$9
+            AND status IN ('queued','running')
           RETURNING assistant_message_id,session_id`,
         [runId, scope.tenantId, scope.workspaceId, input.status, input.code, input.message.slice(0, 1000),
-          input.usage ? JSON.stringify(input.usage) : null, input.responseId ?? null],
+          input.usage ? JSON.stringify(input.usage) : null, input.responseId ?? null, scope.memberNo],
       );
       if (!result.rows[0]) return;
       const text = input.text?.trim() || `本次运行未完成：${input.message}`;
@@ -625,6 +650,12 @@ export class PgAssistantStore implements AssistantStore {
 
   async getEvents(scope: AssistantScope, runId: string, afterId: string, limit = 200): Promise<AssistantRunEvent[]> {
     return this.tx(scope, async (client) => {
+      const run = await client.query(
+        `SELECT 1 FROM assistant_runs
+          WHERE id=$1 AND tenant_id=$2 AND workspace_id=$3 AND owner_member_no=$4`,
+        [runId, scope.tenantId, scope.workspaceId, scope.memberNo],
+      );
+      if (!run.rowCount) throw new AssistantStoreError("RUN_NOT_FOUND", "运行不存在或无权访问", 404);
       const result = await client.query<Row>(
         `SELECT e.* FROM assistant_run_events e
           WHERE e.run_id=$1 AND e.tenant_id=$2 AND e.workspace_id=$3 AND e.id>$4
@@ -646,7 +677,9 @@ export class PgAssistantStore implements AssistantStore {
       throw new AssistantStoreError("INVALID_BUDGET_CONFIG", "搜索预算预留必须是 0..10000 的整数", 503);
     }
     return this.tx(scope, async (client) => {
-      const dateResult = await client.query<{ budget_date: string }>("SELECT current_date::text AS budget_date");
+      const dateResult = await client.query<{ budget_date: string }>(
+        "SELECT (now() AT TIME ZONE 'Asia/Shanghai')::date::text AS budget_date",
+      );
       const budgetDate = dateResult.rows[0]!.budget_date;
       // Materialize today's row before locking it. SELECT ... FOR UPDATE cannot
       // serialize two callers when the row does not exist yet, which would let

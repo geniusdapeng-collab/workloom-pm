@@ -60,6 +60,10 @@ runDb("assistant budget ledger in isolated PostgreSQL", () => {
         .filter((result): result is PromiseFulfilledResult<{ budgetDate: string }> => result.status === "fulfilled")
         .map((result) => result.value);
       expect(admitted).toHaveLength(2);
+      const shanghaiDate = await owner.query<{ budget_date: string }>(
+        "SELECT (now() AT TIME ZONE 'Asia/Shanghai')::date::text AS budget_date",
+      );
+      expect(admitted[0]!.budgetDate).toBe(shanghaiDate.rows[0]!.budget_date);
       expect(reservations.filter((result) => result.status === "rejected")).toHaveLength(1);
 
       await store.settleBudget(scope, {
@@ -153,6 +157,12 @@ runDb("assistant budget ledger in isolated PostgreSQL", () => {
       if (previous === undefined) delete process.env.ASSISTANT_DAILY_SEARCH_LIMIT;
       else process.env.ASSISTANT_DAILY_SEARCH_LIMIT = previous;
     }
+  });
+
+  it("does not expose another member's run or event stream in the same workspace", async () => {
+    const otherMember = { ...scope, memberNo: "MEM-OTHER" };
+    await expect(store.getRun(otherMember, run.id)).rejects.toMatchObject({ code: "RUN_NOT_FOUND" });
+    await expect(store.getEvents(otherMember, run.id, "0")).rejects.toMatchObject({ code: "RUN_NOT_FOUND" });
   });
 
   it("persists source-card messages above the removed B-tree expression limit and still finds them", async () => {

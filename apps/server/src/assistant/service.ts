@@ -48,7 +48,16 @@ export interface AssistantServiceOptions {
   taskFacade?: AssistantTaskFacade;
 }
 
-const active = new Map<string, AbortController>();
+interface ActiveAssistantRun {
+  controller: AbortController;
+  scopeKey: string;
+}
+
+const active = new Map<string, ActiveAssistantRun>();
+
+function assistantScopeKey(scope: AssistantScope): string {
+  return `${scope.tenantId}\0${scope.workspaceId}\0${scope.memberNo}`;
+}
 
 export function systemPrompt(identity: AssistantIdentity, now = new Date()): string {
   return [
@@ -335,7 +344,9 @@ export class AssistantService {
       webSearch: input.webSearch,
     });
     if (!turn.replayed) {
-      if ([...active.keys()].length >= MAX_ACTIVE_RUNS) {
+      const scopeKey = assistantScopeKey(scope);
+      const activeForScope = [...active.values()].filter((item) => item.scopeKey === scopeKey).length;
+      if (activeForScope >= MAX_ACTIVE_RUNS) {
         await this.store.failRun(scope, turn.run.id, {
           status: "blocked",
           code: "CONCURRENCY_LIMIT",
@@ -343,7 +354,7 @@ export class AssistantService {
         });
       } else {
         const controller = new AbortController();
-        active.set(turn.run.id, controller);
+        active.set(turn.run.id, { controller, scopeKey });
         void this.executeTurn(identity, turn.run, input.text, controller)
           .catch((error) => console.error("[assistant] 运行终态保存失败", redactError(error)))
           .finally(() => active.delete(turn.run.id));
@@ -391,7 +402,7 @@ export class AssistantService {
     const scope = identity.assistantScope;
     const run = await this.store.getRun(scope, id);
     if (!["queued", "running"].includes(run.status)) return run;
-    active.get(id)?.abort(new AssistantRunCancelled());
+    active.get(id)?.controller.abort(new AssistantRunCancelled());
     if (run.threadId) {
       await this.taskFacade.cancel(scope, run.threadId, identity.memberNo).catch((error) => {
         if (!(error instanceof PmError && /cancel|already|completed/i.test(error.message))) throw error;

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Identity } from "@workloom/base/tenancy";
-import { AssistantModelError, type AssistantModelClient } from "./model.js";
+import { AssistantModelError, type AssistantModelClient, type AssistantModelResult } from "./model.js";
 import type { AssistantSearchClient } from "./search.js";
 import { AssistantService, systemPrompt, type AssistantTaskFacade } from "./service.js";
 import type { AssistantStore } from "./store.js";
@@ -286,6 +286,128 @@ describe("assistant web search orchestration", () => {
       assistantIdentity.assistantScope,
       expect.objectContaining({ blockedReason: expect.any(String) }),
     );
+  });
+
+  it("limits concurrent runs per workspace instead of across all tenants", async () => {
+    const store = fakeStore();
+    const concurrencyIdentity: AssistantIdentity = {
+      ...assistantIdentity,
+      memberNo: "MEM-CONCURRENCY",
+      workspaceId: "ws-concurrency",
+      assistantScope: {
+        tenantId: "tenant-concurrency",
+        workspaceId: "ws-concurrency",
+        memberNo: "MEM-CONCURRENCY",
+      },
+    };
+    const otherIdentity: AssistantIdentity = {
+      ...concurrencyIdentity,
+      memberNo: "MEM-OTHER",
+      workspaceId: "ws-other",
+      assistantScope: {
+        tenantId: concurrencyIdentity.tenantId,
+        workspaceId: "ws-other",
+        memberNo: "MEM-OTHER",
+      },
+    };
+    const runIds = [
+      "ar-00000000-0000-4000-8000-000000000011",
+      "ar-00000000-0000-4000-8000-000000000012",
+      "ar-00000000-0000-4000-8000-000000000013",
+      "ar-00000000-0000-4000-8000-000000000014",
+    ];
+    let turn = 0;
+    store.createTurn.mockImplementation(async () => {
+      const id = runIds[turn++]!;
+      const turnRun = {
+        ...structuredClone(run),
+        id,
+        mode: "ask" as const,
+        webSearchRequested: false,
+      };
+      return {
+        run: turnRun,
+        userMessage: {
+          id: `am-user-${turn}`,
+          seq: String(turn * 2 - 1),
+          sessionId: turnRun.sessionId,
+          role: "user",
+          parts: [{ type: "text", text: "并发隔离" }],
+          parentMessageId: null,
+          clientMessageId: `client-${turn}`,
+          runId: id,
+          status: "completed",
+          createdAt: new Date(0).toISOString(),
+          finishedAt: new Date(0).toISOString(),
+        },
+        assistantMessage: {
+          id: `am-assistant-${turn}`,
+          seq: String(turn * 2),
+          sessionId: turnRun.sessionId,
+          role: "assistant",
+          parts: [{ type: "text", text: "" }],
+          parentMessageId: `am-user-${turn}`,
+          clientMessageId: null,
+          runId: id,
+          status: "pending",
+          createdAt: new Date(0).toISOString(),
+          finishedAt: null,
+        },
+        replayed: false,
+      };
+    });
+    const pending: Array<() => void> = [];
+    const model: AssistantModelClient = {
+      model: "deepseek-flash",
+      stream: vi.fn(async (): Promise<AssistantModelResult> => new Promise((resolve) => {
+        pending.push(() => resolve({
+          text: "完成",
+          model: "deepseek-flash",
+          usage: { promptTokens: 2, completionTokens: 1, totalTokens: 3 },
+        }));
+      })),
+    };
+    const service = new AssistantService({
+      store: store as unknown as AssistantStore,
+      model,
+      search: { configured: false, search: vi.fn() },
+      events: { append: vi.fn() },
+      taskFacade: {} as never,
+    });
+
+    await service.send(concurrencyIdentity, run.sessionId, {
+      text: "第一个并发任务",
+      mode: "ask",
+      clientMessageId: "client-11",
+      webSearch: false,
+    });
+    await service.send(concurrencyIdentity, run.sessionId, {
+      text: "同工作区超额任务",
+      mode: "ask",
+      clientMessageId: "client-12",
+      webSearch: false,
+    });
+    await service.send(concurrencyIdentity, run.sessionId, {
+      text: "同工作区第三个任务",
+      mode: "ask",
+      clientMessageId: "client-13",
+      webSearch: false,
+    });
+    await service.send(otherIdentity, "as-00000000-0000-4000-8000-000000000002", {
+      text: "另一个工作区任务",
+      mode: "ask",
+      clientMessageId: "client-14",
+      webSearch: false,
+    });
+
+    await vi.waitFor(() => expect(model.stream).toHaveBeenCalledTimes(3));
+    expect(store.failRun).toHaveBeenCalledWith(
+      concurrencyIdentity.assistantScope,
+      runIds[2],
+      expect.objectContaining({ code: "CONCURRENCY_LIMIT" }),
+    );
+    for (const resolve of pending) resolve();
+    await vi.waitFor(() => expect(store.finishRun).toHaveBeenCalledTimes(3));
   });
 });
 

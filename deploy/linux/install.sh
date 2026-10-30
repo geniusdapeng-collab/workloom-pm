@@ -8,6 +8,7 @@ repo_url="https://github.com/geniusdapeng-collab/workloom-pm"
 root="/opt/workloom-pm"
 data_root="/var/lib/workloom-pm"
 config_root="/etc/workloom-pm"
+runtime_env="$config_root/runtime.env"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -50,6 +51,19 @@ database_url() {
       process.stdout.write(url.href);
     '
   )
+}
+
+database_password_from_runtime_env() {
+  "$root/runtime/current/bin/node" -e '
+    const fs = require("node:fs");
+    const [file, key] = process.argv.slice(1);
+    const prefix = `${key}=`;
+    const line = fs.readFileSync(file, "utf8").split(/\r?\n/).find((item) => item.startsWith(prefix));
+    if (!line) throw new Error(`现有运行时配置缺少 ${key}`);
+    const url = new URL(line.slice(prefix.length));
+    if (!url.password) throw new Error(`${key} 缺少数据库密码`);
+    process.stdout.write(decodeURIComponent(url.password));
+  ' "$runtime_env" "$1"
 }
 
 mem_kb="$(awk '/MemTotal/ {print $2}' /proc/meminfo)"
@@ -103,17 +117,26 @@ install -d -m 0755 -o root -g root "$root/releases"
 install -d -m 0700 -o root -g root "$config_root"
 install -d -m 0755 -o root -g root /var/www/letsencrypt
 
-owner_password="${WORKLOOM_OWNER_PASSWORD:-$(openssl rand -hex 32)}"
-app_password="${APP_DB_PASSWORD:-$(openssl rand -hex 32)}"
-gateway_password="${GATEWAY_DB_PASSWORD:-$(openssl rand -hex 32)}"
+if [[ -f "$runtime_env" ]]; then
+  # Reinstalls must reuse the credentials already embedded in runtime.env.
+  # Generating new passwords while leaving the old URLs in place rotates roles
+  # underneath the running service and causes authentication drift.
+  owner_password="$(database_password_from_runtime_env DATABASE_URL)"
+  app_password="$(database_password_from_runtime_env DATABASE_APP_URL)"
+  gateway_password="$(database_password_from_runtime_env DATABASE_GATEWAY_URL)"
+else
+  owner_password="${WORKLOOM_OWNER_PASSWORD:-$(openssl rand -hex 32)}"
+  app_password="${APP_DB_PASSWORD:-$(openssl rand -hex 32)}"
+  gateway_password="${GATEWAY_DB_PASSWORD:-$(openssl rand -hex 32)}"
+fi
 jwt_secret="${JWT_SECRET:-$(openssl rand -hex 48)}"
 pii_salt="${PII_SALT:-$(openssl rand -hex 32)}"
 service_secret="${SERVICE_C_SECRET:-$(openssl rand -hex 32)}"
 [[ -n "${DEEPSEEK_API_KEY:-}" ]] || { printf 'DEEPSEEK_API_KEY must be injected in the install process environment.\n' >&2; exit 1; }
 [[ -n "${WORKLOOM_LAUNCH_PUBLIC_KEY_B64:-}" ]] || { printf 'WORKLOOM_LAUNCH_PUBLIC_KEY_B64 must be injected.\n' >&2; exit 1; }
 
-if [[ ! -f "$config_root/runtime.env" ]]; then
-  install -m 0600 /dev/null "$config_root/runtime.env"
+if [[ ! -f "$runtime_env" ]]; then
+  install -m 0600 /dev/null "$runtime_env"
   node_url_owner="$(database_url workloom_owner "$owner_password" workloom_pm)"
   node_url_app="$(database_url workloom_app "$app_password" workloom_pm)"
   node_url_gateway="$(database_url workloom_gateway "$gateway_password" workloom_pm)"
@@ -130,8 +153,8 @@ if [[ ! -f "$config_root/runtime.env" ]]; then
     printf 'PM_SANDBOX_ROOT=%s/pm-sandbox\nWORKLOOM_SUPPORT_DIR=%s\n' "$data_root" "$data_root"
     printf 'PM_LINUX_SANDBOX_BIN=/usr/bin/bwrap\nEVENT_BUS=memory\n'
     printf 'SERVICE_C_SECRET=%s\nSERVICE_C_DEMO_AUTH=false\n' "$service_secret"
-  } > "$config_root/runtime.env"
-  chmod 0600 "$config_root/runtime.env"
+  } > "$runtime_env"
+  chmod 0600 "$runtime_env"
 fi
 
 release="$root/releases/$sha"
@@ -149,11 +172,15 @@ find "$release" -type d -exec chmod 0755 {} +
 find "$release" -type f -perm /111 -exec chmod 0755 {} +
 find "$release" -type f ! -perm /111 -exec chmod 0644 {} +
 
-export PATH="$root/runtime/current/bin:$root/tooling/bin:/usr/bin:/bin"
+export PATH="$root/runtime/current/bin:$root/tooling/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 runuser -u workloom-pm -- env HOME="$data_root" PATH="$PATH" \
   "$root/tooling/bin/pnpm" -C "$release" install --frozen-lockfile --prod=false
+find "$release/node_modules" -type d -exec chmod 0755 {} +
+find "$release/node_modules" -type f ! -perm /111 -exec chmod 0644 {} +
 runuser -u workloom-pm -- env HOME="$data_root" PATH="$PATH" \
   "$root/tooling/bin/pnpm" -C "$release/apps/web" build
+find "$release/apps/web/dist" -type d -exec chmod 0755 {} +
+find "$release/apps/web/dist" -type f -exec chmod 0644 {} +
 
 WORKLOOM_OWNER_PASSWORD="$owner_password" APP_DB_PASSWORD="$app_password" GATEWAY_DB_PASSWORD="$gateway_password" \
   runuser -u postgres --preserve-environment -- "$root/runtime/current/bin/node" "$release/deploy/linux/bootstrap-db.mjs"
