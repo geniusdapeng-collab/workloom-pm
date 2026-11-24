@@ -1,3 +1,24 @@
+# WorkLoom PM · AI product delivery workspace
+
+WorkLoom PM is for product leads and small development teams. Give the product manager a goal, scope, and acceptance criteria. It coordinates requirements, implementation, quality checks, and delivery as a set of dependent tasks. The workspace shows the plan, artifacts, and evidence for each check.
+
+[简体中文](README.md) · [Delivery architecture](docs/PM-DELIVERY.md) · [Assistant workbench](docs/ASSISTANT-WORKBENCH.md) · [Evaluation results](docs/PM-EVALUATION.md)
+
+## Follow a project from request to delivery
+
+| Stage | What the team does | What you can inspect |
+| --- | --- | --- |
+| Clarify | The product lead defines the scope, roles, and acceptance criteria | Task plan, dependencies, and inputs the team still needs |
+| Execute | Each role follows its skills. Development roles use a restricted DeepSeek Harness environment for task files | Files, status, model usage, and search sources |
+| Verify | The system checks artifacts and records the results in a delivery receipt | Artifact hashes, checks, and open items |
+
+Open the **Development Workspace** at `/development` to enter a goal and follow it through the PM team view. The [delivery guide](docs/PM-DELIVERY.md) explains the stages. The [evaluation records](docs/PM-EVALUATION.md) report evidence for individual tasks and complex team goals separately.
+
+For local setup, expand the source instructions below.
+
+<details>
+<summary>Detailed setup, technical notes, and original documentation</summary>
+
 <div align="center">
 
 # WorkLoom PM
@@ -228,3 +249,6 @@ The generated capability block in the Chinese README is an inherited source-entr
 ## License and acknowledgements
 
 [Apache-2.0](LICENSE). Vendored projects retain their own licenses and attribution. Thanks to [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), [pgvector](https://github.com/pgvector/pgvector), and the original WorkLoom IM engineering foundation.
+
+
+</details>
