@@ -1,28 +1,3 @@
-# WorkLoom PM · AI 产品研发工作台
-
-WorkLoom PM 面向产品负责人和小型研发团队。把目标、范围和验收条件交给产品经理后，团队会把需求、研发、质量和交付拆成有依赖的任务。你可以在同一个工作台查看进度、打开产物，并核对每项检查的结果。
-
-[English](README_EN.md) · [交付架构](docs/PM-DELIVERY.md) · [助手工作台](docs/ASSISTANT-WORKBENCH.md) · [评测记录](docs/PM-EVALUATION.md)
-
-## 一项工作怎么推进
-
-| 阶段 | 系统怎么做 | 你能核对什么 |
-| --- | --- | --- |
-| 澄清目标 | 产品总监整理范围、岗位分工和验收条件 | 任务计划、依赖及需要补充的输入 |
-| 执行任务 | 各岗位按职责和技能执行，研发岗位通过受限的 DeepSeek Harness 操作任务文件 | 文件、执行状态、模型用量和检索来源 |
-| 验证交付 | 系统检查文件与验收条件，把结果与产物写进回执 | 产物哈希、检查记录和未完成事项 |
-
-例如，可以在**开发场域**（`/development`）提出「为内部工具补一个反馈入口，附使用说明和验收证据」。在 PM 团队视图里，可以沿任务依赖查看需求、实现文件、检查结果和交付单。
-
-## 从哪里开始
-
-- 想了解操作界面，先读[助手工作台说明](docs/ASSISTANT-WORKBENCH.md)，再按下方的源码运行步骤启动开发场域。
-- 想了解一次任务能否算完成，查看[交付架构](docs/PM-DELIVERY.md)和[评测记录](docs/PM-EVALUATION.md)。评测文档区分岗位任务与复杂跨岗位目标。
-- 想查看技术实现，从 [PM 服务端](apps/server/src/industry/ai-pm/)和 [AI 产品经理行业包](bundles/ai-pm/)开始。
-
-<details>
-<summary>完整启动、技术说明与原有文档</summary>
-
 <div align="center">
 
 # WorkLoom PM
@@ -273,6 +248,3 @@ pnpm runtime:deps:verify
 ## 许可与来源
 
 本仓遵循 [Apache-2.0](LICENSE)。DeepSeek Harness、dsh-im 等 vendored 项目保留各自许可和来源。感谢 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)、[pgvector](https://github.com/pgvector/pgvector) 及 WorkLoom IM 的原始工程基础。
-
-
-</details>
