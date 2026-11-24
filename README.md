@@ -176,7 +176,7 @@ pnpm app:dev
 
 独立产品身份为 `workloom-pm`，桌面 appId 为 `com.workloom.pm`，偏移为 `200`。打包默认端口为 server `8987`、web `5373`、PG `5632`、NATS `4422`；源码数据库仍以你配置的连接串为准。源码客户端默认支持目录按系统应用目录下的 `workloom-pm` 隔离；可用 `WORKLOOM_SUPPORT_DIR` 显式覆盖。Electron 名称与快捷方式也使用独立产品身份。
 
-本仓是独立产品副本，`product.manifest.json#clientDelivery.mode=repo-owned` 明确三端应用壳与 `packages/ui` 随同一产品提交发布，不接收上游 `ui-v*` 客户端基座状态。发布门禁仍会验真三端入口、`@workloom/ui` workspace 依赖与必备生产文件；这条声明不是跳过检查。
+本项目独立运行。`product.manifest.json#clientDelivery.mode=repo-owned` 明确三端应用壳与 `packages/ui` 随同一产品提交发布，不接收上游 `ui-v*` 客户端基座状态。发布门禁仍会验真三端入口、`@workloom/ui` workspace 依赖与必备生产文件；这条声明不是跳过检查。
 
 上游 `setup` / `preview:all` 脚本及其它行业演示完整保留。`preview:all` 是继承的演示预览路径，不能用它的“就绪”横幅证明真实 PM 交付；它与已有 IM 开发实例的端口和数据库关系，应先按本仓现行配置核实。
 
@@ -207,9 +207,9 @@ pnpm runtime:deps:verify
 
 本轮不把任意互联网软件项目、无人批准的生产发布、跨企业数据汇聚、资金或客户外发纳入默认自治范围。付费真实模型也不意味着所有外部连接器已开通。安装包仍须走载荷、签名、公证与发布门禁；源码运行通过不能替代这些证据。
 
-## 仓库与继承关系
+## 仓库地图
 
-本仓从 [WorkLoom IM](https://github.com/geniusdapeng-collab/workloom-im) 完整复制，导入基线为 `e5d76398484cac7d8ac50b6c27905765a59fd50f`。服务端、三端、桌面、数据库迁移、所有 Bundle、技能、vendor、脚本、测试与历史文档均保留；默认工作对象调整为 PM 团队交付，非默认的 `hotel` / `platform` 资产仍在树中。
+默认工作对象是 PM 团队交付。客户端、服务端、数据库迁移和行业包按下表分工，`hotel` 和 `platform` 行业资产可在相应目录查阅。
 
 | 路径 | 在本项目中的作用 |
 |---|---|
